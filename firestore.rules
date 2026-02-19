@@ -1,0 +1,69 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() { return request.auth != null; }
+    function uid() { return request.auth.uid; }
+
+    function userDoc() {
+      return get(/databases/$(database)/documents/v3_users/$(uid())).data;
+    }
+
+    function role() {
+      return isAuthenticated() ? userDoc().role : null;
+    }
+
+    function isAdmin() { return role() == "admin"; }
+    function isCEO() { return role() == "ceo"; }
+    function isFinance() { return role() == "finance_officer"; }
+
+    // -------------------------
+    // User Profiles
+    // -------------------------
+    match /v3_users/{userId} {
+      allow read: if isAuthenticated() && (userId == uid() || isAdmin() || isCEO() || isFinance());
+      allow create, update, delete: if isAuthenticated() && (isAdmin() || isCEO()); // profile provisioning is via CF
+    }
+
+    // -------------------------
+    // Public metadata (optional)
+    // -------------------------
+    match /v3_locations/{locationId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (isAdmin() || isCEO());
+    }
+
+    match /v3_units/{unitId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (isAdmin() || isCEO());
+    }
+
+    // -------------------------
+    // Core operational / financial collections (SERVER ONLY)
+    // Clients MUST NOT read/write directly. Access via Cloud Functions.
+    // -------------------------
+    match /v3_ledger_entries/{docId} {
+      allow read, write: if false;
+    }
+    match /v3_inventory_valuations/{docId} {
+      allow read, write: if false;
+    }
+    match /v3_trace_events/{docId} {
+      allow read, write: if false;
+    }
+    match /v3_batches/{docId} {
+      allow read, write: if false;
+    }
+    match /v3_shark_alerts/{docId} {
+      allow read, write: if false;
+    }
+    match /v3_shark_location_risk/{docId} {
+      allow read, write: if false;
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

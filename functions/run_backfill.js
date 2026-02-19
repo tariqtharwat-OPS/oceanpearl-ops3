@@ -1,0 +1,65 @@
+const https = require('https');
+
+const FUNCTIONS_HOST = 'asia-southeast1-oceanpearl-ops.cloudfunctions.net';
+const AUTH_HOST = 'identitytoolkit.googleapis.com';
+const API_KEY = 'AIzaSyBmHSr7huWpMZa9RnKNBgV6fnXltmvsxcc';
+
+function request(options, data) {
+    return new Promise((resolve, reject) => {
+        const req = https.request(options, (res) => {
+            let body = '';
+            res.on('data', chunk => body += chunk);
+            res.on('end', () => resolve({ status: res.statusCode, body }));
+        });
+        req.on('error', reject);
+        if (data) req.write(data);
+        req.end();
+    });
+}
+
+function json(res) {
+    try { return JSON.parse(res.body); } catch { return { raw: res.body }; }
+}
+
+async function getIdToken(email, password) {
+    const d = JSON.stringify({ email, password, returnSecureToken: true });
+    let res = await request({
+        hostname: AUTH_HOST,
+        path: `/v1/accounts:signInWithPassword?key=${API_KEY}`,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(d) }
+    }, d);
+    let j = json(res);
+    if (j.idToken) return { token: j.idToken, uid: j.localId };
+    throw new Error("Auth failed: " + JSON.stringify(j));
+}
+
+async function callFunction(name, token, payload) {
+    const data = JSON.stringify({ data: payload });
+    const res = await request({
+        hostname: FUNCTIONS_HOST,
+        path: `/${name}`,
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(data)
+        }
+    }, data);
+    return { status: res.status, ...json(res) };
+}
+
+async function run() {
+    console.log("🦈 STARTING BACKFILL (sharkRebuildViews)...");
+
+    // 1. Auth as CEO
+    const { token } = await getIdToken("ceo@oceanpearlseafood.com", "OceanPearl2026!");
+    console.log("Authenticated as CEO.");
+
+    // 2. Call Backfill
+    console.log("Calling sharkRebuildViews...");
+    const res = await callFunction("sharkRebuildViews", token, {});
+    console.log("Backfill Result:", JSON.stringify(res, null, 2));
+}
+
+run().catch(console.error);

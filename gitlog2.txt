@@ -1,0 +1,10 @@
+﻿9e887d8 fix(shark): FieldValue import for firebase-admin v13, atomic confirm verified
+9359802 fix(shark): atomic ledger expansion for confirmed suggestions
+96cedcb feat(ledger): add verifyLegacyLedgerClean and lock payment atomicity
+03db477 fix(ledger): unify ledger_entries and atomic sales
+2801ded fix(admin): remove duplicate createTestUsers
+fa3665c fix(config): add storage configuration to firebase.json to enable emulator start
+c5abc9a sec(rules): lock down firestore and init storage rules
+f21f70c fix(functions): enforce mass conservation in productionTransform
+e4efbf5 Add Evidence Gate proof document
+7d9cf47 EVIDENCE GATE: Email/Password auth + test users created

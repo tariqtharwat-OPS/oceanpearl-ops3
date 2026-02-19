@@ -1,0 +1,5 @@
+v2.0-materialized-views
+DEPLOY_TIMESTAMP: 2026-02-13T16:15:00Z
+ARCH: Event-Driven Watchers + Materialized Views
+MODELS: gemini-1.5-flash (asia-southeast1)
+TRIGGERS: onLedgerEntryWritten, onInventoryLotWritten

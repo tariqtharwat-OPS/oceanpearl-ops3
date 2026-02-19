@@ -1,0 +1,139 @@
+.header {
+    background: linear-gradient(135deg, #003d5c 0%, #005a8d 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 70px;
+}
+
+.header-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.logo-small {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    background: white;
+    padding: 4px;
+}
+
+.app-name {
+    font-size: 18px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.header-nav {
+    display: flex;
+    gap: 30px;
+    flex: 1;
+    margin-left: 40px;
+}
+
+.header-nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
+    transition: opacity 0.3s ease;
+    white-space: nowrap;
+}
+
+.header-nav a:hover {
+    opacity: 0.8;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-shrink: 0;
+}
+
+.lang-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 12px;
+    transition: all 0.3s ease;
+}
+
+.lang-toggle:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.user-email {
+    font-size: 13px;
+    opacity: 0.9;
+    white-space: nowrap;
+}
+
+.logout-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 12px;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.logout-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+@media (max-width: 1024px) {
+    .header-nav {
+        gap: 15px;
+        margin-left: 20px;
+    }
+
+    .header-nav a {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 768px) {
+    .header-container {
+        padding: 0 10px;
+        height: 60px;
+    }
+
+    .header-nav {
+        display: none;
+    }
+
+    .app-name {
+        font-size: 16px;
+    }
+
+    .header-actions {
+        gap: 10px;
+    }
+
+    .user-email {
+        display: none;
+    }
+}

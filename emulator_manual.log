@@ -1,0 +1,11 @@
+[2026-02-12T13:09:10.602Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[2026-02-12T13:09:10.603Z] > authorizing via signed-in user (tariq.tharwat@gmail.com)
+[2026-02-12T13:09:10.616Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: . If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
+i  emulators: Shutting down emulators. {"metadata":{"emulator":{"name":"hub"},"message":"Shutting down emulators."}}
+[2026-02-12T13:09:10.619Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: . If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
+[2026-02-12T13:09:15.632Z] Error: Timed out.
+    at Timeout._onTimeout (C:\Users\eg_di\AppData\Local\nvm\v20.14.0\node_modules\firebase-tools\lib\utils.js:275:49)
+    at listOnTimeout (node:internal/timers:573:17)
+    at process.processTimers (node:internal/timers:514:7)
+
+Error: An unexpected error has occurred.

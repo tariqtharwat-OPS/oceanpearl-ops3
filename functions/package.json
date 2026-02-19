@@ -1,0 +1,27 @@
+{
+  "name": "oceanpearl-ops-v3-functions",
+  "version": "3.0.0",
+  "description": "Ocean Pearl OPS V3 Cloud Functions",
+  "main": "index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "shell": "firebase functions:shell",
+    "start": "npm run shell",
+    "predeploy": "node scripts/predeploy.js",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "@google-cloud/functions-framework": "^5.0.1",
+    "firebase": "^12.9.0",
+    "firebase-admin": "^13.0.0",
+    "firebase-functions": "^7.0.5"
+  },
+  "devDependencies": {
+    "firebase-functions-test": "^3.3.0"
+  },
+  "private": true
+}

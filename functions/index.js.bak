@@ -1,0 +1,946 @@
+const { onRequest, onCall, HttpsError } = require("firebase-functions/v2/https");
+const { setGlobalOptions } = require("firebase-functions/v2");
+const admin = require("firebase-admin");
+
+// Set region to asia-southeast1 as per user preference
+setGlobalOptions({ region: "asia-southeast1" });
+
+admin.initializeApp();
+const db = admin.firestore();
+
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+/**
+ * Verify user authentication and get user data
+ */
+async function authenticateUser(context) {
+  if (!context.auth) {
+    throw new HttpsError("unauthenticated", "User must be authenticated");
+  }
+
+  const userId = context.auth.uid;
+  const userDoc = await db.collection("users").doc(userId).get();
+
+  if (!userDoc.exists) {
+    // Create user document if it doesn't exist
+    const userData = {
+      displayName: context.auth.token.name || "",
+      email: context.auth.token.email || "",
+      role: "user",
+      allowedLocations: [],
+      allowedUnits: [],
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    };
+    await db.collection("users").doc(userId).set(userData);
+    return { uid: userId, ...userData };
+  }
+
+  return { uid: userId, ...userDoc.data() };
+}
+
+/**
+ * Check if user has required role
+ */
+function hasRole(user, allowedRoles) {
+  return allowedRoles.includes(user.role) || user.role === "CEO";
+}
+
+/**
+ * Generate idempotency key and check if operation already executed
+ */
+async function checkIdempotency(operationId) {
+  if (!operationId) return null;
+
+  const keyDoc = await db.collection("idempotency_keys").doc(operationId).get();
+  if (keyDoc.exists) {
+    return keyDoc.data().result;
+  }
+  return null;
+}
+
+/**
+ * Store idempotency result
+ */
+async function storeIdempotency(operationId, result) {
+  if (!operationId) return;
+
+  await db.collection("idempotency_keys").doc(operationId).set({
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    result: result,
+  });
+}
+
+/**
+ * Log audit entry
+ */
+async function logAudit(userId, action, entityType, entityId, changes) {
+  await db.collection("audit_logs").add({
+    ts: admin.firestore.FieldValue.serverTimestamp(),
+    userId,
+    action,
+    entityType,
+    entityId,
+    changes: changes || {},
+  });
+}
+
+// ============================================================================
+// ADMIN OPERATIONS
+// ============================================================================
+
+/**
+ * Create location
+ */
+exports.createLocation = onCall(async (request) => {
+  const user = await authenticateUser(request);
+  if (!hasRole(user, ["CEO", "HQ_FINANCE"])) {
+    throw new HttpsError("permission-denied", "Only CEO or HQ Finance can create locations");
+  }
+
+  const { locationId, name, type } = request.data;
+
+  if (!locationId || !name || !type) {
+    throw new HttpsError("invalid-argument", "Missing required fields");
+  }
+
+  const locationData = {
+    name,
+    type,
+    active: true,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+
+  await db.collection("locations").doc(locationId).set(locationData);
+  await logAudit(user.uid, "CREATE", "location", locationId, locationData);
+
+  return { success: true, locationId };
+});
+
+/**
+ * List locations
+ */
+exports.listLocations = onCall(async (request) => {
+  const user = await authenticateUser(request);
+
+  const snapshot = await db.collection("locations").where("active", "==", true).get();
+  const locations = [];
+
+  snapshot.forEach((doc) => {
+    locations.push({ id: doc.id, ...doc.data() });
+  });
+
+  return { locations };
+});
+
+/**
+ * Create unit
+ */
+exports.createUnit = onCall(async (request) => {
+  const user = await authenticateUser(request);
+  if (!hasRole(user, ["CEO", "HQ_FINANCE"])) {
+    throw new HttpsError("permission-denied", "Only CEO or HQ Finance can create units");
+  }
+
+  const { id, locationId, name, unitType, active } = request.data;
+
+  if (!id || !locationId || !name || !unitType) {
+    throw new HttpsError("invalid-argument", "Missing required fields: id, locationId, name, unitType");
+  }
+
+  // Validate location exists
+  const locationDoc = await db.collection("locations").doc(locationId).get();
+  if (!locationDoc.exists) {
+    throw new HttpsError("invalid-argument", "Invalid locationId: location does not exist");
+  }
+
+  const unitData = {
+    locationId,
+    name,
+    unitType,
+    active: active !== undefined ? active : true,
+    createdTs: admin.firestore.FieldValue.serverTimestamp(),
+  };
+
+  await db.collection("units").doc(id).set(unitData);
+  await logAudit(user.uid, "CREATE", "unit", id, unitData);
+
+  return { success: true, unitId: id };
+});
+
+/**
+ * Update unit
+ */
+exports.updateUnit = onCall(async (request) => {
+  const user = await authenticateUser(request);
+  if (!hasRole(user, ["CEO", "HQ_FINANCE"])) {
+    throw new HttpsError("permission-denied", "Only CEO or HQ Finance can update units");
+  }
+
+  const { id, locationId, name, unitType, active } = request.data;
+
+  if (!id) {
+    throw new HttpsError("invalid-argument", "Missing required field: id");
+  }
+
+  // Validate location exists if locationId is being updated
+  if (locationId) {
+    const locationDoc = await db.collection("locations").doc(locationId).get();
+    if (!locationDoc.exists) {
+      throw new HttpsError("invalid-argument", "Invalid locationId: location does not exist");
+    }
+  }
+
+  const updates = {};
+  if (locationId !== undefined) updates.locationId = locationId;
+  if (name !== undefined) updates.name = name;
+  if (unitType !== undefined) updates.unitType = unitType;
+  if (active !== undefined) updates.active = active;
+  updates.updatedTs = admin.firestore.FieldValue.serverTimestamp();
+
+  await db.collection("units").doc(id).update(updates);
+  await logAudit(user.uid, "UPDATE", "unit", id, updates);
+
+  return { success: true, unitId: id };
+});
+
+/**
+ * List units
+ */
+exports.listUnits = onCall(async (request) => {
+  const user = await authenticateUser(request);
+  const { locationId } = request.data || {};
+
+  let query = db.collection("units").where("active", "==", true);
+
+  if (locationId) {
+    query = query.where("locationId", "==", locationId);
+  }
+
+  const snapshot = await query.get();
+  const units = [];
+
+  snapshot.forEach((doc) => {
+    const unitData = doc.data();
+    // Filter based on user permissions
+    if (hasRole(user, ["CEO", "HQ_FINANCE"])) {
+      // Admin/CEO can see all units
+      units.push({ id: doc.id, ...unitData });
+    } else if (user.allowedUnits && user.allowedUnits.includes(doc.id)) {
+      // User can see units in their allowedUnits
+      units.push({ id: doc.id, ...unitData });
+    } else if (user.allowedLocations && user.allowedLocations.includes(unitData.locationId)) {
+      // User can see units in their allowedLocations
+      units.push({ id: doc.id, ...unitData });
+    }
+  });
+
+  return { units };
+});
+
+/**
+ * List users
+ */
+exports.listUsers = onCall(async (request) => {
+  const user = await authenticateUser(request);
+  if (!hasRole(user, ["CEO", "HQ_FINANCE"])) {
+    throw new HttpsError("permission-denied", "Only CEO or HQ Finance can list users");
+  }
+
+  const snapshot = await db.collection("users").get();
+  const users = [];
+
+  snapshot.forEach((doc) => {
+    users.push({ id: doc.id, ...doc.data() });
+  });
+
+  return { users };
+});
+
+/**
+ * Update user access
+ */
+exports.updateUserAccess = onCall(async (request) => {
+  const user = await authenticateUser(request);
+  if (!hasRole(user, ["CEO"])) {
+    throw new HttpsError("permission-denied", "Only CEO can update user access");
+  }
+
+  const { userId, role, allowedLocations, allowedUnits, displayName, companyEmail } = request.data;
+
+  if (!userId) {
+    throw new HttpsError("invalid-argument", "Missing userId");
+  }
+
+  const updates = {};
+  if (role) updates.role = role;
+  if (allowedLocations) updates.allowedLocations = allowedLocations;
+  if (allowedUnits) updates.allowedUnits = allowedUnits;
+  if (displayName) updates.displayName = displayName;
+  if (companyEmail) updates.companyEmail = companyEmail;
+  updates.updatedAt = admin.firestore.FieldValue.serverTimestamp();
+
+  await db.collection("users").doc(userId).update(updates);
+  await logAudit(user.uid, "UPDATE", "user", userId, updates);
+
+  return { success: true };
+});
+
+/**
+ * Create product spec
+ */
+exports.createProductSpec = onCall(async (request) => {
+  const user = await authenticateUser(request);
+  if (!hasRole(user, ["CEO"])) {
+    throw new HttpsError("permission-denied", "Only CEO can create product specs");
+  }
+
+  const { specId, name, category, complianceRequirements } = request.data;
+
+  const specData = {
+    name,
+    category,
+    complianceRequirements: complianceRequirements || [],
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+
+  await db.collection("product_specs").doc(specId).set(specData);
+  await logAudit(user.uid, "CREATE", "product_spec", specId, specData);
+
+  return { success: true, specId };
+});
+
+/**
+ * List product specs
+ */
+exports.listProductSpecs = onCall(async (request) => {
+  const user = await authenticateUser(request);
+
+  const snapshot = await db.collection("product_specs").get();
+  const specs = [];
+
+  snapshot.forEach((doc) => {
+    specs.push({ id: doc.id, ...doc.data() });
+  });
+
+  return { specs };
+});
+
+/**
+ * Create species
+ */
+exports.createSpecies = onCall(async (request) => {
+  const user = await authenticateUser(request);
+  if (!hasRole(user, ["CEO"])) {
+    throw new HttpsError("permission-denied", "Only CEO can create species");
+  }
+
+  const { speciesId, name, scientificName } = request.data;
+
+  const speciesData = {
+    name,
+    scientificName,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+
+  await db.collection("species_master").doc(speciesId).set(speciesData);
+  await logAudit(user.uid, "CREATE", "species", speciesId, speciesData);
+
+  return { success: true, speciesId };
+});
+
+/**
+ * List species
+ */
+exports.listSpecies = onCall(async (request) => {
+  const user = await authenticateUser(request);
+
+  const snapshot = await db.collection("species_master").get();
+  const species = [];
+
+  snapshot.forEach((doc) => {
+    species.push({ id: doc.id, ...doc.data() });
+  });
+
+  return { species };
+});
+
+// ============================================================================
+// OPERATIONAL WORKFLOWS
+// ============================================================================
+
+/**
+ * Receive lot (create inventory + ledger entry)
+ */
+exports.receiveLot = onCall(async (request) => {
+  const user = await authenticateUser(request);
+  const { operationId, unitId, productSpecId, quantityKg, pricePerKg, currency, supplierId } = request.data;
+
+  // Check idempotency
+  const existing = await checkIdempotency(operationId);
+  if (existing) return existing;
+
+  // Verify user has access to unit
+  if (user.role === "UNIT_OP" && !user.allowedUnits.includes(unitId)) {
+    throw new HttpsError("permission-denied", "User does not have access to this unit");
+  }
+
+  const batch = db.batch();
+
+  // Create inventory lot
+  const lotRef = db.collection("inventory_lots").doc();
+  const lotData = {
+    unitId,
+    productSpecId,
+    quantityKg,
+    status: "IN_STOCK",
+    createdTs: admin.firestore.FieldValue.serverTimestamp(),
+  };
+  batch.set(lotRef, lotData);
+
+  // Create ledger entry (payment to supplier)
+  const ledgerRef = db.collection("ledger_entries").doc();
+  const ledgerData = {
+    ts: admin.firestore.FieldValue.serverTimestamp(),
+    fromWalletId: `unit_${unitId}_cash`,
+    toWalletId: `supplier_${supplierId}`,
+    amount: pricePerKg * quantityKg,
+    currency,
+    fxRate: 1.0,
+    amountBase: pricePerKg * quantityKg,
+    operationType: "RECEIVE",
+    operationId: lotRef.id,
+    description: `Receive ${quantityKg}kg from supplier ${supplierId}`,
+  };
+  batch.set(ledgerRef, ledgerData);
+
+  await batch.commit();
+
+  const result = { success: true, lotId: lotRef.id, ledgerEntryId: ledgerRef.id };
+  await storeIdempotency(operationId, result);
+  await logAudit(user.uid, "RECEIVE", "inventory_lot", lotRef.id, lotData);
+
+  return result;
+});
+
+/**
+ * Transfer lot between units
+ */
+exports.transferLot = onCall(async (request) => {
+  const user = await authenticateUser(request);
+  const { operationId, lotId, fromUnitId, toUnitId, quantityKg } = request.data;
+
+  // Check idempotency
+  const existing = await checkIdempotency(operationId);
+  if (existing) return existing;
+
+  // Verify access
+  if (user.role === "UNIT_OP" && !user.allowedUnits.includes(fromUnitId)) {
+    throw new HttpsError("permission-denied", "User does not have access to source unit");
+  }
+
+  const batch = db.batch();
+
+  // Get source lot
+  const lotDoc = await db.collection("inventory_lots").doc(lotId).get();
+  if (!lotDoc.exists) {
+    throw new HttpsError("not-found", "Lot not found");
+  }
+
+  const lotData = lotDoc.data();
+
+  // Update source lot quantity
+  const newQuantity = lotData.quantityKg - quantityKg;
+  if (newQuantity < 0) {
+    throw new HttpsError("invalid-argument", "Insufficient quantity");
+  }
+
+  if (newQuantity === 0) {
+    batch.update(db.collection("inventory_lots").doc(lotId), {
+      status: "TRANSFERRED",
+      quantityKg: 0,
+    });
+  } else {
+    batch.update(db.collection("inventory_lots").doc(lotId), {
+      quantityKg: newQuantity,
+    });
+  }
+
+  // Create new lot at destination
+  const newLotRef = db.collection("inventory_lots").doc();
+  const newLotData = {
+    unitId: toUnitId,
+    productSpecId: lotData.productSpecId,
+    quantityKg,
+    status: "IN_STOCK",
+    createdTs: admin.firestore.FieldValue.serverTimestamp(),
+  };
+  batch.set(newLotRef, newLotData);
+
+  await batch.commit();
+
+  const result = { success: true, newLotId: newLotRef.id };
+  await storeIdempotency(operationId, result);
+  await logAudit(user.uid, "TRANSFER", "inventory_lot", lotId, { fromUnitId, toUnitId, quantityKg });
+
+  return result;
+});
+
+/**
+ * Production (transform input lots into output lots)
+ */
+exports.productionTransform = onCall(async (request) => {
+  const user = await authenticateUser(request);
+  const { operationId, unitId, inputLots, outputLots, wasteLots } = request.data;
+
+  // Check idempotency
+  const existing = await checkIdempotency(operationId);
+  if (existing) return existing;
+
+  // Verify access
+  if (user.role === "UNIT_OP" && !user.allowedUnits.includes(unitId)) {
+    throw new HttpsError("permission-denied", "User does not have access to this unit");
+  }
+
+  const batch = db.batch();
+
+  // Invariant 2: Mass Conservation
+  const totalInput = inputLots.reduce((acc, lot) => acc + Number(lot.quantityKg || 0), 0);
+  const totalOutput = outputLots.reduce((acc, lot) => acc + Number(lot.quantityKg || 0), 0);
+  const totalWaste = (wasteLots || []).reduce((acc, lot) => acc + Number(lot.quantityKg || 0), 0);
+
+  // Allow minimal floating point error (e.g. 0.001 kg)
+  if (Math.abs(totalInput - (totalOutput + totalWaste)) > 0.001) {
+    throw new HttpsError(
+      "invalid-argument",
+      `Mass conservation violation: Input(${totalInput}) != Output(${totalOutput}) + Waste(${totalWaste})`
+    );
+  }
+
+  // Consume input lots
+  for (const input of inputLots) {
+    batch.update(db.collection("inventory_lots").doc(input.lotId), {
+      status: "CONSUMED",
+      quantityKg: 0,
+    });
+  }
+
+  // Create output lots
+  const outputLotIds = [];
+  for (const output of outputLots) {
+    const outputLotRef = db.collection("inventory_lots").doc();
+    batch.set(outputLotRef, {
+      unitId,
+      productSpecId: output.productSpecId,
+      quantityKg: output.quantityKg,
+      status: "IN_STOCK",
+      createdTs: admin.firestore.FieldValue.serverTimestamp(),
+    });
+    outputLotIds.push(outputLotRef.id);
+  }
+
+  // Create waste lots if any
+  const wasteLotIds = [];
+  if (wasteLots && wasteLots.length > 0) {
+    for (const waste of wasteLots) {
+      const wasteLotRef = db.collection("inventory_lots").doc();
+      batch.set(wasteLotRef, {
+        unitId,
+        productSpecId: waste.productSpecId,
+        quantityKg: waste.quantityKg,
+        status: "WASTE",
+        createdTs: admin.firestore.FieldValue.serverTimestamp(),
+      });
+      wasteLotIds.push(wasteLotRef.id);
+    }
+  }
+
+  await batch.commit();
+
+  const result = { success: true, outputLotIds, wasteLotIds };
+  await storeIdempotency(operationId, result);
+  await logAudit(user.uid, "PRODUCTION", "inventory_lot", operationId, { inputLots, outputLots, wasteLots });
+
+  return result;
+});
+
+/**
+ * Get inventory by unit
+ */
+exports.getInventoryByUnit = onCall(async (request) => {
+  const user = await authenticateUser(request);
+  const { unitId } = request.data;
+
+  // Verify access
+  if (user.role === "UNIT_OP" && !user.allowedUnits.includes(unitId)) {
+    throw new HttpsError("permission-denied", "User does not have access to this unit");
+  }
+
+  const snapshot = await db.collection("inventory_lots")
+    .where("unitId", "==", unitId)
+    .where("status", "==", "IN_STOCK")
+    .get();
+
+  const lots = [];
+  snapshot.forEach((doc) => {
+    lots.push({ id: doc.id, ...doc.data() });
+  });
+
+  return { lots };
+});
+
+// ============================================================================
+// FINANCE OPERATIONS
+// ============================================================================
+
+/**
+ * Get trial balance
+ */
+exports.getTrialBalance = onCall(async (request) => {
+  const user = await authenticateUser(request);
+  if (!hasRole(user, ["CEO", "HQ_FINANCE", "INVESTOR_READONLY"])) {
+    throw new HttpsError("permission-denied", "Access denied");
+  }
+
+  // Guard against legacy ledger collection
+  const legacySnapshot = await db.collection("ledger").limit(1).get();
+  if (!legacySnapshot.empty) {
+    throw new HttpsError("failed-precondition", "Invalid ledger collection detected. Use ledger_entries only.");
+  }
+
+  const snapshot = await db.collection("ledger_entries").get();
+  const walletBalances = {};
+
+  snapshot.forEach((doc) => {
+    const entry = doc.data();
+    const amount = entry.amountBase || entry.amount;
+
+    // Debit (from wallet)
+    if (entry.fromWalletId) {
+      if (!walletBalances[entry.fromWalletId]) {
+        walletBalances[entry.fromWalletId] = 0;
+      }
+      walletBalances[entry.fromWalletId] -= amount;
+    }
+
+    // Credit (to wallet)
+    if (entry.toWalletId) {
+      if (!walletBalances[entry.toWalletId]) {
+        walletBalances[entry.toWalletId] = 0;
+      }
+      walletBalances[entry.toWalletId] += amount;
+    }
+  });
+
+  const balances = Object.entries(walletBalances).map(([walletId, balance]) => ({
+    walletId,
+    balance,
+  }));
+
+  return { balances };
+});
+
+/**
+ * Get P&L by unit
+ */
+exports.getPLByUnit = onCall(async (request) => {
+  const user = await authenticateUser(request);
+  if (!hasRole(user, ["CEO", "HQ_FINANCE", "LOC_MANAGER", "INVESTOR_READONLY"])) {
+    throw new HttpsError("permission-denied", "Access denied");
+  }
+
+  const { unitId } = request.data;
+
+  // Get all ledger entries for this unit's wallet
+  const snapshot = await db.collection("ledger_entries")
+    .where("fromWalletId", "==", `unit_${unitId}_cash`)
+    .get();
+
+  let totalExpenses = 0;
+  let totalRevenue = 0;
+
+  snapshot.forEach((doc) => {
+    const entry = doc.data();
+    const amount = entry.amountBase || entry.amount;
+
+    if (entry.operationType === "RECEIVE" || entry.operationType === "PRODUCTION") {
+      totalExpenses += amount;
+    } else if (entry.operationType === "SALE") {
+      totalRevenue += amount;
+    }
+  });
+
+  return {
+    unitId,
+    totalRevenue,
+    totalExpenses,
+    netProfit: totalRevenue - totalExpenses,
+  };
+});
+
+// ============================================================================
+// SHARK AI OPERATIONS
+// ============================================================================
+
+/**
+ * Upload and extract document
+ */
+exports.sharkUploadAndExtract = onCall(async (request) => {
+  const user = await authenticateUser(request);
+  const { fileUrl, fileName, mimeType } = request.data;
+
+  // TODO: Implement Gemini 2.0 Flash extraction
+  // For now, return a placeholder
+
+  const suggestionRef = db.collection("shark_suggestions").doc();
+  const suggestionData = {
+    userId: user.uid,
+    status: "DRAFT",
+    sourceFileName: fileName,
+    extractedFields: {},
+    proposedPayload: {},
+    createdTs: admin.firestore.FieldValue.serverTimestamp(),
+  };
+
+  await suggestionRef.set(suggestionData);
+
+  return { success: true, suggestionId: suggestionRef.id };
+});
+
+/**
+ * Get user suggestions
+ */
+exports.sharkGetSuggestions = onCall(async (request) => {
+  const user = await authenticateUser(request);
+
+  let query = db.collection("shark_suggestions");
+
+  // Non-CEO users can only see their own suggestions
+  if (user.role !== "CEO") {
+    query = query.where("userId", "==", user.uid);
+  }
+
+  const snapshot = await query.orderBy("createdTs", "desc").limit(50).get();
+  const suggestions = [];
+
+  snapshot.forEach((doc) => {
+    suggestions.push({ id: doc.id, ...doc.data() });
+  });
+
+  return { suggestions };
+});
+
+/**
+ * Update suggestion status
+ */
+exports.sharkUpdateSuggestion = onCall(async (request) => {
+  const user = await authenticateUser(request);
+  const { suggestionId, status } = request.data;
+
+  const suggestionDoc = await db.collection("shark_suggestions").doc(suggestionId).get();
+  if (!suggestionDoc.exists) {
+    throw new HttpsError("not-found", "Suggestion not found");
+  }
+
+  const suggestion = suggestionDoc.data();
+
+  // Verify ownership or CEO
+  if (suggestion.userId !== user.uid && user.role !== "CEO") {
+    throw new HttpsError("permission-denied", "Access denied");
+  }
+
+  await db.collection("shark_suggestions").doc(suggestionId).update({
+    status,
+    updatedTs: admin.firestore.FieldValue.serverTimestamp(),
+  });
+
+  return { success: true };
+});
+
+// ============================================================================
+// HTTP API ENDPOINT (for frontend)
+// ============================================================================
+
+/**
+ * Main API endpoint
+ */
+exports.api = onRequest({ cors: true }, async (req, res) => {
+  res.json({
+    status: "ok",
+    message: "Ocean Pearl OPS V2 API",
+    version: "1.0.0",
+  });
+});
+
+/**
+ * Record sale
+ */
+exports.recordSale = onCall(async (request) => {
+  const user = await authenticateUser(request);
+  const { saleId, lotIds, customerName, pricePerKg, currency, quantityKg, unitId } = request.data;
+
+  if (!saleId || !lotIds || !customerName || !pricePerKg || !currency || !quantityKg || !unitId) {
+    throw new HttpsError("invalid-argument", "Missing required fields");
+  }
+
+  const batch = db.batch();
+
+  // 1. Create Sale Record
+  const saleRef = db.collection("sales").doc(saleId);
+  const saleData = {
+    lotIds,
+    customerName,
+    pricePerKg,
+    currency,
+    quantityKg,
+    totalAmount: pricePerKg * quantityKg,
+    createdBy: user.uid,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+  batch.set(saleRef, saleData);
+
+  // 2. Create Ledger Entry (Revenue)
+  const ledgerRef = db.collection("ledger_entries").doc();
+  const ledgerData = {
+    ts: admin.firestore.FieldValue.serverTimestamp(),
+    fromWalletId: `customer_${customerName.replace(/\s+/g, '_').toLowerCase()}`, // Customer pays
+    toWalletId: `unit_${unitId}_cash`, // Unit receives cash
+    amount: saleData.totalAmount,
+    currency,
+    fxRate: 1.0,
+    amountBase: saleData.totalAmount,
+    operationType: "SALE",
+    operationId: saleId,
+    description: `Sale to ${customerName}`,
+  };
+  batch.set(ledgerRef, ledgerData);
+
+  // 3. Consume Inventory Lots (Atomic consistency)
+  for (const lotId of lotIds) {
+    const lotRef = db.collection("inventory_lots").doc(lotId);
+    batch.update(lotRef, {
+      status: "SOLD",
+      saleId: saleId,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+  }
+
+  await batch.commit();
+  await logAudit(user.uid, "CREATE", "sale", saleId, saleData);
+
+  return { success: true, saleId };
+});
+
+/**
+ * Record payment
+ */
+exports.recordPayment = onCall(async (request) => {
+  const user = await authenticateUser(request);
+  const { paymentId, unitId, amount, currency, type, description } = request.data;
+
+  if (!paymentId || !unitId || !amount || !currency || !type) {
+    throw new HttpsError("invalid-argument", "Missing required fields");
+  }
+
+  const batch = db.batch();
+
+  // 1. Create Payment Record
+  const paymentRef = db.collection("payments").doc(paymentId);
+  const paymentData = {
+    unitId,
+    amount,
+    currency,
+    type,
+    description,
+    createdBy: user.uid,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+  batch.set(paymentRef, paymentData);
+
+  // 2. Create Ledger Entry
+  const ledgerRef = db.collection("ledger_entries").doc();
+
+  let fromWalletId, toWalletId;
+
+  if (type === "payment") {
+    // Outgoing payment
+    fromWalletId = `unit_${unitId}_cash`;
+    toWalletId = "external_party";
+  } else {
+    // Incoming payment (collection)
+    fromWalletId = "external_party";
+    toWalletId = `unit_${unitId}_cash`;
+  }
+
+  const ledgerData = {
+    ts: admin.firestore.FieldValue.serverTimestamp(),
+    fromWalletId,
+    toWalletId,
+    amount,
+    currency,
+    fxRate: 1.0,
+    amountBase: amount,
+    operationType: type.toUpperCase(),
+    operationId: paymentId,
+    description: description || `${type} for unit ${unitId}`,
+  };
+  batch.set(ledgerRef, ledgerData);
+
+  await batch.commit();
+  await logAudit(user.uid, "CREATE", "payment", paymentId, paymentData);
+
+  return { success: true, paymentId };
+});
+
+/**
+ * Create test users (HTTP endpoint for admin use)
+ */
+exports.createTestUsers = onRequest({ cors: true }, async (req, res) => {
+  const testUsers = [
+    { email: 'ceo@oceanpearlseafood.com', password: 'OceanPearl2026!', role: 'CEO', displayName: 'CEO' },
+    { email: 'finance@oceanpearlseafood.com', password: 'OceanPearl2026!', role: 'HQ_FINANCE', displayName: 'Finance Manager' },
+    { email: 'manager.kaimana@oceanpearlseafood.com', password: 'OceanPearl2026!', role: 'LOCATION_MANAGER', displayName: 'Kaimana Manager' },
+    { email: 'operator.boat1@oceanpearlseafood.com', password: 'OceanPearl2026!', role: 'OPERATOR', displayName: 'Boat 1 Operator' },
+    { email: 'investor@oceanpearlseafood.com', password: 'OceanPearl2026!', role: 'INVESTOR', displayName: 'Investor' }
+  ];
+
+  const results = [];
+
+  for (const userData of testUsers) {
+    try {
+      const userRecord = await admin.auth().createUser({
+        email: userData.email,
+        password: userData.password,
+        displayName: userData.displayName
+      });
+
+      await db.collection('users').doc(userRecord.uid).set({
+        email: userData.email,
+        displayName: userData.displayName,
+        role: userData.role,
+        companyEmail: userData.email,
+        allowedLocations: [],
+        allowedUnits: [],
+        createdAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+
+      results.push({ success: true, email: userData.email, uid: userRecord.uid });
+    } catch (error) {
+      if (error.code === 'auth/email-already-exists') {
+        results.push({ success: false, email: userData.email, error: 'Already exists' });
+      } else {
+        results.push({ success: false, email: userData.email, error: error.message });
+      }
+    }
+  }
+
+  res.json({
+    message: 'Test users creation completed',
+    password: 'OceanPearl2026!',
+    results
+  });
+});
+
+
+

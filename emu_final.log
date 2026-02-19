@@ -1,0 +1,122 @@
+[36m[1mi  emulators:[22m[39m Starting emulators: auth, functions, firestore, hosting, storage, extensions
+[33m[1m!  emulators:[22m[39m It seems that you are running multiple instances of the emulator suite for project oceanpearl-ops. This may result in unexpected behavior.
+[33m[1m!  functions:[22m[39m The following emulators are not running, calls to these services from the Functions emulator will affect production: [1mapphosting, database, pubsub, dataconnect[22m
+[33m[1m!  functions:[22m[39m Application Default Credentials detected. Non-emulated services will access production using these credentials. Be careful!
+[36m[1mi  firestore:[22m[39m Firestore Emulator logging to [1mfirestore-debug.log[22m
+[32m[1m+  firestore:[22m[39m Firestore Emulator UI websocket is running on 9150.
+[36m[1mi  hosting[oceanpearl-ops]:[22m[39m Serving hosting files from: [1mfrontend/dist[22m
+[32m[1m+  hosting[oceanpearl-ops]:[22m[39m Local server: [4m[1mhttp://127.0.0.1:5000[22m[24m
+[36m[1mi  functions:[22m[39m Watching "D:\OPS2\functions" for Cloud Functions...
+[33m[1m! [22m[39m [1m[33mfunctions: [39m[22mpackage.json indicates an outdated version of firebase-functions. Please upgrade using [1mnpm install --save firebase-functions@latest[22m in your functions directory.
+[33m[1m! [22m[39m [1m[33mfunctions: [39m[22mPlease note that there will be breaking changes when you upgrade.
+[32m[1m+  functions:[22m[39m Using node@20 from host.
+Serving at port 8449
+
+[33m[1m!  functions:[22m[39m Application Default Credentials detected. Non-emulated services will access production using these credentials. Be careful!
+[32m[1m+  functions:[22m[39m Loaded functions definitions from source: createLocation, listLocations, createUnit, updateUnit, listUnits, listUsers, updateUserAccess, createProductSpec, listProductSpecs, createSpecies, listSpecies, receiveLot, transferLot, productionTransform, getInventoryByUnit, getTrialBalance, verifyLegacyLedgerClean, getPLByUnit, sharkUploadAndExtract, sharkGetSuggestions, sharkUpdateSuggestion, api, recordSale, recordPayment, createTestUsers.
+[32m[1m+  functions[asia-southeast1-createLocation]:[22m[39m [1mhttp[22m function initialized (http://127.0.0.1:5001/oceanpearl-ops/asia-southeast1/createLocation).
+[32m[1m+  functions[asia-southeast1-listLocations]:[22m[39m [1mhttp[22m function initialized (http://127.0.0.1:5001/oceanpearl-ops/asia-southeast1/listLocations).
+[32m[1m+  functions[asia-southeast1-createUnit]:[22m[39m [1mhttp[22m function initialized (http://127.0.0.1:5001/oceanpearl-ops/asia-southeast1/createUnit).
+[32m[1m+  functions[asia-southeast1-updateUnit]:[22m[39m [1mhttp[22m function initialized (http://127.0.0.1:5001/oceanpearl-ops/asia-southeast1/updateUnit).
+[32m[1m+  functions[asia-southeast1-listUnits]:[22m[39m [1mhttp[22m function initialized (http://127.0.0.1:5001/oceanpearl-ops/asia-southeast1/listUnits).
+[32m[1m+  functions[asia-southeast1-listUsers]:[22m[39m [1mhttp[22m function initialized (http://127.0.0.1:5001/oceanpearl-ops/asia-southeast1/listUsers).
+[32m[1m+  functions[asia-southeast1-updateUserAccess]:[22m[39m [1mhttp[22m function initialized (http://127.0.0.1:5001/oceanpearl-ops/asia-southeast1/updateUserAccess).
+[32m[1m+  functions[asia-southeast1-createProductSpec]:[22m[39m [1mhttp[22m function initialized (http://127.0.0.1:5001/oceanpearl-ops/asia-southeast1/createProductSpec).
+[32m[1m+  functions[asia-southeast1-listProductSpecs]:[22m[39m [1mhttp[22m function initialized (http://127.0.0.1:5001/oceanpearl-ops/asia-southeast1/listProductSpecs).
+[32m[1m+  functions[asia-southeast1-createSpecies]:[22m[39m [1mhttp[22m function initialized (http://127.0.0.1:5001/oceanpearl-ops/asia-southeast1/createSpecies).
+[32m[1m+  functions[asia-southeast1-listSpecies]:[22m[39m [1mhttp[22m function initialized (http://127.0.0.1:5001/oceanpearl-ops/asia-southeast1/listSpecies).
+[32m[1m+  functions[asia-southeast1-receiveLot]:[22m[39m [1mhttp[22m function initialized (http://127.0.0.1:5001/oceanpearl-ops/asia-southeast1/receiveLot).
+[32m[1m+  functions[asia-southeast1-transferLot]:[22m[39m [1mhttp[22m function initialized (http://127.0.0.1:5001/oceanpearl-ops/asia-southeast1/transferLot).
+[32m[1m+  functions[asia-southeast1-productionTransform]:[22m[39m [1mhttp[22m function initialized (http://127.0.0.1:5001/oceanpearl-ops/asia-southeast1/productionTransform).
+[32m[1m+  functions[asia-southeast1-getInventoryByUnit]:[22m[39m [1mhttp[22m function initialized (http://127.0.0.1:5001/oceanpearl-ops/asia-southeast1/getInventoryByUnit).
+[32m[1m+  functions[asia-southeast1-getTrialBalance]:[22m[39m [1mhttp[22m function initialized (http://127.0.0.1:5001/oceanpearl-ops/asia-southeast1/getTrialBalance).
+[32m[1m+  functions[asia-southeast1-verifyLegacyLedgerClean]:[22m[39m [1mhttp[22m function initialized (http://127.0.0.1:5001/oceanpearl-ops/asia-southeast1/verifyLegacyLedgerClean).
+[32m[1m+  functions[asia-southeast1-getPLByUnit]:[22m[39m [1mhttp[22m function initialized (http://127.0.0.1:5001/oceanpearl-ops/asia-southeast1/getPLByUnit).
+[32m[1m+  functions[asia-southeast1-sharkUploadAndExtract]:[22m[39m [1mhttp[22m function initialized (http://127.0.0.1:5001/oceanpearl-ops/asia-southeast1/sharkUploadAndExtract).
+[32m[1m+  functions[asia-southeast1-sharkGetSuggestions]:[22m[39m [1mhttp[22m function initialized (http://127.0.0.1:5001/oceanpearl-ops/asia-southeast1/sharkGetSuggestions).
+[32m[1m+  functions[asia-southeast1-sharkUpdateSuggestion]:[22m[39m [1mhttp[22m function initialized (http://127.0.0.1:5001/oceanpearl-ops/asia-southeast1/sharkUpdateSuggestion).
+[32m[1m+  functions[asia-southeast1-api]:[22m[39m [1mhttp[22m function initialized (http://127.0.0.1:5001/oceanpearl-ops/asia-southeast1/api).
+[32m[1m+  functions[asia-southeast1-recordSale]:[22m[39m [1mhttp[22m function initialized (http://127.0.0.1:5001/oceanpearl-ops/asia-southeast1/recordSale).
+[32m[1m+  functions[asia-southeast1-recordPayment]:[22m[39m [1mhttp[22m function initialized (http://127.0.0.1:5001/oceanpearl-ops/asia-southeast1/recordPayment).
+[32m[1m+  functions[asia-southeast1-createTestUsers]:[22m[39m [1mhttp[22m function initialized (http://127.0.0.1:5001/oceanpearl-ops/asia-southeast1/createTestUsers).
+
+[90m┌─────────────────────────────────────────────────────────────┐[39m
+[90m│[39m [32m✔[39m  [1mAll emulators ready! It is now safe to connect your app.[22m [90m│[39m
+[90m│[39m [36mi[39m  View Emulator UI at [4m[1mhttp://127.0.0.1:4000/[22m[24m               [90m│[39m
+[90m└─────────────────────────────────────────────────────────────┘[39m
+
+[90m┌────────────────[39m[90m┬────────────────[39m[90m┬──────────────────────────────────┐[39m
+[90m│[39m[33m Emulator       [39m[90m│[39m[33m Host:Port      [39m[90m│[39m[33m View in Emulator UI              [39m[90m│[39m
+[90m├────────────────[39m[90m┼────────────────[39m[90m┼──────────────────────────────────┤[39m
+[90m│[39m Authentication [90m│[39m 127.0.0.1:9099 [90m│[39m [4m[1mhttp://127.0.0.1:4000/auth[22m[24m       [90m│[39m
+[90m├────────────────[39m[90m┼────────────────[39m[90m┼──────────────────────────────────┤[39m
+[90m│[39m Functions      [90m│[39m 127.0.0.1:5001 [90m│[39m [4m[1mhttp://127.0.0.1:4000/functions[22m[24m  [90m│[39m
+[90m├────────────────[39m[90m┼────────────────[39m[90m┼──────────────────────────────────┤[39m
+[90m│[39m Firestore      [90m│[39m 127.0.0.1:8080 [90m│[39m [4m[1mhttp://127.0.0.1:4000/firestore[22m[24m  [90m│[39m
+[90m├────────────────[39m[90m┼────────────────[39m[90m┼──────────────────────────────────┤[39m
+[90m│[39m Hosting        [90m│[39m 127.0.0.1:5000 [90m│[39m n/a                              [90m│[39m
+[90m├────────────────[39m[90m┼────────────────[39m[90m┼──────────────────────────────────┤[39m
+[90m│[39m Storage        [90m│[39m 127.0.0.1:9199 [90m│[39m [4m[1mhttp://127.0.0.1:4000/storage[22m[24m    [90m│[39m
+[90m├────────────────[39m[90m┼────────────────[39m[90m┼──────────────────────────────────┤[39m
+[90m│[39m Extensions     [90m│[39m 127.0.0.1:5001 [90m│[39m [4m[1mhttp://127.0.0.1:4000/extensions[22m[24m [90m│[39m
+[90m└────────────────[39m[90m┴────────────────[39m[90m┴──────────────────────────────────┘[39m
+[90m  Emulator Hub host: 127.0.0.1 port: 4400[39m
+[90m  Other reserved ports:[39m 4500, 9150
+[90m┌─────────────────────────[39m[90m┬───────────────[39m[90m┬─────────────────────┐[39m
+[90m│[39m[33m Extension Instance Name [39m[90m│[39m[33m Extension Ref [39m[90m│[39m[33m View in Emulator UI [39m[90m│[39m
+[90m└─────────────────────────[39m[90m┴───────────────[39m[90m┴─────────────────────┘[39m
+Issues? Report them at [4m[1mhttps://github.com/firebase/firebase-tools/issues[22m[24m and attach the *-debug.log files.
+ 
+[33m[1m! [22m[39m TypeError: Cannot read properties of undefined (reading 'setEmulatedAdminApp')
+    at Proxy.<anonymous> (C:\Users\eg_di\AppData\Local\nvm\v20.14.0\node_modules\firebase-tools\lib\emulator\functionsEmulatorRuntime.js:289:34)
+    at Object.<anonymous> (D:\OPS2\functions\index.js:4:7)
+    at Module._compile (node:internal/modules/cjs/loader:1358:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1416:10)
+    at Module.load (node:internal/modules/cjs/loader:1208:32)
+    at Module._load (node:internal/modules/cjs/loader:1024:12)
+    at Module.require (node:internal/modules/cjs/loader:1233:19)
+    at require (node:internal/modules/helpers:179:18)
+    at loadTriggers (C:\Users\eg_di\AppData\Local\nvm\v20.14.0\node_modules\firebase-tools\lib\emulator\functionsEmulatorRuntime.js:475:25)
+    at main (C:\Users\eg_di\AppData\Local\nvm\v20.14.0\node_modules\firebase-tools\lib\emulator\functionsEmulatorRuntime.js:528:32)
+[33m[1m! [22m[39m We were unable to load your functions code. (see above)
+[33m[1m!  functions:[22m[39m Failed to initialize and load triggers. This shouldn't happen: Cannot read properties of undefined (reading 'setEmulatedAdminApp')
+[33m[1m! [22m[39m Your function was killed because it raised an unhandled error.
+[31m[1m!!  functions:[22m[39m Failed to handle request for function asia-southeast1-sharkUpdateSuggestion
+[31m[1m!!  functions:[22m[39m Failed to start functions in D:\OPS2\functions: FirebaseError: Failed to load function.
+[33m[1m! [22m[39m TypeError: Cannot read properties of undefined (reading 'setEmulatedAdminApp')
+    at Proxy.<anonymous> (C:\Users\eg_di\AppData\Local\nvm\v20.14.0\node_modules\firebase-tools\lib\emulator\functionsEmulatorRuntime.js:289:34)
+    at Object.<anonymous> (D:\OPS2\functions\index.js:4:7)
+    at Module._compile (node:internal/modules/cjs/loader:1358:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1416:10)
+    at Module.load (node:internal/modules/cjs/loader:1208:32)
+    at Module._load (node:internal/modules/cjs/loader:1024:12)
+    at Module.require (node:internal/modules/cjs/loader:1233:19)
+    at require (node:internal/modules/helpers:179:18)
+    at loadTriggers (C:\Users\eg_di\AppData\Local\nvm\v20.14.0\node_modules\firebase-tools\lib\emulator\functionsEmulatorRuntime.js:475:25)
+    at main (C:\Users\eg_di\AppData\Local\nvm\v20.14.0\node_modules\firebase-tools\lib\emulator\functionsEmulatorRuntime.js:528:32)
+[33m[1m! [22m[39m We were unable to load your functions code. (see above)
+[33m[1m!  functions:[22m[39m Failed to initialize and load triggers. This shouldn't happen: Cannot read properties of undefined (reading 'setEmulatedAdminApp')
+[33m[1m! [22m[39m Your function was killed because it raised an unhandled error.
+[31m[1m!!  functions:[22m[39m Failed to handle request for function asia-southeast1-sharkUpdateSuggestion
+[31m[1m!!  functions:[22m[39m Failed to start functions in D:\OPS2\functions: FirebaseError: Failed to load function.
+[33m[1m! [22m[39m [1m[33mfunctions: [39m[22mpackage.json indicates an outdated version of firebase-functions. Please upgrade using [1mnpm install --save firebase-functions@latest[22m in your functions directory.
+[33m[1m! [22m[39m [1m[33mfunctions: [39m[22mPlease note that there will be breaking changes when you upgrade.
+[32m[1m+  functions:[22m[39m Using node@20 from host.
+Serving at port 8411
+
+[33m[1m!  functions:[22m[39m Application Default Credentials detected. Non-emulated services will access production using these credentials. Be careful!
+[32m[1m+  functions:[22m[39m Loaded functions definitions from source: createLocation, listLocations, createUnit, updateUnit, listUnits, listUsers, updateUserAccess, createProductSpec, listProductSpecs, createSpecies, listSpecies, receiveLot, transferLot, productionTransform, getInventoryByUnit, getTrialBalance, verifyLegacyLedgerClean, getPLByUnit, sharkUploadAndExtract, sharkGetSuggestions, sharkUpdateSuggestion, api, recordSale, recordPayment, createTestUsers.
+[33m[1m!  firestore:[22m[39m Fatal error occurred: 
+   Firestore Emulator has exited with code: 1, 
+   stopping all running emulators
+[36m[1mi  ui:[22m[39m Stopping Emulator UI
+[36m[1mi  extensions:[22m[39m Stopping Extensions Emulator
+[36m[1mi  functions:[22m[39m Stopping Functions Emulator
+[36m[1mi  hosting:[22m[39m Stopping Hosting Emulator
+[36m[1mi  firestore:[22m[39m Stopping Firestore Emulator
+[36m[1mi  auth:[22m[39m Stopping Authentication Emulator
+[36m[1mi  storage:[22m[39m Stopping Storage Emulator
+[36m[1mi  eventarc:[22m[39m Stopping Eventarc Emulator
+[36m[1mi  tasks:[22m[39m Stopping Cloud Tasks Emulator
+[36m[1mi  hub:[22m[39m Stopping emulator hub
+[36m[1mi  logging:[22m[39m Stopping Logging Emulator
