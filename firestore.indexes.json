@@ -1,6 +1,24 @@
 {
   "indexes": [
     {
+      "collectionGroup": "v3_financial_periods",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "endDate",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "startDate",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "__name__",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
       "collectionGroup": "v3_ledger_entries",
       "queryScope": "COLLECTION",
       "fields": [
@@ -150,16 +168,6 @@
         },
         {
           "fieldPath": "openedAt",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "v3_shark_location_risk",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "totalScore",
           "order": "DESCENDING"
         }
       ]
