@@ -9,7 +9,7 @@ import '../styles/AdminPage.css';
 interface UserData {
     uid: string;
     email: string;
-    role: 'admin' | 'user';
+    role: string;
     allowedLocationIds: string[];
     disabled: boolean;
 }
@@ -24,7 +24,7 @@ const AdminUsersPage: React.FC = () => {
     const [formData, setFormData] = useState({
         email: '',
         password: '',
-        role: 'user' as 'admin' | 'user',
+        role: 'unit_operator',
         allowedLocationIds: [] as string[],
     });
 
@@ -35,14 +35,14 @@ const AdminUsersPage: React.FC = () => {
             setLoading(true);
             setError('');
             try {
-                const snap = await getDocs(collection(db, 'users'));
+                const snap = await getDocs(collection(db, 'v3_users'));
                 const list: UserData[] = [];
                 snap.forEach((d) => {
                     const data: any = d.data();
                     list.push({
                         uid: d.id,
                         email: data.email || '',
-                        role: data.role === 'admin' ? 'admin' : 'user',
+                        role: data.role || 'user',
                         allowedLocationIds: Array.isArray(data.allowedLocationIds) ? data.allowedLocationIds : [],
                         disabled: !!data.disabled,
                     });
@@ -82,7 +82,7 @@ const AdminUsersPage: React.FC = () => {
             setFormData({
                 email: '',
                 password: '',
-                role: 'user',
+                role: 'unit_operator',
                 allowedLocationIds: [],
             });
             setShowForm(false);
@@ -133,12 +133,16 @@ const AdminUsersPage: React.FC = () => {
                         <select
                             value={formData.role}
                             onChange={(e) =>
-                                setFormData({ ...formData, role: e.target.value as 'admin' | 'user' })
+                                setFormData({ ...formData, role: e.target.value as any })
                             }
                             disabled={loading}
                         >
-                            <option value="user">{t('admin.user')}</option>
-                            <option value="admin">{t('admin.admin')}</option>
+                            <option value="unit_operator">Unit Operator</option>
+                            <option value="location_manager">Location Manager</option>
+                            <option value="finance_officer">Finance Officer</option>
+                            <option value="ceo">CEO</option>
+                            <option value="admin">Admin</option>
+                            <option value="investor">Investor</option>
                         </select>
                     </div>
 

@@ -1,103 +1,78 @@
-(node:34048) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
-(Use `node --trace-deprecation ...` to show where the warning was created)
+[2026-02-26T16:47:04.314Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[2026-02-26T16:47:04.317Z] > authorizing via signed-in user (tariq.tharwat@gmail.com)
+[2026-02-26T16:47:04.318Z] [iam] checking project oceanpearl-ops for permissions ["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]
+[2026-02-26T16:47:04.319Z] Checked if tokens are valid: true, expires at: 1772125705949
+[2026-02-26T16:47:04.320Z] Checked if tokens are valid: true, expires at: 1772125705949
+[2026-02-26T16:47:04.321Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/oceanpearl-ops:testIamPermissions [none]
+[2026-02-26T16:47:04.321Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/oceanpearl-ops:testIamPermissions  x-goog-user-project=oceanpearl-ops
+[2026-02-26T16:47:04.321Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/oceanpearl-ops:testIamPermissions {"permissions":["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]}
+[2026-02-26T16:47:05.637Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/oceanpearl-ops:testIamPermissions 200
+[2026-02-26T16:47:05.637Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/oceanpearl-ops:testIamPermissions {"permissions":["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]}
 
 === Deploying to 'oceanpearl-ops'...
 
-i  deploying firestore, functions, hosting
-i  firestore: ensuring required API firestore.googleapis.com is enabled...
-i  firestore: ensuring required API firestore.googleapis.com is enabled...
-i  firestore: reading indexes from firestore.indexes.json...
-i  cloud.firestore: checking firestore.rules for compilation errors...
-✔  cloud.firestore: rules file firestore.rules compiled successfully
-i  functions: preparing codebase default for deployment
-i  functions: ensuring required API cloudfunctions.googleapis.com is enabled...
-i  functions: ensuring required API cloudbuild.googleapis.com is enabled...
-i  artifactregistry: ensuring required API artifactregistry.googleapis.com is enabled...
-⚠  functions: Runtime Node.js 20 will be deprecated on 2026-04-30 and will be decommissioned on 2026-10-30, after which you will not be able to deploy without upgrading. Consider upgrading now to avoid disruption. See https://cloud.google.com/functions/docs/runtime-support for full details on the lifecycle policy
-⚠  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory.
-⚠  functions: Please note that there will be breaking changes when you upgrade.
-i  functions: Loading and analyzing source code for codebase default to determine what to deploy
-Serving at port 8622
+i  deploying firestore 
+i  firestore: ensuring required API firestore.googleapis.com is enabled... 
+i  firestore: ensuring required API firestore.googleapis.com is enabled... 
+[2026-02-26T16:47:05.644Z] Checked if tokens are valid: true, expires at: 1772125705949
+[2026-02-26T16:47:05.645Z] Checked if tokens are valid: true, expires at: 1772125705949
+[2026-02-26T16:47:05.645Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/oceanpearl-ops/databases/(default) [none]
+[2026-02-26T16:47:07.135Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/oceanpearl-ops/databases/(default) 200
+[2026-02-26T16:47:07.135Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/oceanpearl-ops/databases/(default) {"name":"projects/oceanpearl-ops/databases/(default)","uid":"690ea8f9-0dcb-4e19-84c0-db6dc56cf9d2","createTime":"2026-02-08T06:58:57.190369Z","updateTime":"2026-02-08T06:58:57.190369Z","locationId":"nam5","type":"FIRESTORE_NATIVE","concurrencyMode":"PESSIMISTIC","versionRetentionPeriod":"3600s","earliestVersionTime":"2026-02-26T15:47:06.952402Z","appEngineIntegrationMode":"DISABLED","keyPrefix":"s","pointInTimeRecoveryEnablement":"POINT_IN_TIME_RECOVERY_DISABLED","deleteProtectionState":"DELETE_PROTECTION_DISABLED","databaseEdition":"STANDARD","freeTier":true,"realtimeUpdatesMode":"REALTIME_UPDATES_MODE_ENABLED","etag":"INu43ffN95IDMOGZkfie5pID"}
+i  firestore: reading indexes from firestore.indexes.json... 
+i  cloud.firestore: checking firestore.rules for compilation errors... 
+[2026-02-26T16:47:07.141Z] Checked if tokens are valid: true, expires at: 1772125705949
+[2026-02-26T16:47:07.141Z] Checked if tokens are valid: true, expires at: 1772125705949
+[2026-02-26T16:47:07.143Z] >>> [apiv2][query] POST https://firebaserules.googleapis.com/v1/projects/oceanpearl-ops:test [none]
+[2026-02-26T16:47:07.143Z] >>> [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/oceanpearl-ops:test [omitted]
+[2026-02-26T16:47:08.528Z] <<< [apiv2][status] POST https://firebaserules.googleapis.com/v1/projects/oceanpearl-ops:test 200
+[2026-02-26T16:47:08.528Z] <<< [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/oceanpearl-ops:test {"issues":[{"sourcePosition":{"fileName":"firestore.rules","line":28,"column":14,"currentOffset":720,"endOffset":733},"description":"Unused function: isUnitOperator.","severity":"WARNING"}]}
+!  [W] 28:14 - Unused function: isUnitOperator. 
++  cloud.firestore: rules file firestore.rules compiled successfully 
+i  firestore: deploying indexes... 
+[2026-02-26T16:47:08.532Z] Checked if tokens are valid: true, expires at: 1772125705949
+[2026-02-26T16:47:08.532Z] Checked if tokens are valid: true, expires at: 1772125705949
+[2026-02-26T16:47:08.533Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/oceanpearl-ops/databases/(default)/collectionGroups/-/indexes [none]
+[2026-02-26T16:47:08.861Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/oceanpearl-ops/databases/(default)/collectionGroups/-/indexes 200
+[2026-02-26T16:47:08.861Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/oceanpearl-ops/databases/(default)/collectionGroups/-/indexes {"indexes":[{"name":"projects/oceanpearl-ops/databases/(default)/collectionGroups/v3_trace_events/indexes/CICAgNiav4AK","queryScope":"COLLECTION","fields":[{"fieldPath":"batchId","order":"ASCENDING"},{"fieldPath":"createdAt","order":"ASCENDING"},{"fieldPath":"__name__","order":"ASCENDING"}],"state":"READY","density":"SPARSE_ALL"},{"name":"projects/oceanpearl-ops/databases/(default)/collectionGroups/v3_ledger_entries/indexes/CICAgJim14AK","queryScope":"COLLECTION","fields":[{"fieldPath":"locationId","order":"ASCENDING"},{"fieldPath":"unitId","order":"ASCENDING"},{"fieldPath":"createdAt","order":"ASCENDING"},{"fieldPath":"__name__","order":"ASCENDING"}],"state":"READY","density":"SPARSE_ALL"},{"name":"projects/oceanpearl-ops/databases/(default)/collectionGroups/shark_alerts/indexes/CICAgOjXh4EK","queryScope":"COLLECTION","fields":[{"fieldPath":"status","order":"ASCENDING"},{"fieldPath":"createdAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}],"state":"READY","density":"SPARSE_ALL"},{"name":"projects/oceanpearl-ops/databases/(default)/collectionGroups/v3_shark_alerts/indexes/CICAgNiroIEK","queryScope":"COLLECTION","fields":[{"fieldPath":"locationId","order":"ASCENDING"},{"fieldPath":"unitId","order":"ASCENDING"},{"fieldPath":"openedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}],"state":"READY","density":"SPARSE_ALL"},{"name":"projects/oceanpearl-ops/databases/(default)/collectionGroups/v3_ledger_entries/indexes/CICAgJj7z4EK","queryScope":"COLLECTION","fields":[{"fieldPath":"accountId","order":"ASCENDING"},{"fieldPath":"locationId","order":"ASCENDING"},{"fieldPath":"unitId","order":"ASCENDING"},{"fieldPath":"createdAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}],"state":"READY","density":"SPARSE_ALL"},{"name":"projects/oceanpearl-ops/databases/(default)/collectionGroups/v3_account_balance_shards/indexes/CICAgNjpgYIK","queryScope":"COLLECTION","fields":[{"fieldPath":"accountId","order":"ASCENDING"},{"fieldPath":"locationId","order":"ASCENDING"},{"fieldPath":"unitId","order":"ASCENDING"},{"fieldPath":"__name__","order":"ASCENDING"}],"state":"READY","density":"SPARSE_ALL"},{"name":"projects/oceanpearl-ops/databases/(default)/collectionGroups/v3_ledger_entries/indexes/CICAgJjF9oIK","queryScope":"COLLECTION","fields":[{"fieldPath":"locationId","order":"ASCENDING"},{"fieldPath":"accountCategory","order":"ASCENDING"},{"fieldPath":"createdAt","order":"ASCENDING"},{"fieldPath":"__name__","order":"ASCENDING"}],"state":"READY","density":"SPARSE_ALL"},{"name":"projects/oceanpearl-ops/databases/(default)/collectionGroups/v3_shark_alerts/indexes/CICAgLiIkYMK","queryScope":"COLLECTION","fields":[{"fieldPath":"status","order":"ASCENDING"},{"fieldPath":"openedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}],"state":"READY","density":"SPARSE_ALL"},{"name":"projects/oceanpearl-ops/databases/(default)/collectionGroups/inventory_lots/indexes/CICAgJiUpoMK","queryScope":"COLLECTION","fields":[{"fieldPath":"unitId","order":"ASCENDING"},{"fieldPath":"status","order":"ASCENDING"},{"fieldPath":"createdTs","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}],"state":"READY","density":"SPARSE_ALL"},{"name":"projects/oceanpearl-ops/databases/(default)/collectionGroups/v3_inventory_valuations/indexes/CICAgNi47oMK","queryScope":"COLLECTION","fields":[{"fieldPath":"locationId","order":"ASCENDING"},{"fieldPath":"unitId","order":"ASCENDING"},{"fieldPath":"__name__","order":"ASCENDING"}],"state":"READY","density":"SPARSE_ALL"},{"name":"projects/oceanpearl-ops/databases/(default)/collectionGroups/v3_account_balance_shards/indexes/CICAgJjmiJEK","queryScope":"COLLECTION","fields":[{"fieldPath":"locationId","order":"ASCENDING"},{"fieldPath":"unitId","order":"ASCENDING"},{"fieldPath":"accountId","order":"ASCENDING"},{"fieldPath":"__name__","order":"ASCENDING"}],"state":"READY","density":"SPARSE_ALL"},{"name":"projects/oceanpearl-ops/databases/(default)/collectionGroups/v3_financial_periods/indexes/CICAgJjFqZMK","queryScope":"COLLECTION","fields":[{"fieldPath":"endDate","order":"ASCENDING"},{"fieldPath":"startDate","order":"ASCENDING"},{"fieldPath":"__name__","order":"ASCENDING"}],"state":"READY","density":"SPARSE_ALL"}]}
+[2026-02-26T16:47:08.862Z] Checked if tokens are valid: true, expires at: 1772125705949
+[2026-02-26T16:47:08.862Z] Checked if tokens are valid: true, expires at: 1772125705949
+[2026-02-26T16:47:08.862Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/oceanpearl-ops/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* [none]
+[2026-02-26T16:47:09.168Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/oceanpearl-ops/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* 200
+[2026-02-26T16:47:09.168Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/oceanpearl-ops/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* {"fields":[{"name":"projects/oceanpearl-ops/databases/(default)/collectionGroups/__default__/fields/*","indexConfig":{"indexes":[{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","order":"ASCENDING"}],"state":"READY"},{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","order":"DESCENDING"}],"state":"READY"},{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","arrayConfig":"CONTAINS"}],"state":"READY"}]}}]}
+[2026-02-26T16:47:09.169Z] Checked if tokens are valid: true, expires at: 1772125705949
+[2026-02-26T16:47:09.169Z] Checked if tokens are valid: true, expires at: 1772125705949
+[2026-02-26T16:47:09.169Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/oceanpearl-ops/databases/(default) [none]
+[2026-02-26T16:47:09.498Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/oceanpearl-ops/databases/(default) 200
+[2026-02-26T16:47:09.499Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/oceanpearl-ops/databases/(default) {"name":"projects/oceanpearl-ops/databases/(default)","uid":"690ea8f9-0dcb-4e19-84c0-db6dc56cf9d2","createTime":"2026-02-08T06:58:57.190369Z","updateTime":"2026-02-08T06:58:57.190369Z","locationId":"nam5","type":"FIRESTORE_NATIVE","concurrencyMode":"PESSIMISTIC","versionRetentionPeriod":"3600s","earliestVersionTime":"2026-02-26T15:47:09.322023Z","appEngineIntegrationMode":"DISABLED","keyPrefix":"s","pointInTimeRecoveryEnablement":"POINT_IN_TIME_RECOVERY_DISABLED","deleteProtectionState":"DELETE_PROTECTION_DISABLED","databaseEdition":"STANDARD","freeTier":true,"realtimeUpdatesMode":"REALTIME_UPDATES_MODE_ENABLED","etag":"IIGI7vjN95IDMOGZkfie5pID"}
+[2026-02-26T16:47:09.500Z] Skipping existing index: {"collectionGroup":"v3_financial_periods","queryScope":"COLLECTION","fields":[{"fieldPath":"endDate","order":"ASCENDING"},{"fieldPath":"startDate","order":"ASCENDING"},{"fieldPath":"__name__","order":"ASCENDING"}]}
+[2026-02-26T16:47:09.500Z] Skipping existing index: {"collectionGroup":"v3_ledger_entries","queryScope":"COLLECTION","fields":[{"fieldPath":"locationId","order":"ASCENDING"},{"fieldPath":"unitId","order":"ASCENDING"},{"fieldPath":"createdAt","order":"ASCENDING"},{"fieldPath":"__name__","order":"ASCENDING"}]}
+[2026-02-26T16:47:09.500Z] Skipping existing index: {"collectionGroup":"v3_ledger_entries","queryScope":"COLLECTION","fields":[{"fieldPath":"locationId","order":"ASCENDING"},{"fieldPath":"accountCategory","order":"ASCENDING"},{"fieldPath":"createdAt","order":"ASCENDING"},{"fieldPath":"__name__","order":"ASCENDING"}]}
+[2026-02-26T16:47:09.500Z] Skipping existing index: {"collectionGroup":"v3_ledger_entries","queryScope":"COLLECTION","fields":[{"fieldPath":"accountId","order":"ASCENDING"},{"fieldPath":"locationId","order":"ASCENDING"},{"fieldPath":"unitId","order":"ASCENDING"},{"fieldPath":"createdAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]}
+[2026-02-26T16:47:09.500Z] Skipping existing index: {"collectionGroup":"v3_inventory_valuations","queryScope":"COLLECTION","fields":[{"fieldPath":"locationId","order":"ASCENDING"},{"fieldPath":"unitId","order":"ASCENDING"},{"fieldPath":"__name__","order":"ASCENDING"}]}
+[2026-02-26T16:47:09.501Z] Skipping existing index: {"collectionGroup":"v3_trace_events","queryScope":"COLLECTION","fields":[{"fieldPath":"batchId","order":"ASCENDING"},{"fieldPath":"createdAt","order":"ASCENDING"},{"fieldPath":"__name__","order":"ASCENDING"}]}
+[2026-02-26T16:47:09.501Z] Skipping existing index: {"collectionGroup":"v3_account_balance_shards","queryScope":"COLLECTION","fields":[{"fieldPath":"locationId","order":"ASCENDING"},{"fieldPath":"unitId","order":"ASCENDING"},{"fieldPath":"accountId","order":"ASCENDING"},{"fieldPath":"__name__","order":"ASCENDING"}]}
+[2026-02-26T16:47:09.501Z] Skipping existing index: {"collectionGroup":"v3_account_balance_shards","queryScope":"COLLECTION","fields":[{"fieldPath":"accountId","order":"ASCENDING"},{"fieldPath":"locationId","order":"ASCENDING"},{"fieldPath":"unitId","order":"ASCENDING"},{"fieldPath":"__name__","order":"ASCENDING"}]}
+[2026-02-26T16:47:09.501Z] Skipping existing index: {"collectionGroup":"v3_shark_alerts","queryScope":"COLLECTION","fields":[{"fieldPath":"locationId","order":"ASCENDING"},{"fieldPath":"unitId","order":"ASCENDING"},{"fieldPath":"openedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]}
+[2026-02-26T16:47:09.501Z] Skipping existing index: {"collectionGroup":"v3_shark_alerts","queryScope":"COLLECTION","fields":[{"fieldPath":"status","order":"ASCENDING"},{"fieldPath":"openedAt","order":"DESCENDING"},{"fieldPath":"__name__","order":"DESCENDING"}]}
+[2026-02-26T16:47:09.501Z] Creating new index: {"collectionGroup":"v3_shark_location_risk","queryScope":"COLLECTION","fields":[{"fieldPath":"totalScore","order":"DESCENDING"}]}
+[2026-02-26T16:47:09.501Z] Checked if tokens are valid: true, expires at: 1772125705949
+[2026-02-26T16:47:09.501Z] Checked if tokens are valid: true, expires at: 1772125705949
+[2026-02-26T16:47:09.501Z] >>> [apiv2][query] POST https://firestore.googleapis.com/v1/projects/oceanpearl-ops/databases/(default)/collectionGroups/v3_shark_location_risk/indexes [none]
+[2026-02-26T16:47:09.502Z] >>> [apiv2][body] POST https://firestore.googleapis.com/v1/projects/oceanpearl-ops/databases/(default)/collectionGroups/v3_shark_location_risk/indexes {"fields":[{"fieldPath":"totalScore","order":"DESCENDING"}],"queryScope":"COLLECTION"}
+[2026-02-26T16:47:09.798Z] <<< [apiv2][status] POST https://firestore.googleapis.com/v1/projects/oceanpearl-ops/databases/(default)/collectionGroups/v3_shark_location_risk/indexes 400
+[2026-02-26T16:47:09.798Z] <<< [apiv2][body] POST https://firestore.googleapis.com/v1/projects/oceanpearl-ops/databases/(default)/collectionGroups/v3_shark_location_risk/indexes {"error":{"code":400,"message":"this index is not necessary, configure using single field index controls","status":"INVALID_ARGUMENT"}}
 
-i  extensions: ensuring required API firebaseextensions.googleapis.com is enabled...
-i  functions: preparing functions directory for uploading...
-i  functions: packaged /home/ubuntu/oceanpearl-firebase/functions (34.73 KB) for uploading
-i  functions: ensuring required API run.googleapis.com is enabled...
-i  functions: ensuring required API eventarc.googleapis.com is enabled...
-i  functions: ensuring required API pubsub.googleapis.com is enabled...
-i  functions: ensuring required API storage.googleapis.com is enabled...
-i  functions: generating the service identity for pubsub.googleapis.com...
-i  functions: generating the service identity for eventarc.googleapis.com...
-i  firestore: latest version of firestore.rules already up to date, skipping upload...
-i  firestore: deploying indexes...
-✔  firestore: deployed indexes in firestore.indexes.json successfully for (default) database
-✔  functions: functions source uploaded successfully
-i  hosting[oceanpearl-ops]: beginning deploy...
-i  hosting[oceanpearl-ops]: found 5 files in public
-✔  hosting[oceanpearl-ops]: file upload complete
-✔  firestore: released rules firestore.rules to cloud.firestore
-i  functions: creating Node.js 20 (2nd Gen) function recordSale(asia-southeast1)...
-i  functions: creating Node.js 20 (2nd Gen) function recordPayment(asia-southeast1)...
-i  functions: updating Node.js 20 (2nd Gen) function createLocation(asia-southeast1)...
-i  functions: updating Node.js 20 (2nd Gen) function listLocations(asia-southeast1)...
-i  functions: updating Node.js 20 (2nd Gen) function createUnit(asia-southeast1)...
-i  functions: updating Node.js 20 (2nd Gen) function updateUnit(asia-southeast1)...
-i  functions: updating Node.js 20 (2nd Gen) function listUnits(asia-southeast1)...
-i  functions: updating Node.js 20 (2nd Gen) function listUsers(asia-southeast1)...
-i  functions: updating Node.js 20 (2nd Gen) function updateUserAccess(asia-southeast1)...
-i  functions: updating Node.js 20 (2nd Gen) function createProductSpec(asia-southeast1)...
-i  functions: updating Node.js 20 (2nd Gen) function listProductSpecs(asia-southeast1)...
-i  functions: updating Node.js 20 (2nd Gen) function createSpecies(asia-southeast1)...
-i  functions: updating Node.js 20 (2nd Gen) function listSpecies(asia-southeast1)...
-i  functions: updating Node.js 20 (2nd Gen) function receiveLot(asia-southeast1)...
-i  functions: updating Node.js 20 (2nd Gen) function transferLot(asia-southeast1)...
-i  functions: updating Node.js 20 (2nd Gen) function productionTransform(asia-southeast1)...
-i  functions: updating Node.js 20 (2nd Gen) function getInventoryByUnit(asia-southeast1)...
-i  functions: updating Node.js 20 (2nd Gen) function getTrialBalance(asia-southeast1)...
-i  functions: updating Node.js 20 (2nd Gen) function getPLByUnit(asia-southeast1)...
-i  functions: updating Node.js 20 (2nd Gen) function sharkUploadAndExtract(asia-southeast1)...
-i  functions: updating Node.js 20 (2nd Gen) function sharkGetSuggestions(asia-southeast1)...
-i  functions: updating Node.js 20 (2nd Gen) function sharkUpdateSuggestion(asia-southeast1)...
-i  functions: updating Node.js 20 (2nd Gen) function api(asia-southeast1)...
-✔  functions[recordSale(asia-southeast1)] Successful create operation.
-✔  functions[listUnits(asia-southeast1)] Successful update operation.
-✔  functions[createLocation(asia-southeast1)] Successful update operation.
-✔  functions[recordPayment(asia-southeast1)] Successful create operation.
-✔  functions[receiveLot(asia-southeast1)] Successful update operation.
-✔  functions[productionTransform(asia-southeast1)] Successful update operation.
-✔  functions[createUnit(asia-southeast1)] Successful update operation.
-✔  functions[getPLByUnit(asia-southeast1)] Successful update operation.
-✔  functions[api(asia-southeast1)] Successful update operation.
-✔  functions[transferLot(asia-southeast1)] Successful update operation.
-✔  functions[listSpecies(asia-southeast1)] Successful update operation.
-✔  functions[updateUserAccess(asia-southeast1)] Successful update operation.
-✔  functions[sharkUploadAndExtract(asia-southeast1)] Successful update operation.
-✔  functions[createSpecies(asia-southeast1)] Successful update operation.
-✔  functions[getInventoryByUnit(asia-southeast1)] Successful update operation.
-✔  functions[sharkUpdateSuggestion(asia-southeast1)] Successful update operation.
-Could not create or update Cloud Run service listusers, Container Healthcheck failed. Revision 'listusers-00002-jaz' is not ready and cannot serve traffic. Quota exceeded for total allowable CPU per project per region.
-
-Logs URL: https://console.cloud.google.com/logs/viewer?project=oceanpearl-ops&resource=cloud_run_revision/service_name/listusers/revision_name/listusers-00002-jaz&advancedFilter=resource.type%3D%22cloud_run_revision%22%0Aresource.labels.service_name%3D%22listusers%22%0Aresource.labels.revision_name%3D%22listusers-00002-jaz%22 
-For more troubleshooting guidance, see https://cloud.google.com/run/docs/troubleshooting#container-failed-to-start
-Could not create or update Cloud Run service sharkgetsuggestions, Container Healthcheck failed. Revision 'sharkgetsuggestions-00002-soh' is not ready and cannot serve traffic. Quota exceeded for total allowable CPU per project per region.
-
-Logs URL: https://console.cloud.google.com/logs/viewer?project=oceanpearl-ops&resource=cloud_run_revision/service_name/sharkgetsuggestions/revision_name/sharkgetsuggestions-00002-soh&advancedFilter=resource.type%3D%22cloud_run_revision%22%0Aresource.labels.service_name%3D%22sharkgetsuggestions%22%0Aresource.labels.revision_name%3D%22sharkgetsuggestions-00002-soh%22 
-For more troubleshooting guidance, see https://cloud.google.com/run/docs/troubleshooting#container-failed-to-start
-✔  functions[updateUnit(asia-southeast1)] Successful update operation.
-Could not create or update Cloud Run service listlocations, Container Healthcheck failed. Quota exceeded for total allowable CPU per project per region.
-
-Logs URL: https://console.cloud.google.com/logs/viewer?project=oceanpearl-ops&resource=cloud_run_revision/service_name/listlocations/revision_name/listlocations-00002-rad&advancedFilter=resource.type%3D%22cloud_run_revision%22%0Aresource.labels.service_name%3D%22listlocations%22%0Aresource.labels.revision_name%3D%22listlocations-00002-rad%22 
-For more troubleshooting guidance, see https://cloud.google.com/run/docs/troubleshooting#container-failed-to-start
-✔  functions[listProductSpecs(asia-southeast1)] Successful update operation.
-✔  functions[getTrialBalance(asia-southeast1)] Successful update operation.
-✔  functions[createProductSpec(asia-southeast1)] Successful update operation.
-
-Functions deploy had errors with the following functions:
-	listLocations(asia-southeast1)
-	listUsers(asia-southeast1)
-	sharkGetSuggestions(asia-southeast1)
-Function URL (api(asia-southeast1)): https://api-likj6cnxhq-as.a.run.app
-Error: There was an error deploying functions:
-- Error Failed to update function listUsers in region asia-southeast1
-- Error Failed to update function sharkGetSuggestions in region asia-southeast1
-- Error Failed to update function listLocations in region asia-southeast1
+Error: Request to https://firestore.googleapis.com/v1/projects/oceanpearl-ops/databases/(default)/collectionGroups/v3_shark_location_risk/indexes had HTTP Error: 400, this index is not necessary, configure using single field index controls
+[2026-02-26T16:47:09.890Z] Error Context: {
+  "body": {
+    "error": {
+      "code": 400,
+      "message": "this index is not necessary, configure using single field index controls",
+      "status": "INVALID_ARGUMENT"
+    }
+  },
+  "response": {
+    "statusCode": 400
+  }
+}

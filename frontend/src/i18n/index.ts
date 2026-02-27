@@ -24,6 +24,7 @@ export interface TranslationKeys {
   common_back: string;
   common_copy: string;
   common_idempotency: string;
+  common_info: string;
 
   // Navigation
   nav_dashboard: string;
@@ -62,6 +63,7 @@ export interface TranslationKeys {
   ops_record_waste: string;
   ops_trip_expense: string;
   ops_sale: string;
+  ops_price_customer: string;
   ops_sku: string;
   ops_qty: string;
   ops_cost: string;
@@ -132,6 +134,56 @@ export interface TranslationKeys {
   auth_password: string;
   auth_role: string;
   auth_unauthorized: string;
+
+  // New keys for Operations/Finance/Shark
+  ops_location_unit: string;
+  ops_sku_qty: string;
+  ops_cost_source: string;
+  ops_batch_sku: string;
+  ops_qty_cost: string;
+  ops_from: string;
+  ops_to: string;
+  ops_scope: string;
+  ops_details: string;
+  ops_spoilage: string;
+  ops_drier_loss: string;
+  ops_sorting_error: string;
+  ops_wallet_transfer: string;
+  fin_location: string;
+  fin_unit: string;
+  fin_debit: string;
+  fin_credit: string;
+  fin_net_balance: string;
+  fin_account_id: string;
+  fin_loc_short: string;
+  fin_sku_id: string;
+  shark_realtime: string;
+  shark_update: string;
+  shark_global_risk: string;
+  shark_active_alerts: string;
+  shark_detection: string;
+  shark_no_alerts: string;
+  shark_resolved: string;
+  shark_confirm_res: string;
+  shark_explain_closure: string;
+
+  // Additional Traceability details
+  trace_check_origin: string;
+  trace_sku: string;
+  trace_status: string;
+  trace_loc: string;
+  trace_unit: string;
+
+  // Bootstrap
+  boot_title: string;
+  boot_step1: string;
+  boot_step1_desc: string;
+  boot_step2: string;
+  boot_step2_desc: string;
+  boot_step2_note: string;
+  boot_instructions: string;
+  boot_run: string;
+  boot_run_seed: string;
 }
 
 export const translations: Record<Language, TranslationKeys> = {
@@ -150,6 +202,7 @@ export const translations: Record<Language, TranslationKeys> = {
     common_back: 'Kembali',
     common_copy: 'Salin',
     common_idempotency: 'Kunci Idempotensi',
+    common_info: 'Informasi',
 
     nav_dashboard: 'Dasbor',
     nav_operations: 'Operasional',
@@ -184,6 +237,7 @@ export const translations: Record<Language, TranslationKeys> = {
     ops_record_waste: 'Catat Kerugian',
     ops_trip_expense: 'Biaya Perjalanan',
     ops_sale: 'Penjualan',
+    ops_price_customer: 'Harga / Pelanggan',
     ops_sku: 'ID SKU',
     ops_qty: 'Kuantitas (Kg)',
     ops_cost: 'Biaya/Kg (IDR)',
@@ -248,7 +302,52 @@ export const translations: Record<Language, TranslationKeys> = {
     auth_email: 'Alamat Email',
     auth_password: 'Kata Sandi',
     auth_role: 'Peran',
-    auth_unauthorized: 'Akses Tidak Diizinkan'
+    auth_unauthorized: 'Akses Tidak Diizinkan',
+
+    ops_location_unit: 'Lokasi / Unit',
+    ops_sku_qty: 'SKU / Qty',
+    ops_cost_source: 'Biaya / Sumber',
+    ops_batch_sku: 'Batch Input / SKU Output',
+    ops_qty_cost: 'Qty Output / Biaya',
+    ops_from: 'Dari',
+    ops_to: 'Ke',
+    ops_scope: 'Cakupan',
+    ops_details: 'Detail',
+    ops_spoilage: 'Pembusukan',
+    ops_drier_loss: 'Kehilangan Pengering',
+    ops_sorting_error: 'Kesalahan Sortir',
+    ops_wallet_transfer: 'Transfer Dompet',
+    fin_location: 'Lokasi',
+    fin_unit: 'Unit',
+    fin_debit: 'Debit',
+    fin_credit: 'Kredit',
+    fin_net_balance: 'Saldo Bersih',
+    fin_account_id: 'ID Akun',
+    fin_loc_short: 'Lok',
+    fin_sku_id: 'ID SKU',
+    shark_realtime: 'Deteksi kecurangan waktu nyata dan pemantauan risiko operasional',
+    shark_update: 'Pembaruan',
+    shark_global_risk: 'INDEKS RISIKO GLOBAL',
+    shark_active_alerts: 'Peringatan Aktif',
+    shark_detection: 'Deteksi',
+    shark_no_alerts: 'Tidak ada peringatan aktif. Operasi stabil.',
+    shark_resolved: 'DISELESAIKAN',
+    shark_confirm_res: 'Konfirmasi Resolusi',
+    shark_explain_closure: 'Jelaskan mengapa peringatan ini ditutup...',
+    trace_check_origin: 'Periksa asal dan riwayat batch seafood Anda',
+    trace_sku: 'SKU',
+    trace_status: 'Status',
+    trace_loc: 'Lokasi',
+    trace_unit: 'Unit',
+    boot_title: 'Bootstrap & Data Tes OPS V3',
+    boot_step1: 'Langkah 1: Bootstrap (Buat Admin Pertama)',
+    boot_step1_desc: 'Ini akan membuat akun admin CEO: ceo@oceanpearlseafood.com / OceanPearl2026!',
+    boot_step2: 'Langkah 2: Seed Test Pack (Setelah Bootstrap)',
+    boot_step2_desc: 'Ini akan membuat semua data tes: lokasi, unit, mitra, spesies, produk, dan pengguna tes.',
+    boot_step2_note: 'Anda harus masuk sebagai CEO/admin untuk menjalankan ini.',
+    boot_instructions: 'Instruksi:',
+    boot_run: 'Jalankan Bootstrap',
+    boot_run_seed: 'Jalankan Seed Test Pack'
   },
   en: {
     common_save: 'Save',
@@ -265,6 +364,7 @@ export const translations: Record<Language, TranslationKeys> = {
     common_back: 'Back',
     common_copy: 'Copy',
     common_idempotency: 'Idempotency Key',
+    common_info: 'Information',
 
     nav_dashboard: 'Dashboard',
     nav_operations: 'Operations',
@@ -299,6 +399,7 @@ export const translations: Record<Language, TranslationKeys> = {
     ops_record_waste: 'Record Waste',
     ops_trip_expense: 'Trip Expense',
     ops_sale: 'Sale',
+    ops_price_customer: 'Price / Customer',
     ops_sku: 'SKU ID',
     ops_qty: 'Quantity (Kg)',
     ops_cost: 'Cost/Kg (IDR)',
@@ -363,7 +464,52 @@ export const translations: Record<Language, TranslationKeys> = {
     auth_email: 'Email Address',
     auth_password: 'Password',
     auth_role: 'Role',
-    auth_unauthorized: 'Unauthorized Access'
+    auth_unauthorized: 'Unauthorized Access',
+
+    ops_location_unit: 'Location / Unit',
+    ops_sku_qty: 'SKU / Qty',
+    ops_cost_source: 'Cost / Source',
+    ops_batch_sku: 'Input Batch / Output SKU',
+    ops_qty_cost: 'Output Qty / Post Cost',
+    ops_from: 'From',
+    ops_to: 'To',
+    ops_scope: 'Scope',
+    ops_details: 'Details',
+    ops_spoilage: 'Spoilage',
+    ops_drier_loss: 'Drier Loss',
+    ops_sorting_error: 'Sorting Error',
+    ops_wallet_transfer: 'Wallet Transfer',
+    fin_location: 'Location',
+    fin_unit: 'Unit',
+    fin_debit: 'Debit',
+    fin_credit: 'Credit',
+    fin_net_balance: 'Net Balance',
+    fin_account_id: 'Account ID',
+    fin_loc_short: 'Loc',
+    fin_sku_id: 'SKU ID',
+    shark_realtime: 'Real-time fraud detection and operational risk monitoring',
+    shark_update: 'Update',
+    shark_global_risk: 'GLOBAL RISK INDEX',
+    shark_active_alerts: 'Active Alerts',
+    shark_detection: 'Detection',
+    shark_no_alerts: 'No active alerts detected. Operations are stable.',
+    shark_resolved: 'RESOLVED',
+    shark_confirm_res: 'Confirm Resolution',
+    shark_explain_closure: 'Explain why this alert is being closed...',
+    trace_check_origin: 'Check the origin and history of your seafood batch',
+    trace_sku: 'SKU',
+    trace_status: 'Status',
+    trace_loc: 'Location',
+    trace_unit: 'Unit',
+    boot_title: 'OPS V3 Bootstrap & Test Data',
+    boot_step1: 'Step 1: Bootstrap (Create First Admin)',
+    boot_step1_desc: 'This creates the CEO admin account: ceo@oceanpearlseafood.com / OceanPearl2026!',
+    boot_step2: 'Step 2: Seed Test Pack (After Bootstrap)',
+    boot_step2_desc: 'This creates all test data: locations, units, partners, species, products, and test users.',
+    boot_step2_note: 'You must be signed in as the CEO/admin to run this.',
+    boot_instructions: 'Instructions:',
+    boot_run: 'Run Bootstrap',
+    boot_run_seed: 'Run Seed Test Pack'
   }
 };
 
@@ -372,11 +518,11 @@ export function t(key: keyof TranslationKeys, lang: Language = defaultLanguage):
 }
 
 export function getCurrentLanguage(): Language {
-  const stored = localStorage.getItem('ops_language');
+  const stored = localStorage.getItem('language');
   return (stored === 'id' || stored === 'en') ? stored : defaultLanguage;
 }
 
 export function setCurrentLanguage(lang: Language): void {
-  localStorage.setItem('ops_language', lang);
+  localStorage.setItem('language', lang);
   window.location.reload(); // Reload to apply language change
 }

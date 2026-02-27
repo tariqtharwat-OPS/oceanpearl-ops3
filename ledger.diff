@@ -1,0 +1,25 @@
+diff --git a/functions/lib/ledger.js b/functions/lib/ledger.js
+index 56485be..3a818cf 100644
+--- a/functions/lib/ledger.js
++++ b/functions/lib/ledger.js
+@@ -114,11 +114,17 @@ async function getLedgerUpdatePayload({ transactionId, entries, createdByUid, en
+   const periodSnap = await batch.get(
+     db.collection("v3_financial_periods")
+       .where("startDate", "<=", logicalDate)
+-      .where("endDate", ">=", logicalDate)
++      .orderBy("startDate", "desc")
+       .limit(1)
+   );
+-  if (!periodSnap.empty && periodSnap.docs[0].data().status === "CLOSED") {
+-    throw new HttpsError("failed-precondition", "PERIOD_CLOSED");
++  if (!periodSnap.empty) {
++    const p = periodSnap.docs[0].data();
++    if (p.endDate && p.status === "CLOSED") {
++      const parsedEndDate = p.endDate.toDate ? p.endDate.toDate() : new Date(p.endDate);
++      if (logicalDate <= parsedEndDate) {
++        throw new HttpsError("failed-precondition", "PERIOD_CLOSED");
++      }
++    }
+   }
+ 
+   const crypto = require("crypto");

@@ -13,16 +13,41 @@ service cloud.firestore {
       return isAuthenticated() ? userDoc().role : null;
     }
 
-    function isAdmin() { return role() == "admin"; }
-    function isCEO() { return role() == "ceo"; }
-    function isFinance() { return role() == "finance_officer"; }
+    // Role Normalization Helper
+    function normalizedRole() {
+      return role() != null ? role().lower() : "";
+    }
+
+    // Canonical Checks (Case-Insensitive)
+    function isAdmin() { 
+      return normalizedRole() == "admin"; 
+    }
+    function isCEO() { 
+      return normalizedRole() == "ceo"; 
+    }
+    function isUnitOperator() { 
+      return normalizedRole() == "unit_operator" || normalizedRole() == "operator"; // Compat with old OPERATOR
+    }
+    function isFinance() { 
+      return normalizedRole() == "finance_officer" || normalizedRole() == "hq_finance"; 
+    }
+    function isLocationManager() {
+      return normalizedRole() == "location_manager";
+    }
 
     // -------------------------
-    // User Profiles
+    // User Profiles (v3_users)
     // -------------------------
     match /v3_users/{userId} {
-      allow read: if isAuthenticated() && (userId == uid() || isAdmin() || isCEO() || isFinance());
-      allow create, update, delete: if isAuthenticated() && (isAdmin() || isCEO()); // profile provisioning is via CF
+      allow read: if isAuthenticated() && (
+        userId == uid() || 
+        isAdmin() || 
+        isCEO() || 
+        isFinance() ||
+        isLocationManager() // Managers need to see profiles sometimes
+      );
+      // Only Admin/CEO can create/update profiles (provisioning)
+      allow write: if isAuthenticated() && (isAdmin() || isCEO()); 
     }
 
     // -------------------------
@@ -36,6 +61,25 @@ service cloud.firestore {
     match /v3_units/{unitId} {
       allow read: if isAuthenticated();
       allow write: if isAuthenticated() && (isAdmin() || isCEO());
+    }
+    match /v3_partners/{id} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (isAdmin() || isCEO());
+    }
+    match /v3_species/{id} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (isAdmin() || isCEO());
+    }
+    match /v3_products/{id} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (isAdmin() || isCEO());
+    }
+    match /v3_system/{id} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (isAdmin() || isCEO());
+    }
+    match /v3_seed_packs/{id} {
+      allow read: if isAuthenticated() && (isAdmin() || isCEO());
     }
 
     // -------------------------

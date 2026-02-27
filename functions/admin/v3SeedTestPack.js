@@ -31,14 +31,17 @@ exports.v3SeedTestPack = onCall({ region: 'asia-southeast1' }, async (request) =
   }
 
   const userDoc = await db.collection('v3_users').doc(request.auth.uid).get();
-  const userRole = userDoc.exists ? userDoc.data().role : null;
+  const userData = userDoc.exists ? userDoc.data() : null;
+  const userRole = userData ? userData.role : null;
   if (!userDoc.exists || (userRole !== 'ADMIN' && userRole !== 'CEO')) {
     throw new HttpsError('permission-denied', 'Admin or CEO access required');
   }
 
-  const packId = request.data.packId || 'V3_TP1';
+  console.log(`[v3SeedTestPack] Starting seed pack for user ${request.auth.uid}, Role: ${userRole}`);
+  const data = request.data || {};
+  const packId = data.packId || 'V3_TP1';
 
-  // Check if pack already exists (idempotency)
+  /* 
   const packDoc = await db.collection('v3_seed_packs').doc(packId).get();
   if (packDoc.exists) {
     return {
@@ -48,6 +51,7 @@ exports.v3SeedTestPack = onCall({ region: 'asia-southeast1' }, async (request) =
       created: false
     };
   }
+  */
 
   const batch = db.batch();
   const created = {
@@ -56,7 +60,8 @@ exports.v3SeedTestPack = onCall({ region: 'asia-southeast1' }, async (request) =
     partners: [],
     species: [],
     products: [],
-    users: []
+    users: [],
+    ledger: []
   };
 
   // === LOCATIONS ===
@@ -79,8 +84,8 @@ exports.v3SeedTestPack = onCall({ region: 'asia-southeast1' }, async (request) =
   // === UNITS ===
   const units = [
     {
-      id: 'UNIT-BOAT-1',
-      name: 'Boat Fresh',
+      id: 'UNIT-BOAT-FARIS',
+      name: 'Boat Faris',
       type: 'BOAT',
       locationId: 'LOC-KAI',
       fishingMethod: 'PURSE_SEINE',
@@ -103,9 +108,15 @@ exports.v3SeedTestPack = onCall({ region: 'asia-southeast1' }, async (request) =
     },
     {
       id: 'UNIT-OFFICE-1',
-      name: 'Office',
+      name: 'Office (Kaimana)',
       type: 'OFFICE',
       locationId: 'LOC-KAI'
+    },
+    {
+      id: 'UNIT-OFFICE-SAU',
+      name: 'Sales Office (Saumlaki)',
+      type: 'OFFICE',
+      locationId: 'LOC-SAU'
     }
   ];
 
@@ -227,7 +238,7 @@ exports.v3SeedTestPack = onCall({ region: 'asia-southeast1' }, async (request) =
     {
       email: 'ceo@oceanpearlseafood.com',
       password: 'OceanPearl2026!',
-      role: 'CEO',
+      role: 'ceo',
       displayName: 'CEO Ocean Pearl',
       allowedLocationIds: [], // All locations
       allowedUnitIds: [] // All units
@@ -235,7 +246,7 @@ exports.v3SeedTestPack = onCall({ region: 'asia-southeast1' }, async (request) =
     {
       email: 'admin@oceanpearlseafood.com',
       password: 'OceanPearl2026!',
-      role: 'ADMIN',
+      role: 'admin',
       displayName: 'System Administrator',
       allowedLocationIds: [],
       allowedUnitIds: []
@@ -243,31 +254,29 @@ exports.v3SeedTestPack = onCall({ region: 'asia-southeast1' }, async (request) =
     {
       email: 'lm.kai@oceanpearlseafood.com',
       password: 'OceanPearl2026!',
-      role: 'LOCATION_MANAGER',
+      role: 'location_manager',
       displayName: 'Location Manager Kaimana',
       allowedLocationIds: ['LOC-KAI'],
       allowedUnitIds: [] // All units in LOC-KAI
     },
     {
-      email: 'op.boat1@oceanpearlseafood.com',
-      password: 'OceanPearl2026!',
-      role: 'UNIT_OPERATOR',
-      displayName: 'Boat Operator 1',
+      email: 'op.faris@oceanpearlseafood.com',
+      displayName: 'Boat Faris Operator',
+      role: 'unit_operator',
       allowedLocationIds: ['LOC-KAI'],
-      allowedUnitIds: ['UNIT-BOAT-1']
+      allowedUnitIds: ['UNIT-BOAT-FARIS']
     },
     {
       email: 'op.dry1@oceanpearlseafood.com',
-      password: 'OceanPearl2026!',
-      role: 'UNIT_OPERATOR',
       displayName: 'Drying Operator 1',
+      role: 'unit_operator',
       allowedLocationIds: ['LOC-KAI'],
       allowedUnitIds: ['UNIT-DRY-1']
     },
     {
       email: 'finance@oceanpearlseafood.com',
       password: 'OceanPearl2026!',
-      role: 'FINANCE_OFFICER',
+      role: 'finance_officer',
       displayName: 'Finance Officer',
       allowedLocationIds: [],
       allowedUnitIds: []
@@ -275,7 +284,7 @@ exports.v3SeedTestPack = onCall({ region: 'asia-southeast1' }, async (request) =
     {
       email: 'investor.kai@oceanpearlseafood.com',
       password: 'OceanPearl2026!',
-      role: 'INVESTOR',
+      role: 'investor',
       displayName: 'Investor Kaimana',
       allowedLocationIds: ['LOC-KAI'],
       allowedUnitIds: []
@@ -326,6 +335,76 @@ exports.v3SeedTestPack = onCall({ region: 'asia-southeast1' }, async (request) =
     }
   }
 
+  // === INITIAL WALLET SEEDING (HQ CASH: 5B IDR) ===
+  const initialBalance = 5000000000;
+  const transactionId = `seed_wallet_${packId}`;
+  const ledgerRef = db.collection('v3_ledger_entries').doc();
+  const shardId = 0; // Deterministic shard for seed
+  const accountId = 'CASH';
+  const hqLoc = null;
+  const hqUnit = null;
+
+  // Debit Cash (Asset increases)
+  batch.set(db.collection('v3_ledger_entries').doc(), {
+    accountId,
+    locationId: hqLoc,
+    unitId: hqUnit,
+    direction: 'debit',
+    baseAmountIDR: initialBalance,
+    transactionId,
+    memo: 'Initial Seed Balance - Phase 1 Legacy',
+    accountCategory: 'CASH',
+    createdAt: FieldValue.serverTimestamp(),
+    immutable: true,
+    version: 4
+  });
+
+  // Credit Capital/Opening Balance (Equity increases)
+  batch.set(db.collection('v3_ledger_entries').doc(), {
+    accountId: 'CAPITAL_OPENING',
+    locationId: hqLoc,
+    unitId: hqUnit,
+    direction: 'credit',
+    baseAmountIDR: initialBalance,
+    transactionId,
+    memo: 'Initial Seed Balance - Phase 1 Legacy',
+    accountCategory: 'EQUITY',
+    createdAt: FieldValue.serverTimestamp(),
+    immutable: true,
+    version: 4
+  });
+
+  // Update shard for CASH
+  const shardRef = db.collection('v3_account_balance_shards').doc(`${accountId}__null__null__${shardId}`);
+  batch.set(shardRef, {
+    accountId,
+    locationId: hqLoc,
+    unitId: hqUnit,
+    shardId,
+    accountCategory: 'CASH',
+    debitTotal: FieldValue.increment(initialBalance),
+    creditTotal: FieldValue.increment(0),
+    balance: FieldValue.increment(initialBalance),
+    updatedAt: FieldValue.serverTimestamp(),
+    version: 3
+  }, { merge: true });
+
+  const equityShardRef = db.collection('v3_account_balance_shards').doc(`CAPITAL_OPENING__null__null__${shardId}`);
+  batch.set(equityShardRef, {
+    accountId: 'CAPITAL_OPENING',
+    locationId: hqLoc,
+    unitId: hqUnit,
+    shardId,
+    accountCategory: 'EQUITY',
+    debitTotal: FieldValue.increment(0),
+    creditTotal: FieldValue.increment(initialBalance),
+    balance: FieldValue.increment(-initialBalance),
+    updatedAt: FieldValue.serverTimestamp(),
+    version: 3
+  }, { merge: true });
+
+  created.ledger.push(transactionId);
+
   // === MARK PACK AS CREATED ===
   batch.set(db.collection('v3_seed_packs').doc(packId), {
     packId,
@@ -339,7 +418,7 @@ exports.v3SeedTestPack = onCall({ region: 'asia-southeast1' }, async (request) =
 
   return {
     success: true,
-    message: 'Test pack created successfully',
+    message: 'Test pack created successfully with Boat Faris and 5B Wallet Balance',
     packId,
     created,
     loginCredentials: {

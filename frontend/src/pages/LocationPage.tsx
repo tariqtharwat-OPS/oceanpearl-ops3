@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
-import { firestoreService, Location, Place } from '../services/firestoreService';
+import { firestoreService, type Location, type Place } from '../services/firestoreService';
 import '../styles/LocationPage.css';
 
 const LocationPage: React.FC = () => {
@@ -24,7 +24,9 @@ const LocationPage: React.FC = () => {
             const allLocations = await firestoreService.getLocations();
             // Filter locations based on user permissions
             const accessibleLocations = allLocations.filter((loc) =>
-                userProfile?.allowedLocationIds.includes(loc.id)
+                !userProfile?.allowedLocationIds ||
+                userProfile.allowedLocationIds.length === 0 ||
+                userProfile.allowedLocationIds.includes(loc.id)
             );
             setLocations(accessibleLocations);
             if (accessibleLocations.length > 0) {
@@ -68,7 +70,7 @@ const LocationPage: React.FC = () => {
                     <option value="">{t('common.loading')}</option>
                     {locations.map((loc) => (
                         <option key={loc.id} value={loc.id}>
-                            {loc.name}
+                            {loc.name_en || loc.name_id || loc.name}
                         </option>
                     ))}
                 </select>

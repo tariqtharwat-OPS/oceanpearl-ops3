@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { authService, AuthUser } from '../services/authService';
-import { firestoreService, UserProfile } from '../services/firestoreService';
+import type { AuthUser } from '../services/authService';
+import { authService } from '../services/authService';
+import type { UserProfile } from '../services/firestoreService';
+import { firestoreService } from '../services/firestoreService';
 
 interface AuthContextType {
     user: AuthUser | null;
@@ -44,7 +46,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user,
         userProfile,
         loading,
-        isAdmin: userProfile?.role === 'admin',
+        isAdmin: ['admin', 'ceo', 'ADMIN', 'CEO'].includes(userProfile?.role || ''),
         login: authService.login,
         logout: authService.logout,
     };

@@ -14,8 +14,9 @@ import { db } from './firebase';
 export interface UserProfile {
     uid: string;
     email: string;
-    role: 'admin' | 'user';
+    role: string;
     allowedLocationIds: string[];
+    allowedUnitIds: string[];
     createdAt: Timestamp;
     disabled: boolean;
 }
@@ -23,6 +24,8 @@ export interface UserProfile {
 export interface Location {
     id: string;
     name: string;
+    name_id?: string;
+    name_en?: string;
     code: string;
     address?: string;
     manager?: string;
@@ -64,15 +67,16 @@ export interface LedgerEntry {
 export const firestoreService = {
     // User operations
     getUserProfile: async (uid: string): Promise<UserProfile | null> => {
-        const docRef = doc(db, 'users', uid);
+        const docRef = doc(db, 'v3_users', uid);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
             const data = docSnap.data() as any;
             return {
                 uid: docSnap.id,
                 email: data.email ?? '',
-                role: (data.role === 'admin' ? 'admin' : 'user'),
+                role: data.role || 'user',
                 allowedLocationIds: Array.isArray(data.allowedLocationIds) ? data.allowedLocationIds : [],
+                allowedUnitIds: Array.isArray(data.allowedUnitIds) ? data.allowedUnitIds : [],
                 createdAt: data.createdAt ?? Timestamp.now(),
                 disabled: !!data.disabled,
             } as UserProfile;
@@ -82,7 +86,7 @@ export const firestoreService = {
 
     // Location operations
     getLocation: async (locationId: string): Promise<Location | null> => {
-        const docRef = doc(db, 'locations', locationId);
+        const docRef = doc(db, 'v3_locations', locationId);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
             return { id: docSnap.id, ...docSnap.data() } as Location;
@@ -91,7 +95,7 @@ export const firestoreService = {
     },
 
     getLocations: async (): Promise<Location[]> => {
-        const q = query(collection(db, 'locations'));
+        const q = query(collection(db, 'v3_locations'));
         const querySnapshot = await getDocs(q);
         return querySnapshot.docs.map((doc) => ({
             id: doc.id,
@@ -99,11 +103,11 @@ export const firestoreService = {
         })) as Location[];
     },
 
-    // Places operations
+    // Places operations (Units in V3)
     getPlaces: async (locationId: string): Promise<Place[]> => {
         const q = query(
-            collection(db, 'locations', locationId, 'places'),
-            orderBy('order', 'asc')
+            collection(db, 'v3_units'),
+            where('locationId', '==', locationId)
         );
         const querySnapshot = await getDocs(q);
         return querySnapshot.docs.map((doc) => ({
@@ -138,7 +142,7 @@ export const firestoreService = {
     ): Promise<LedgerEntry[]> => {
         const defaultConstraints = [orderBy('createdAt', 'desc')];
         const q = query(
-            collection(db, 'locations', locationId, 'ledger'),
+            collection(db, 'v3_locations', locationId, 'ledger'),
             ...defaultConstraints,
             ...constraints
         );
@@ -155,7 +159,7 @@ export const firestoreService = {
         placeId: string
     ): Promise<LedgerEntry[]> => {
         const q = query(
-            collection(db, 'locations', locationId, 'ledger'),
+            collection(db, 'v3_locations', locationId, 'ledger'),
             where('toPlaceId', '==', placeId),
             orderBy('createdAt', 'desc')
         );
@@ -176,13 +180,13 @@ export const firestoreService = {
         let q;
         if (itemId) {
             q = query(
-                collection(db, 'locations', locationId, 'ledger'),
+                collection(db, 'v3_locations', locationId, 'ledger'),
                 where('toPlaceId', '==', placeId),
                 where('itemId', '==', itemId)
             );
         } else {
             q = query(
-                collection(db, 'locations', locationId, 'ledger'),
+                collection(db, 'v3_locations', locationId, 'ledger'),
                 where('toPlaceId', '==', placeId)
             );
         }
@@ -202,7 +206,7 @@ export const firestoreService = {
 
     // Get all stock for a location
     calculateAllStock: async (locationId: string): Promise<{ [key: string]: number }> => {
-        const q = query(collection(db, 'locations', locationId, 'ledger'));
+        const q = query(collection(db, 'v3_locations', locationId, 'ledger'));
         const querySnapshot = await getDocs(q);
         const stock: { [key: string]: number } = {};
 

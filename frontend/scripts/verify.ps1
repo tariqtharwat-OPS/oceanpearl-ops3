@@ -3,6 +3,11 @@
 
 Write-Host "--- PHASING: VERIFICATION GATE ---" -ForegroundColor Cyan
 
+# Ensure we are in the frontend directory
+$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$FrontendDir = Split-Path -Parent $ScriptDir
+Set-Location $FrontendDir
+
 Write-Host "1. Running Typecheck..." -ForegroundColor Yellow
 npm run typecheck
 if ($LASTEXITCODE -ne 0) {

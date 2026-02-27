@@ -1,7 +1,10 @@
 import { useState } from 'react';
-import { getFunctions, httpsCallable } from 'firebase/functions';
+import { functions } from '../firebase';
+import { httpsCallable } from 'firebase/functions';
+import { getCurrentLanguage, t, type Language } from '../i18n';
 
 export default function Bootstrap() {
+  const [language] = useState<Language>(getCurrentLanguage());
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
@@ -12,12 +15,11 @@ export default function Bootstrap() {
     setResult(null);
 
     try {
-      const functions = getFunctions();
       const v3Bootstrap = httpsCallable(functions, 'v3Bootstrap');
       const response = await v3Bootstrap({ secret: 'OceanPearl2026Bootstrap!' });
       setResult(response.data);
     } catch (err: any) {
-      setError(err.message || 'Bootstrap failed');
+      setError(err.message || t('common_error', language));
     } finally {
       setLoading(false);
     }
@@ -29,12 +31,11 @@ export default function Bootstrap() {
     setResult(null);
 
     try {
-      const functions = getFunctions();
       const v3SeedTestPack = httpsCallable(functions, 'v3SeedTestPack');
       const response = await v3SeedTestPack({ packId: 'V3_TP1' });
       setResult(response.data);
     } catch (err: any) {
-      setError(err.message || 'Seed test pack failed');
+      setError(err.message || t('common_error', language));
     } finally {
       setLoading(false);
     }
@@ -42,13 +43,13 @@ export default function Bootstrap() {
 
   return (
     <div style={{ padding: '40px', maxWidth: '800px', margin: '0 auto' }}>
-      <h1>OPS V3 Bootstrap & Test Data</h1>
-      
+      <h1>{t('boot_title', language)}</h1>
+
       <div style={{ marginTop: '30px' }}>
-        <h2>Step 1: Bootstrap (Create First Admin)</h2>
-        <p>This creates the CEO admin account: ceo@oceanpearlseafood.com / OceanPearl2026!</p>
-        <button 
-          onClick={handleBootstrap} 
+        <h2>{t('boot_step1', language)}</h2>
+        <p>{t('boot_step1_desc', language)}</p>
+        <button
+          onClick={handleBootstrap}
           disabled={loading}
           style={{
             padding: '12px 24px',
@@ -60,16 +61,16 @@ export default function Bootstrap() {
             cursor: loading ? 'not-allowed' : 'pointer'
           }}
         >
-          {loading ? 'Running...' : 'Run Bootstrap'}
+          {loading ? t('common_loading', language) : t('boot_run', language)}
         </button>
       </div>
 
       <div style={{ marginTop: '30px' }}>
-        <h2>Step 2: Seed Test Pack (After Bootstrap)</h2>
-        <p>This creates all test data: locations, units, partners, species, products, and test users.</p>
-        <p><strong>Note:</strong> You must be signed in as the CEO/admin to run this.</p>
-        <button 
-          onClick={handleSeedTestPack} 
+        <h2>{t('boot_step2', language)}</h2>
+        <p>{t('boot_step2_desc', language)}</p>
+        <p><strong>{t('common_info', language)}:</strong> {t('boot_step2_note', language)}</p>
+        <button
+          onClick={handleSeedTestPack}
           disabled={loading}
           style={{
             padding: '12px 24px',
@@ -81,31 +82,31 @@ export default function Bootstrap() {
             cursor: loading ? 'not-allowed' : 'pointer'
           }}
         >
-          {loading ? 'Running...' : 'Run Seed Test Pack'}
+          {loading ? t('common_loading', language) : t('boot_run_seed', language)}
         </button>
       </div>
 
       {error && (
-        <div style={{ 
-          marginTop: '20px', 
-          padding: '16px', 
-          backgroundColor: '#fee', 
+        <div style={{
+          marginTop: '20px',
+          padding: '16px',
+          backgroundColor: '#fee',
           border: '1px solid #fcc',
           borderRadius: '4px'
         }}>
-          <strong>Error:</strong> {error}
+          <strong>{t('common_error', language)}:</strong> {error}
         </div>
       )}
 
       {result && (
-        <div style={{ 
-          marginTop: '20px', 
-          padding: '16px', 
-          backgroundColor: '#efe', 
+        <div style={{
+          marginTop: '20px',
+          padding: '16px',
+          backgroundColor: '#efe',
           border: '1px solid #cfc',
           borderRadius: '4px'
         }}>
-          <strong>Success!</strong>
+          <strong>{t('common_success', language)}!</strong>
           <pre style={{ marginTop: '10px', whiteSpace: 'pre-wrap' }}>
             {JSON.stringify(result, null, 2)}
           </pre>
@@ -113,11 +114,11 @@ export default function Bootstrap() {
       )}
 
       <div style={{ marginTop: '40px', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-        <h3>Instructions:</h3>
+        <h3>{t('boot_instructions', language)}</h3>
         <ol>
-          <li>Click "Run Bootstrap" to create the first admin user</li>
+          <li>Click "{t('boot_run', language)}" to create the first admin user</li>
           <li>Sign in with: ceo@oceanpearlseafood.com / OceanPearl2026!</li>
-          <li>Come back to this page and click "Run Seed Test Pack"</li>
+          <li>Come back to this page and click "{t('boot_run_seed', language)}"</li>
           <li>All test data will be created</li>
         </ol>
       </div>

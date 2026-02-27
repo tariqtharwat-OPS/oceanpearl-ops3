@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
-import { firestoreService, Location } from '../services/firestoreService';
+import type { Location } from '../services/firestoreService';
+import { firestoreService } from '../services/firestoreService';
 import '../styles/ReportsPage.css';
 
 const ReportsPage: React.FC = () => {

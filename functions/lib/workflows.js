@@ -346,7 +346,7 @@ exports.recordTripExpense = onCall(async (request) => {
   const user = await getUserProfile(uid);
   requireRole(user, ["admin", "ceo", "location_manager", "finance_officer"]);
 
-  const { idempotencyKey, locationId, unitId, amountIDR, memo } = request.data || {};
+  const { idempotencyKey, locationId, unitId, tripId, amountIDR, memo } = request.data || {};
 
   return await withIdempotency(idempotencyKey, uid, async (transaction) => {
     if (!locationId || !unitId) throw new HttpsError("invalid-argument", "locationId, unitId required.");
@@ -368,6 +368,7 @@ exports.recordTripExpense = onCall(async (request) => {
       type: "TRIP_EXPENSE",
       locationId,
       unitId,
+      tripId: tripId || null,
       amountIDR: amt,
       memo: memo || null,
       transactionId,
@@ -376,6 +377,39 @@ exports.recordTripExpense = onCall(async (request) => {
     });
 
     return { ok: true, transactionId };
+  });
+});
+
+// --------------------------
+// Workflow: Trip Start
+// --------------------------
+exports.recordTripStart = onCall(async (request) => {
+  const uid = requireAuth(request);
+  const user = await getUserProfile(uid);
+  requireRole(user, ["admin", "ceo", "location_manager", "unit_operator"]);
+
+  const { idempotencyKey, locationId, unitId, vesselName } = request.data || {};
+
+  return await withIdempotency(idempotencyKey, uid, async (transaction) => {
+    if (!locationId || !unitId) throw new HttpsError("invalid-argument", "locationId, unitId required.");
+    requireLocationScope(user, locationId);
+    requireUnitScope(user, unitId);
+
+    const tripId = `TRIP-${idempotencyKey}`;
+    const tripRef = db.collection("v3_trips").doc(tripId);
+
+    transaction.set(tripRef, {
+      tripId,
+      locationId,
+      unitId,
+      vesselName: vesselName || null,
+      status: "ACTIVE",
+      startedAt: FieldValue.serverTimestamp(),
+      startedByUid: uid,
+      version: 3
+    });
+
+    return { ok: true, tripId };
   });
 });
 
@@ -390,6 +424,7 @@ exports.recordSale = onCall(async (request) => {
   const { idempotencyKey, locationId, unitId, batchId, qtyKg, pricePerKgIDR, customerName, paymentType } = request.data || {};
 
   return await withIdempotency(idempotencyKey, uid, async (transaction) => {
+    console.log(`[recordSale] Starting sale for batch ${batchId}`, { locationId, unitId, qtyKg, pricePerKgIDR });
     if (!locationId || !unitId || !batchId) throw new HttpsError("invalid-argument", "locationId, unitId, batchId required.");
     requireLocationScope(user, locationId);
     requireUnitScope(user, unitId);
@@ -613,6 +648,37 @@ exports.recordTripClearing = onCall(async (request) => {
     return { ok: true, tripId, status: "CLEARED" };
   });
 });
+// --------------------------
+// Workflow: Wallet Transfer (Cash movement between scopes)
+// --------------------------
+exports.recordWalletTransfer = onCall(async (request) => {
+  const uid = requireAuth(request);
+  const user = await getUserProfile(uid);
+  requireRole(user, ["admin", "ceo", "finance_officer"]);
+
+  const { idempotencyKey, fromLocationId, fromUnitId, toLocationId, toUnitId, amountIDR, memo } = request.data || {};
+
+  return await withIdempotency(idempotencyKey, uid, async (transaction) => {
+    if (fromLocationId === toLocationId && fromUnitId === toUnitId) {
+      throw new HttpsError("invalid-argument", "Source and destination must be different.");
+    }
+
+    const amt = requirePositiveNumber(amountIDR, "amountIDR");
+    const transactionId = `trf_${idempotencyKey}`;
+
+    // Prepare Ledger: 
+    // Debit destination (Cash increases)
+    // Credit source (Cash decreases)
+    const entries = [
+      { accountId: "CASH", direction: "debit", baseAmountIDR: amt, locationId: toLocationId || null, unitId: toUnitId || null, meta: { memo, from: fromUnitId || 'HQ' } },
+      { accountId: "CASH", direction: "credit", baseAmountIDR: amt, locationId: fromLocationId || null, unitId: fromUnitId || null, meta: { memo, to: toUnitId || 'HQ' } },
+    ];
+
+    await createLedgerEntriesInternal({ transactionId, entries, createdByUid: uid }, transaction);
+    return { ok: true, transactionId };
+  });
+});
+
 module.exports = {
   recordReceiving: exports.recordReceiving,
   recordProduction: exports.recordProduction,
@@ -623,4 +689,6 @@ module.exports = {
   recordWaste: exports.recordWaste,
   recordAdjustment: exports.recordAdjustment,
   recordTripClearing: exports.recordTripClearing,
+  recordWalletTransfer: exports.recordWalletTransfer,
+  recordTripStart: exports.recordTripStart,
 };

@@ -1,0 +1,2 @@
+9 FAILED_PRECONDITION: The query requires an index. You can create it here: https://console.firebase.google.com/v1/r/project/oceanpearl-ops/firestore/indexes?create_composite=Cltwcm9qZWN0cy9vY2VhbnBlYXJsLW9wcy9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvdjNfZmluYW5jaWFsX3BlcmlvZHMvaW5kZXhlcy9fEAEaCwoHZW5kRGF0ZRABGg0KCXN0YXJ0RGF0ZRABGgwKCF9fbmFtZV9fEAE .
+The query contains range and inequality filters on multiple fields, please refer to the documentation for index selection best practices: https://cloud.google.com/firestore/docs/query-data/multiple-range-fields.

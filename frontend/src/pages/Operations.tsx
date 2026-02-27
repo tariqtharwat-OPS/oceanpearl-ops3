@@ -70,141 +70,214 @@ const Operations = ({ userProfile }: OperationsProps) => {
     memo: ''
   });
 
+  const [walletTransfer, setWalletTransfer] = useState({
+    fromLocationId: '',
+    fromUnitId: '',
+    toLocationId: '',
+    toUnitId: '',
+    amountIDR: '',
+    memo: ''
+  });
+
+  const [tripStart, setTripStart] = useState({
+    locationId: userProfile?.allowedLocationIds?.[0] || '',
+    unitId: userProfile?.allowedUnitIds?.[0] || '',
+    vesselName: 'Boat Faris'
+  });
+
+  const [sale, setSale] = useState({
+    locationId: userProfile?.allowedLocationIds?.[0] || '',
+    unitId: userProfile?.allowedUnitIds?.[0] || '',
+    skuId: 'ANCH-DRY-MED-A',
+    qty: '',
+    unitPriceIDR: '',
+    customerName: ''
+  });
+
   const runWorkflow = async (name: string, data: any, prefix: string) => {
     setLoading(true);
-  setResult(null);
-  try {
-    const callable = httpsCallable(functions, `workflows-${name}`);
-    const ik = getIK(prefix);
-    const res = await callable({ ...data, idempotencyKey: ik });
-    setResult({ type: name, data: res.data });
-  } catch (error: any) {
-    setResult({ type: `${name} Error`, error: error.message });
-  } finally {
-    setLoading(false);
-  }
-};
-
-const copyToClipboard = (text: string) => {
-  navigator.clipboard.writeText(text);
-alert(t('common_success', language));
+    setResult(null);
+    try {
+      const callable = httpsCallable(functions, `workflows-${name}`);
+      const ik = getIK(prefix);
+      const res = await callable({ ...data, idempotencyKey: ik });
+      setResult({ type: name, data: res.data });
+    } catch (error: any) {
+      setResult({ type: `${name} Error`, error: error.message });
+    } finally {
+      setLoading(false);
+    }
   };
 
-return (
-  <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-    <h1 style={{ color: '#0f172a', marginBottom: '2rem' }}>{t('ops_hub', language)}</h1>
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    alert(t('common_success', language));
+  };
 
-    {result && (
-    <div style={{
-      marginBottom: '2rem',
-      padding: '1.5rem',
-      background: result.error ? '#fef2f2' : '#f0fdf4',
-      borderRadius: '1rem',
-      border: `1px solid ${result.error ? '#fee2e2' : '#dcfce7'}`,
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'flex-start'
-    }}>
-      <div style={{ flex: 1 }}>
-        <h3 style={{ margin: '0 0 0.5rem 0', color: result.error ? '#991b1b' : '#166534' }}>{result.type} {result.error ? 'Error' : 'Success'}</h3>
-        <pre style={{ fontSize: '0.875rem', overflow: 'auto' }}>{JSON.stringify(result.error || result.data, null, 2)}</pre>
-        {result.data?.batchId && (
-        <div style={{ marginTop: '0.5rem' }}>
-          <strong>Batch ID:</strong> {result.data.batchId}
-          <button onClick={() => copyToClipboard(result.data.batchId)} style={{ marginLeft: '0.5rem', padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}>{t('common_copy', language)}</button>
-      </div>
+  return (
+    <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+      <h1 style={{ color: '#0f172a', marginBottom: '2rem' }}>{t('ops_hub', language)}</h1>
+
+      {result && (
+        <div style={{
+          marginBottom: '2rem',
+          padding: '1.5rem',
+          background: result.error ? '#fef2f2' : '#f0fdf4',
+          borderRadius: '1rem',
+          border: `1px solid ${result.error ? '#fee2e2' : '#dcfce7'}`,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start'
+        }}>
+          <div style={{ flex: 1 }}>
+            <h3 style={{ margin: '0 0 0.5rem 0', color: result.error ? '#991b1b' : '#166534' }}>{result.type} {result.error ? t('common_error', language) : t('common_success', language)}</h3>
+            <pre style={{ fontSize: '0.875rem', overflow: 'auto' }}>{JSON.stringify(result.error || result.data, null, 2)}</pre>
+            {result.data?.batchId && (
+              <div style={{ marginTop: '0.5rem' }}>
+                <strong>Batch ID:</strong> {result.data.batchId}
+                <button onClick={() => copyToClipboard(result.data.batchId)} style={{ marginLeft: '0.5rem', padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}>{t('common_copy', language)}</button>
+              </div>
             )}
-    </div>
-    <button onClick={() => setResult(null)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '1.25rem' }}>×</button>
+            {result.data?.tripId && (
+              <div style={{ marginTop: '0.5rem' }}>
+                <strong>Trip ID:</strong> {result.data.tripId}
+                <button onClick={() => copyToClipboard(result.data.tripId)} style={{ marginLeft: '0.5rem', padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}>{t('common_copy', language)}</button>
+              </div>
+            )}
+          </div>
+          <button onClick={() => setResult(null)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '1.25rem' }}>×</button>
         </div >
       )}
 
-<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
 
-  {/* 1. RECORD RECEIVING */}
-  <WorkflowCard title={t('ops_record_receiving', language)} onSubmit={() => runWorkflow('recordReceiving', {...receiving, qtyKg: Number(receiving.qtyKg), unitCostIDR: Number(receiving.unitCostIDR) }, 'RECV')} loading={loading} language={language}>
-  <FormGroup label="Location / Unit">
-    <input type="text" placeholder="Location ID" value={receiving.locationId} onChange={e => setReceiving({...receiving, locationId: e.target.value})} style={inputStyle} />
-    <input type="text" placeholder="Unit ID" value={receiving.unitId} onChange={e => setReceiving({...receiving, unitId: e.target.value})} style={inputStyle} />
-  </FormGroup>
-  <FormGroup label="SKU / Qty">
-    <input type="text" placeholder="SKU ID" value={receiving.skuId} onChange={e => setReceiving({...receiving, skuId: e.target.value})} style={inputStyle} />
-    <input type="number" placeholder="Qty (Kg)" value={receiving.qtyKg} onChange={e => setReceiving({...receiving, qtyKg: e.target.value})} style={inputStyle} />
-  </FormGroup>
-  <FormGroup label="Cost / Source">
-    <input type="number" placeholder="Cost/Kg (IDR)" value={receiving.unitCostIDR} onChange={e => setReceiving({...receiving, unitCostIDR: e.target.value})} style={inputStyle} />
-    <input type="text" placeholder="Supplier" value={receiving.supplierName} onChange={e => setReceiving({...receiving, supplierName: e.target.value})} style={inputStyle} />
-  </FormGroup>
-</WorkflowCard>
+        {/* 1. RECORD RECEIVING */}
+        <WorkflowCard title={t('ops_record_receiving', language)} onSubmit={() => runWorkflow('recordReceiving', { ...receiving, qtyKg: Number(receiving.qtyKg), unitCostIDR: Number(receiving.unitCostIDR) }, 'RECV')} loading={loading} language={language}>
+          <FormGroup label={t('ops_location_unit', language)}>
+            <input type="text" placeholder={t('fin_location', language)} value={receiving.locationId} onChange={e => setReceiving({ ...receiving, locationId: e.target.value })} style={inputStyle} />
+            <input type="text" placeholder={t('fin_unit', language)} value={receiving.unitId} onChange={e => setReceiving({ ...receiving, unitId: e.target.value })} style={inputStyle} />
+          </FormGroup>
+          <FormGroup label={t('ops_sku_qty', language)}>
+            <input type="text" placeholder={t('ops_sku', language)} value={receiving.skuId} onChange={e => setReceiving({ ...receiving, skuId: e.target.value })} style={inputStyle} />
+            <input type="number" placeholder={t('ops_qty', language)} value={receiving.qtyKg} onChange={e => setReceiving({ ...receiving, qtyKg: e.target.value })} style={inputStyle} />
+          </FormGroup>
+          <FormGroup label={t('ops_cost_source', language)}>
+            <input type="number" placeholder={t('ops_cost', language)} value={receiving.unitCostIDR} onChange={e => setReceiving({ ...receiving, unitCostIDR: e.target.value })} style={inputStyle} />
+            <input type="text" placeholder={t('ops_supplier', language)} value={receiving.supplierName} onChange={e => setReceiving({ ...receiving, supplierName: e.target.value })} style={inputStyle} />
+          </FormGroup>
+        </WorkflowCard>
 
-{/* 2. RECORD PRODUCTION */ }
-<WorkflowCard title={t('ops_record_production', language)} onSubmit={() => runWorkflow('recordProduction', { ...production, outputQtyKg: Number(production.outputQtyKg), processingCostIDR: Number(production.processingCostIDR) }, 'PROD')} loading = { loading } language = { language } >
-          <FormGroup label="Location / Unit">
-            <input type="text" placeholder="Location ID" value={production.locationId} onChange={e => setProduction({...production, locationId: e.target.value})} style={inputStyle} />
-            <input type="text" placeholder="Unit ID" value={production.unitId} onChange={e => setProduction({...production, unitId: e.target.value})} style={inputStyle} />
+        {/* 2. RECORD PRODUCTION */}
+        <WorkflowCard title={t('ops_record_production', language)} onSubmit={() => runWorkflow('recordProduction', { ...production, outputQtyKg: Number(production.outputQtyKg), processingCostIDR: Number(production.processingCostIDR) }, 'PROD')} loading={loading} language={language} >
+          <FormGroup label={t('ops_location_unit', language)}>
+            <input type="text" placeholder={t('fin_location', language)} value={production.locationId} onChange={e => setProduction({ ...production, locationId: e.target.value })} style={inputStyle} />
+            <input type="text" placeholder={t('fin_unit', language)} value={production.unitId} onChange={e => setProduction({ ...production, unitId: e.target.value })} style={inputStyle} />
           </FormGroup>
-          <FormGroup label="Input Batch / Output SKU">
-            <input type="text" placeholder="Input Batch ID" value={production.inputBatchId} onChange={e => setProduction({...production, inputBatchId: e.target.value})} style={inputStyle} />
-            <input type="text" placeholder="Output SKU" value={production.outputSkuId} onChange={e => setProduction({...production, outputSkuId: e.target.value})} style={inputStyle} />
+          <FormGroup label={t('ops_batch_sku', language)}>
+            <input type="text" placeholder={t('ops_input_batch', language)} value={production.inputBatchId} onChange={e => setProduction({ ...production, inputBatchId: e.target.value })} style={inputStyle} />
+            <input type="text" placeholder={t('ops_output_sku', language)} value={production.outputSkuId} onChange={e => setProduction({ ...production, outputSkuId: e.target.value })} style={inputStyle} />
           </FormGroup>
-          <FormGroup label="Output Qty / Post Cost">
-            <input type="number" placeholder="Output Qty (Kg)" value={production.outputQtyKg} onChange={e => setProduction({...production, outputQtyKg: e.target.value})} style={inputStyle} />
-            <input type="number" placeholder="Process Cost (IDR)" value={production.processingCostIDR} onChange={e => setProduction({...production, processingCostIDR: e.target.value})} style={inputStyle} />
+          <FormGroup label={t('ops_qty_cost', language)}>
+            <input type="number" placeholder={t('ops_output_qty', language)} value={production.outputQtyKg} onChange={e => setProduction({ ...production, outputQtyKg: e.target.value })} style={inputStyle} />
+            <input type="number" placeholder={t('ops_processing_cost', language)} value={production.processingCostIDR} onChange={e => setProduction({ ...production, processingCostIDR: e.target.value })} style={inputStyle} />
           </FormGroup>
         </WorkflowCard >
 
-  {/* 3. RECORD TRANSFER */ }
-  < WorkflowCard title = { t('ops_record_transfer', language) } onSubmit = {() => runWorkflow('recordTransfer', transfer, 'XFER')} loading = { loading } language = { language } >
-          <FormGroup label="From">
-            <input type="text" placeholder="From Location" value={transfer.fromLocationId} onChange={e => setTransfer({...transfer, fromLocationId: e.target.value})} style={inputStyle} />
-            <input type="text" placeholder="From Unit" value={transfer.fromUnitId} onChange={e => setTransfer({...transfer, fromUnitId: e.target.value})} style={inputStyle} />
+        {/* 3. RECORD TRANSFER */}
+        < WorkflowCard title={t('ops_record_transfer', language)} onSubmit={() => runWorkflow('recordTransfer', transfer, 'XFER')} loading={loading} language={language} >
+          <FormGroup label={t('ops_from', language)}>
+            <input type="text" placeholder={t('fin_location', language)} value={transfer.fromLocationId} onChange={e => setTransfer({ ...transfer, fromLocationId: e.target.value })} style={inputStyle} />
+            <input type="text" placeholder={t('fin_unit', language)} value={transfer.fromUnitId} onChange={e => setTransfer({ ...transfer, fromUnitId: e.target.value })} style={inputStyle} />
           </FormGroup>
-          <FormGroup label="To">
-            <input type="text" placeholder="To Location" value={transfer.toLocationId} onChange={e => setTransfer({...transfer, toLocationId: e.target.value})} style={inputStyle} />
-            <input type="text" placeholder="To Unit" value={transfer.toUnitId} onChange={e => setTransfer({...transfer, toUnitId: e.target.value})} style={inputStyle} />
+          <FormGroup label={t('ops_to', language)}>
+            <input type="text" placeholder={t('fin_location', language)} value={transfer.toLocationId} onChange={e => setTransfer({ ...transfer, toLocationId: e.target.value })} style={inputStyle} />
+            <input type="text" placeholder={t('fin_unit', language)} value={transfer.toUnitId} onChange={e => setTransfer({ ...transfer, toUnitId: e.target.value })} style={inputStyle} />
           </FormGroup>
-          <FormGroup label="Batch">
-            <input type="text" placeholder="Batch ID" value={transfer.batchId} onChange={e => setTransfer({...transfer, batchId: e.target.value})} style={{...inputStyle, width: '100%'}} />
+          <FormGroup label={t('ops_batch_id', language)}>
+            <input type="text" placeholder={t('ops_batch_id', language)} value={transfer.batchId} onChange={e => setTransfer({ ...transfer, batchId: e.target.value })} style={{ ...inputStyle, width: '100%' }} />
           </FormGroup>
         </WorkflowCard >
 
-  {/* 4. RECORD WASTE */ }
-  < WorkflowCard title = { t('ops_record_waste', language) } onSubmit = {() => runWorkflow('recordWaste', { ...waste, qtyKg: Number(waste.qtyKg) }, 'WSTE')} loading = { loading } language = { language } >
-          <FormGroup label="Location / Unit">
-            <input type="text" placeholder="Location ID" value={waste.locationId} onChange={e => setWaste({...waste, locationId: e.target.value})} style={inputStyle} />
-            <input type="text" placeholder="Unit ID" value={waste.unitId} onChange={e => setWaste({...waste, unitId: e.target.value})} style={inputStyle} />
+        {/* 4. RECORD WASTE */}
+        < WorkflowCard title={t('ops_record_waste', language)} onSubmit={() => runWorkflow('recordWaste', { ...waste, qtyKg: Number(waste.qtyKg) }, 'WSTE')} loading={loading} language={language} >
+          <FormGroup label={t('ops_location_unit', language)}>
+            <input type="text" placeholder={t('fin_location', language)} value={waste.locationId} onChange={e => setWaste({ ...waste, locationId: e.target.value })} style={inputStyle} />
+            <input type="text" placeholder={t('fin_unit', language)} value={waste.unitId} onChange={e => setWaste({ ...waste, unitId: e.target.value })} style={inputStyle} />
           </FormGroup>
-          <FormGroup label="Batch ID / Qty">
-            <input type="text" placeholder="Batch ID" value={waste.batchId} onChange={e => setWaste({...waste, batchId: e.target.value})} style={inputStyle} />
-            <input type="number" placeholder="Qty (Kg)" value={waste.qtyKg} onChange={e => setWaste({...waste, qtyKg: e.target.value})} style={inputStyle} />
+          <FormGroup label={t('ops_batch_sku', language)}>
+            <input type="text" placeholder={t('ops_batch_id', language)} value={waste.batchId} onChange={e => setWaste({ ...waste, batchId: e.target.value })} style={inputStyle} />
+            <input type="number" placeholder={t('ops_qty', language)} value={waste.qtyKg} onChange={e => setWaste({ ...waste, qtyKg: e.target.value })} style={inputStyle} />
           </FormGroup>
-          <FormGroup label="Reason">
-            <select value={waste.reason} onChange={e => setWaste({...waste, reason: e.target.value})} style={{...inputStyle, width: '100%'}}>
-              <option value="SPOILAGE">Spoilage / Busuk</option>
-              <option value="DRIER_LOSS">Drier Loss</option>
-              <option value="SORTING_ERROR">Sorting Error</option>
+          <FormGroup label={t('ops_reason', language)}>
+            <select value={waste.reason} onChange={e => setWaste({ ...waste, reason: e.target.value })} style={{ ...inputStyle, width: '100%' }}>
+              <option value="SPOILAGE">{t('ops_spoilage', language)}</option>
+              <option value="DRIER_LOSS">{t('ops_drier_loss', language)}</option>
+              <option value="SORTING_ERROR">{t('ops_sorting_error', language)}</option>
             </select>
           </FormGroup >
         </WorkflowCard >
 
-  {/* 5. TRIP EXPENSE */ }
-  < WorkflowCard title = { t('ops_trip_expense', language) } onSubmit = {() => runWorkflow('recordTripExpense', { ...expense, amountIDR: Number(expense.amountIDR) }, 'TRIP')} loading = { loading } language = { language } >
-          <FormGroup label="Scope">
-            <input type="text" placeholder="Location ID" value={expense.locationId} onChange={e => setExpense({...expense, locationId: e.target.value})} style={inputStyle} />
-            <input type="text" placeholder="Unit ID" value={expense.unitId} onChange={e => setExpense({...expense, unitId: e.target.value})} style={inputStyle} />
+        {/* 5. TRIP EXPENSE */}
+        < WorkflowCard title={t('ops_trip_expense', language)} onSubmit={() => runWorkflow('recordTripExpense', { ...expense, amountIDR: Number(expense.amountIDR) }, 'TRIP')} loading={loading} language={language} >
+          <FormGroup label={t('ops_scope', language)}>
+            <input type="text" placeholder={t('fin_location', language)} value={expense.locationId} onChange={e => setExpense({ ...expense, locationId: e.target.value })} style={inputStyle} />
+            <input type="text" placeholder={t('fin_unit', language)} value={expense.unitId} onChange={e => setExpense({ ...expense, unitId: e.target.value })} style={inputStyle} />
           </FormGroup>
-          <FormGroup label="Details">
-            <input type="number" placeholder="Amount (IDR)" value={expense.amountIDR} onChange={e => setExpense({...expense, amountIDR: e.target.value})} style={inputStyle} />
-            <input type="text" placeholder="Memo" value={expense.memo} onChange={e => setExpense({...expense, memo: e.target.value})} style={inputStyle} />
+          <FormGroup label={t('ops_details', language)}>
+            <input type="number" placeholder={t('ops_amount', language)} value={expense.amountIDR} onChange={e => setExpense({ ...expense, amountIDR: e.target.value })} style={inputStyle} />
+            <input type="text" placeholder={t('ops_memo', language)} value={expense.memo} onChange={e => setExpense({ ...expense, memo: e.target.value })} style={inputStyle} />
           </FormGroup>
         </WorkflowCard >
+
+        {/* 6. WALLET TRANSFER */}
+        < WorkflowCard title={t('ops_wallet_transfer', language)} onSubmit={() => runWorkflow('recordWalletTransfer', { ...walletTransfer, amountIDR: Number(walletTransfer.amountIDR) }, 'WTRF')} loading={loading} language={language} >
+          <FormGroup label={t('ops_from', language)}>
+            <input type="text" placeholder={t('fin_location', language)} value={walletTransfer.fromLocationId} onChange={e => setWalletTransfer({ ...walletTransfer, fromLocationId: e.target.value })} style={inputStyle} />
+            <input type="text" placeholder={t('fin_unit', language)} value={walletTransfer.fromUnitId} onChange={e => setWalletTransfer({ ...walletTransfer, fromUnitId: e.target.value })} style={inputStyle} />
+          </FormGroup>
+          <FormGroup label={t('ops_to', language)}>
+            <input type="text" placeholder={t('fin_location', language)} value={walletTransfer.toLocationId} onChange={e => setWalletTransfer({ ...walletTransfer, toLocationId: e.target.value })} style={inputStyle} />
+            <input type="text" placeholder={t('fin_unit', language)} value={walletTransfer.toUnitId} onChange={e => setWalletTransfer({ ...walletTransfer, toUnitId: e.target.value })} style={inputStyle} />
+          </FormGroup>
+          <FormGroup label={t('ops_details', language)}>
+            <input type="number" placeholder={t('ops_amount', language)} value={walletTransfer.amountIDR} onChange={e => setWalletTransfer({ ...walletTransfer, amountIDR: e.target.value })} style={inputStyle} />
+            <input type="text" placeholder={t('ops_memo', language)} value={walletTransfer.memo} onChange={e => setWalletTransfer({ ...walletTransfer, memo: e.target.value })} style={inputStyle} />
+          </FormGroup>
+        </WorkflowCard >
+
+        {/* 7. START TRIP */}
+        < WorkflowCard title="Start Trip" onSubmit={() => runWorkflow('recordTripStart', tripStart, 'TRIP')} loading={loading} language={language} >
+          <FormGroup label={t('ops_location_unit', language)}>
+            <input type="text" placeholder={t('fin_location', language)} value={tripStart.locationId} onChange={e => setTripStart({ ...tripStart, locationId: e.target.value })} style={inputStyle} />
+            <input type="text" placeholder={t('fin_unit', language)} value={tripStart.unitId} onChange={e => setTripStart({ ...tripStart, unitId: e.target.value })} style={inputStyle} />
+          </FormGroup>
+          <FormGroup label="Vessel / Context">
+            <input type="text" placeholder="Vessel Name" value={tripStart.vesselName} onChange={e => setTripStart({ ...tripStart, vesselName: e.target.value })} style={{ ...inputStyle, width: '100%' }} />
+          </FormGroup>
+        </WorkflowCard >
+
+        {/* 8. RECORD SALE */}
+        <WorkflowCard title={t('ops_sale', language)} onSubmit={() => runWorkflow('recordSale', { ...sale, qty: Number(sale.qty), unitPriceIDR: Number(sale.unitPriceIDR) }, 'SALE')} loading={loading} language={language}>
+          <FormGroup label={t('ops_location_unit', language)}>
+            <input type="text" placeholder={t('fin_location', language)} value={sale.locationId} onChange={e => setSale({ ...sale, locationId: e.target.value })} style={inputStyle} />
+            <input type="text" placeholder={t('fin_unit', language)} value={sale.unitId} onChange={e => setSale({ ...sale, unitId: e.target.value })} style={inputStyle} />
+          </FormGroup>
+          <FormGroup label={t('ops_sku_qty', language)}>
+            <input type="text" placeholder={t('ops_sku', language)} value={sale.skuId} onChange={e => setSale({ ...sale, skuId: e.target.value })} style={inputStyle} />
+            <input type="number" placeholder={t('ops_qty', language)} value={sale.qty} onChange={e => setSale({ ...sale, qty: e.target.value })} style={inputStyle} />
+          </FormGroup>
+          <FormGroup label={t('ops_price_customer', language)}>
+            <input type="number" placeholder={t('ops_price', language)} value={sale.unitPriceIDR} onChange={e => setSale({ ...sale, unitPriceIDR: e.target.value })} style={inputStyle} />
+            <input type="text" placeholder={t('ops_customer', language)} value={sale.customerName} onChange={e => setSale({ ...sale, customerName: e.target.value })} style={inputStyle} />
+          </FormGroup>
+        </WorkflowCard>
 
       </div >
     </div >
   );
 };
 
-const WorkflowCard = ({ title, children, onSubmit, loading, language }: { title: string, children: React.ReactNode, onSubmit: () => void, loading: boolean, language: Language }) =>(
+const WorkflowCard = ({ title, children, onSubmit, loading, language }: { title: string, children: React.ReactNode, onSubmit: () => void, loading: boolean, language: Language }) => (
   <div style={{ background: 'white', padding: '1.5rem', borderRadius: '1rem', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', border: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
     <h2 style={{ fontSize: '1.25rem', color: '#1e293b' }}>{title}</h2>
     {children}

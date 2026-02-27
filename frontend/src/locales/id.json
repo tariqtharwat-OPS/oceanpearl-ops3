@@ -28,7 +28,30 @@
         "search": "Cari",
         "filter": "Filter",
         "export": "Ekspor",
-        "import": "Impor"
+        "import": "Impor",
+        "copy": "Salin",
+        "idempotency": "Kunci Idempotensi"
+    },
+    "nav": {
+        "dashboard": "Dasbor",
+        "operations": "Operasional",
+        "finance": "Keuangan",
+        "inventory": "Inventori",
+        "reports": "Laporan",
+        "settings": "Pengaturan",
+        "logout": "Keluar",
+        "admin": "Admin Sistem",
+        "shark": "Shark AI",
+        "trace": "Traceability"
+    },
+    "roles": {
+        "admin": "Administrator",
+        "ceo": "CEO",
+        "location_manager": "Manajer Lokasi",
+        "unit_operator": "Operator Unit",
+        "finance_officer": "Petugas Keuangan",
+        "investor": "Investor",
+        "shark": "Shark AI"
     },
     "auth": {
         "loginTitle": "Masuk ke Ocean Pearl Operations",
@@ -41,7 +64,8 @@
         "createAccount": "Buat Akun",
         "invalidCredentials": "Email atau kata sandi tidak valid",
         "loginError": "Gagal masuk. Silakan coba lagi.",
-        "logoutSuccess": "Anda telah berhasil keluar"
+        "logoutSuccess": "Anda telah berhasil keluar",
+        "loggedInAs": "Masuk sebagai"
     },
     "dashboard": {
         "title": "Dasbor",
@@ -131,8 +155,6 @@
         "movement": "Pergerakan Stok",
         "reports": "Laporan",
         "places": "Tempat",
-        "receiving": "Penerimaan",
-        "processing": "Pemrosesan",
         "drying": "Pengeringan",
         "finished": "Barang Jadi",
         "coldStorage": "Penyimpanan Dingin",
@@ -203,5 +225,16 @@
         "networkError": "Kesalahan jaringan. Silakan periksa koneksi Anda",
         "firebaseError": "Kesalahan Firebase: {{message}}",
         "functionError": "Kesalahan fungsi: {{message}}"
+    },
+    "admin_custom": {
+        "panel": "System Admin Panel",
+        "bootstrap": "Bootstrap Sistem",
+        "seed": "Seed Data Tes",
+        "users": "Daftar Pengguna",
+        "run": "Jalankan",
+        "result": "Hasil",
+        "bootstrap_desc": "Inisialisasi konfigurasi sistem dan admin root.",
+        "seed_desc": "Isi sistem dengan pengguna, lokasi, dan produk pengujian.",
+        "no_users": "Tidak ada pengguna ditemukan. Jalankan seeding terlebih dahulu."
     }
 }

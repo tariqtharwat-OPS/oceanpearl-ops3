@@ -3,8 +3,7 @@ import {
     signOut,
     onAuthStateChanged,
 } from 'firebase/auth';
-import { auth, functions } from './firebase';
-import { httpsCallable } from 'firebase/functions';
+import { auth } from './firebase';
 
 export interface AuthUser {
     uid: string;
@@ -16,14 +15,7 @@ export const authService = {
     login: async (email: string, password: string): Promise<AuthUser> => {
         const result = await signInWithEmailAndPassword(auth, email, password);
 
-        // Initialize user profile in Firestore after successful login
-        try {
-            const initializeUserProfile = httpsCallable(functions, 'initializeUserProfile');
-            await initializeUserProfile({});
-        } catch (error) {
-            console.error('Error initializing user profile:', error);
-            // Don't fail the login if profile initialization fails
-        }
+        // Profile initialization is handled by AuthContext via firestoreService
 
         return {
             uid: result.user.uid,

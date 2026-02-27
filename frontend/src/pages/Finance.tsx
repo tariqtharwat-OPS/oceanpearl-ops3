@@ -43,76 +43,76 @@ const Finance = ({ userProfile }: FinanceProps) => {
 
   const fetchReport = async (name: string, data: any, label: string) => {
     setLoading(true);
-  setReport(null);
-  try {
-    const callable = httpsCallable(functions, name);
-    const res = await callable(data);
-    setReport({ type: label, data: res.data });
-  } catch (error: any) {
-    alert(`Error: ${error.message}`);
-  } finally {
-    setLoading(false);
-  }
-};
+    setReport(null);
+    try {
+      const callable = httpsCallable(functions, name);
+      const res = await callable(data);
+      setReport({ type: label, data: res.data });
+    } catch (error: any) {
+      alert(`Error: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-return (
-  <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-    <h1 style={{ color: '#0f172a', marginBottom: '2rem' }}>{t('fin_center', language)}</h1>
+  return (
+    <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+      <h1 style={{ color: '#0f172a', marginBottom: '2rem' }}>{t('fin_center', language)}</h1>
 
-    {/* Global Scope Selector */}
-    <div style={{ background: 'white', padding: '1.5rem', borderRadius: '1rem', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', marginBottom: '2rem', display: 'flex', gap: '2rem', alignItems: 'center' }}>
-      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-        <label style={{ fontWeight: '700', fontSize: '0.875rem' }}>Location:</label>
-        <input type="text" value={scope.locationId} onChange={e => setScope({...scope, locationId: e.target.value})} style={inputStyle} />
-      </div>
-      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-        <label style={{ fontWeight: '700', fontSize: '0.875rem' }}>Unit:</label>
-        <input type="text" value={scope.unitId} onChange={e => setScope({...scope, unitId: e.target.value})} style={inputStyle} />
-      </div>
-      <div style={{ display: 'flex', gap: '0.5rem' }}>
-        <button onClick={() => fetchReport('reporting-getTrialBalance', scope, t('fin_trial_balance', language))} disabled={loading} style={btnStyle}>{t('fin_trial_balance', language)}</button>
-      <button onClick={() => fetchReport('reporting-getPnLSummary', scope, t('fin_pnl', language))} disabled={loading} style={btnStyle}>{t('fin_pnl', language)}</button>
-    <button onClick={() => fetchReport('reporting-getInventorySummary', scope, t('nav_inventory', language))} disabled={loading} style={btnStyle}>{t('nav_inventory', language)}</button>
+      {/* Global Scope Selector */}
+      <div style={{ background: 'white', padding: '1.5rem', borderRadius: '1rem', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', marginBottom: '2rem', display: 'flex', gap: '2rem', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <label style={{ fontWeight: '700', fontSize: '0.875rem' }}>{t('fin_location', language)}:</label>
+          <input type="text" value={scope.locationId} onChange={e => setScope({ ...scope, locationId: e.target.value })} style={inputStyle} />
+        </div>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <label style={{ fontWeight: '700', fontSize: '0.875rem' }}>{t('fin_unit', language)}:</label>
+          <input type="text" value={scope.unitId} onChange={e => setScope({ ...scope, unitId: e.target.value })} style={inputStyle} />
+        </div>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button onClick={() => fetchReport('reporting-getTrialBalance', scope, t('fin_trial_balance', language))} disabled={loading} style={btnStyle}>{t('fin_trial_balance', language)}</button>
+          <button onClick={() => fetchReport('reporting-getPnLSummary', scope, t('fin_pnl', language))} disabled={loading} style={btnStyle}>{t('fin_pnl', language)}</button>
+          <button onClick={() => fetchReport('reporting-getInventorySummary', scope, t('nav_inventory', language))} disabled={loading} style={btnStyle}>{t('nav_inventory', language)}</button>
         </div >
       </div >
 
-  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
-    {/* Ledger Lookup */}
-    <div style={cardStyle}>
-      <h3>{t('fin_ledger', language)} Lookup</h3>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem', marginBottom: '1rem' }}>
-        <input type="text" placeholder="Account ID" value={ledgerQuery.accountId} onChange={e => setLedgerQuery({...ledgerQuery, accountId: e.target.value})} style={inputStyle} />
-        <input type="text" placeholder="Loc" value={ledgerQuery.locationId} onChange={e => setLedgerQuery({...ledgerQuery, locationId: e.target.value})} style={inputStyle} />
-        <input type="text" placeholder="Unit" value={ledgerQuery.unitId} onChange={e => setLedgerQuery({...ledgerQuery, unitId: e.target.value})} style={inputStyle} />
-      </div>
-      <button onClick={() => fetchReport('ledger-getLedgerBalance', ledgerQuery, t('fin_balance', language))} disabled={loading} style={{ ...btnStyle, width: '100%' }}>{t('common_search', language)}</button>
-  </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
+        {/* Ledger Lookup */}
+        <div style={cardStyle}>
+          <h3>{t('fin_ledger', language)} Lookup</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem', marginBottom: '1rem' }}>
+            <input type="text" placeholder={t('fin_account_id', language)} value={ledgerQuery.accountId} onChange={e => setLedgerQuery({ ...ledgerQuery, accountId: e.target.value })} style={inputStyle} />
+            <input type="text" placeholder={t('fin_loc_short', language)} value={ledgerQuery.locationId} onChange={e => setLedgerQuery({ ...ledgerQuery, locationId: e.target.value })} style={inputStyle} />
+            <input type="text" placeholder={t('fin_unit', language)} value={ledgerQuery.unitId} onChange={e => setLedgerQuery({ ...ledgerQuery, unitId: e.target.value })} style={inputStyle} />
+          </div>
+          <button onClick={() => fetchReport('ledger-getLedgerBalance', ledgerQuery, t('fin_balance', language))} disabled={loading} style={{ ...btnStyle, width: '100%' }}>{t('common_search', language)}</button>
+        </div>
 
-{/* Inventory Specific Lookup */ }
-<div style={cardStyle}>
-  <h3>{t('fin_inventory_value', language)} Lookup</h3>
-  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem', marginBottom: '1rem' }}>
-    <input type="text" placeholder="Loc" value={valuationQuery.locationId} onChange={e => setValuationQuery({...valuationQuery, locationId: e.target.value})} style={inputStyle} />
-    <input type="text" placeholder="Unit" value={valuationQuery.unitId} onChange={e => setValuationQuery({...valuationQuery, unitId: e.target.value})} style={inputStyle} />
-    <input type="text" placeholder="SKU ID" value={valuationQuery.skuId} onChange={e => setValuationQuery({...valuationQuery, skuId: e.target.value})} style={inputStyle} />
-  </div>
-  <button onClick={() => fetchReport('inventory-getInventoryValuation', valuationQuery, t('fin_inventory_value', language))} disabled={loading} style={{ ...btnStyle, width: '100%' }}>{t('common_search', language)}</button>
+        {/* Inventory Specific Lookup */}
+        <div style={cardStyle}>
+          <h3>{t('fin_inventory_value', language)} Lookup</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem', marginBottom: '1rem' }}>
+            <input type="text" placeholder={t('fin_loc_short', language)} value={valuationQuery.locationId} onChange={e => setValuationQuery({ ...valuationQuery, locationId: e.target.value })} style={inputStyle} />
+            <input type="text" placeholder={t('fin_unit', language)} value={valuationQuery.unitId} onChange={e => setValuationQuery({ ...valuationQuery, unitId: e.target.value })} style={inputStyle} />
+            <input type="text" placeholder={t('fin_sku_id', language)} value={valuationQuery.skuId} onChange={e => setValuationQuery({ ...valuationQuery, skuId: e.target.value })} style={inputStyle} />
+          </div>
+          <button onClick={() => fetchReport('inventory-getInventoryValuation', valuationQuery, t('fin_inventory_value', language))} disabled={loading} style={{ ...btnStyle, width: '100%' }}>{t('common_search', language)}</button>
         </div >
       </div >
 
-  {/* REPORT DISPLAY AREA */ }
-{report &&(
-  <div style={{ background: 'white', padding: '2rem', borderRadius: '1rem', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', border: '1px solid #f1f5f9' }}>
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-      <h2 style={{ margin: 0 }}>{report.type}</h2>
-      <button onClick={() => setReport(null)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '1.5rem' }}>×</button>
-  </div>
-          
-          { report.type === t('fin_trial_balance', language) &&<TrialBalanceTable balances = {report.data.balances } language = { language } />}
-{ report.type === t('fin_pnl', language) && < PnLSummary data = { report.data } language = { language } />}
-{ report.type === t('nav_inventory', language) && < InventoryTable items = { report.data.items } language = { language } />}
-{ report.type === t('fin_balance', language) && < pre > { JSON.stringify(report.data, null, 2) }</pre >}
-{ report.type === t('fin_inventory_value', language) && < pre > { JSON.stringify(report.data, null, 2) }</pre >}
+      {/* REPORT DISPLAY AREA */}
+      {report && (
+        <div style={{ background: 'white', padding: '2rem', borderRadius: '1rem', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', border: '1px solid #f1f5f9' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+            <h2 style={{ margin: 0 }}>{report.type}</h2>
+            <button onClick={() => setReport(null)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '1.5rem' }}>×</button>
+          </div>
+
+          {report.type === t('fin_trial_balance', language) && <TrialBalanceTable balances={report.data.balances} language={language} />}
+          {report.type === t('fin_pnl', language) && < PnLSummary data={report.data} language={language} />}
+          {report.type === t('nav_inventory', language) && < InventoryTable items={report.data.items} language={language} />}
+          {report.type === t('fin_balance', language) && < pre > {JSON.stringify(report.data, null, 2)}</pre >}
+          {report.type === t('fin_inventory_value', language) && < pre > {JSON.stringify(report.data, null, 2)}</pre >}
         </div >
       )}
     </div >
@@ -124,21 +124,21 @@ const TrialBalanceTable = ({ balances, language }: { balances: any[], language: 
     <thead>
       <tr style={thRowStyle}>
         <th style={tdStyle}>{t('fin_account', language)}</th>
-        <th style={tdStyle}>Debit</th>
-        <th style={tdStyle}>Credit</th>
-        <th style={tdStyle}>Net Balance</th>
+        <th style={tdStyle}>{t('fin_debit', language)}</th>
+        <th style={tdStyle}>{t('fin_credit', language)}</th>
+        <th style={tdStyle}>{t('fin_net_balance', language)}</th>
       </tr>
     </thead>
     <tbody>
       {balances.map((b, i) => (
-      <tr key={i} style={i % 2 === 0 ? {} : { background: '#f8fafc' }}>
-        <td style={tdStyle}><strong>{b.accountId}</strong> <br /><span style={{ fontSize: '0.75rem', color: '#64748b' }}>{b.category}</span></td>
-        <td style={tdStyle}>{b.debitTotal?.toLocaleString()}</td>
-        <td style={tdStyle}>{b.creditTotal?.toLocaleString()}</td>
-        <td style={{ ...tdStyle, fontWeight: '700', color: b.balance < 0 ? '#ef4444' : '#10b981'}}>{b.balance?.toLocaleString()}</td>
-    </tr>
+        <tr key={i} style={i % 2 === 0 ? {} : { background: '#f8fafc' }}>
+          <td style={tdStyle}><strong>{b.accountId}</strong> <br /><span style={{ fontSize: '0.75rem', color: '#64748b' }}>{b.category}</span></td>
+          <td style={tdStyle}>{b.debitTotal?.toLocaleString()}</td>
+          <td style={tdStyle}>{b.creditTotal?.toLocaleString()}</td>
+          <td style={{ ...tdStyle, fontWeight: '700', color: b.balance < 0 ? '#ef4444' : '#10b981' }}>{b.balance?.toLocaleString()}</td>
+        </tr>
       ))}
-  </tbody>
+    </tbody>
   </table >
 );
 
@@ -173,12 +173,12 @@ const InventoryTable = ({ items, language }: { items: any[], language: Language 
     </thead>
     <tbody>
       {items.map((it, i) => (
-      <tr key={i} style={i % 2 === 0 ? {} : { background: '#f8fafc' }}>
-        <td style={tdStyle}><strong>{it.skuId}</strong></td>
-        <td style={tdStyle}>{it.qtyKg?.toFixed(2)} kg</td>
-        <td style={tdStyle}>IDR {it.avgCostIDR?.toLocaleString()}</td>
-        <td style={{ ...tdStyle, fontWeight: '700' }}>IDR {it.inventoryValue?.toLocaleString()}</td>
-      </tr>
+        <tr key={i} style={i % 2 === 0 ? {} : { background: '#f8fafc' }}>
+          <td style={tdStyle}><strong>{it.skuId}</strong></td>
+          <td style={tdStyle}>{it.qtyKg?.toFixed(2)} kg</td>
+          <td style={tdStyle}>IDR {it.avgCostIDR?.toLocaleString()}</td>
+          <td style={{ ...tdStyle, fontWeight: '700' }}>IDR {it.inventoryValue?.toLocaleString()}</td>
+        </tr>
       ))}
     </tbody>
   </table>

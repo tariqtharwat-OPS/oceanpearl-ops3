@@ -27,16 +27,17 @@ const Header: React.FC = () => {
                 </div>
 
                 <nav className="header-nav">
-                    <Link to="/dashboard">{t('dashboard.title')}</Link>
+                    <Link to="/dashboard">{t('nav.dashboard')}</Link>
+                    <Link to="/operations">{t('nav.operations')}</Link>
+                    <Link to="/finance">{t('nav.finance')}</Link>
+                    <Link to="/shark">{t('nav.shark')}</Link>
+                    <Link to="/traceability">{t('nav.trace')}</Link>
                     {isAdmin && (
                         <>
+                            <Link to="/admin">{t('nav.admin')}</Link>
                             <Link to="/admin/users">{t('admin.users')}</Link>
-                            <Link to="/admin/locations">{t('admin.locations')}</Link>
-                            <Link to="/admin/master-data">{t('admin.masterData')}</Link>
                         </>
                     )}
-                    <Link to="/location">{t('location.title')}</Link>
-                    <Link to="/reports">{t('reports.title')}</Link>
                 </nav>
 
                 <div className="header-actions">

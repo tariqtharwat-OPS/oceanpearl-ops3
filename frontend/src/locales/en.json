@@ -28,7 +28,30 @@
         "search": "Search",
         "filter": "Filter",
         "export": "Export",
-        "import": "Import"
+        "import": "Import",
+        "copy": "Copy",
+        "idempotency": "Idempotency Key"
+    },
+    "nav": {
+        "dashboard": "Dashboard",
+        "operations": "Operations",
+        "finance": "Finance",
+        "inventory": "Inventory",
+        "reports": "Reports",
+        "settings": "Settings",
+        "logout": "Logout",
+        "admin": "System Admin",
+        "shark": "Shark AI",
+        "trace": "Traceability"
+    },
+    "roles": {
+        "admin": "Administrator",
+        "ceo": "CEO",
+        "location_manager": "Location Manager",
+        "unit_operator": "Unit Operator",
+        "finance_officer": "Finance Officer",
+        "investor": "Investor",
+        "shark": "Shark AI"
     },
     "auth": {
         "loginTitle": "Ocean Pearl Operations Login",
@@ -41,7 +64,8 @@
         "createAccount": "Create Account",
         "invalidCredentials": "Invalid email or password",
         "loginError": "Login failed. Please try again.",
-        "logoutSuccess": "You have been logged out successfully"
+        "logoutSuccess": "You have been logged out successfully",
+        "loggedInAs": "Logged in as"
     },
     "dashboard": {
         "title": "Dashboard",
@@ -131,8 +155,6 @@
         "movement": "Stock Movement",
         "reports": "Reports",
         "places": "Places",
-        "receiving": "Receiving",
-        "processing": "Processing",
         "drying": "Drying",
         "finished": "Finished Goods",
         "coldStorage": "Cold Storage",
@@ -203,5 +225,16 @@
         "networkError": "Network error. Please check your connection",
         "firebaseError": "Firebase error: {{message}}",
         "functionError": "Function error: {{message}}"
+    },
+    "admin_custom": {
+        "panel": "System Admin Panel",
+        "bootstrap": "System Bootstrap",
+        "seed": "Seed Test Data",
+        "users": "User Directory",
+        "run": "Run",
+        "result": "Result",
+        "bootstrap_desc": "Initialize system configuration and root admin.",
+        "seed_desc": "Populate system with test users, locations, and products.",
+        "no_users": "No users found. Run seeding first."
     }
 }
