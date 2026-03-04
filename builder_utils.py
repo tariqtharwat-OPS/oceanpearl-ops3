@@ -126,7 +126,7 @@ def get_js():
             'role_ceo': {
                 color: 'bg-slate-900', label: 'CEO Command',
                 nav: [
-                    { id: 'ceo_dash', label: 'Executive Pulse', icon: 'bar-chart-2' }, { id: 'ceo_map', label: 'Global Inventory Map', icon: 'globe' }, { id: 'ceo_yield', label: 'Yield Anomalies', icon: 'alert-triangle' }, { id: 'ceo_health', label: 'Financial Health', icon: 'dollar-sign' }, { id: 'ceo_risk', label: 'Risk Dashboard', icon: 'shield' }, { id: 'ceo_appr', label: 'Approvals / Overrides', icon: 'key' }, { id: 'ceo_shark', label: 'Shark AI Ops', icon: 'cpu' }
+                    { id: 'ceo_dash', label: 'Executive Pulse', icon: 'bar-chart-2' }, { id: 'ceo_map', label: 'Global Inventory Map', icon: 'globe' }, { id: 'ceo_yield', label: 'Yield Anomalies', icon: 'alert-triangle' }, { id: 'ceo_health', label: 'Financial Health', icon: 'dollar-sign' }, { id: 'ceo_risk', label: 'Risk Dashboard', icon: 'shield' }, { id: 'ceo_appr', label: 'Approvals / Overrides', icon: 'key' }, { id: 'ceo_shark', label: 'Shark AI Ops', icon: 'cpu' }, { id: 'freeze_chk', label: 'UI Freeze Contract', icon: 'shield-check' }
                 ]
             },
             'role_investor': {
@@ -138,7 +138,7 @@ def get_js():
             'role_admin': {
                 color: 'bg-fuchsia-900', label: 'System Admin',
                 nav: [
-                    { id: 'adm_usr', label: 'User Mgt (Roles/Scope)', icon: 'users' }, { id: 'adm_loc', label: 'Location/Unit Tree', icon: 'git-merge' }, { id: 'adm_ppl', label: 'People Registry Master', icon: 'contact' }, { id: 'adm_exp_type', label: 'Expense Type Master', icon: 'list' }, { id: 'adm_mdm', label: 'Master Data Configs', icon: 'database' }, { id: 'adm_aud', label: 'System Audit Log', icon: 'list' }, { id: 'adm_perm', label: 'Permissions Matrix', icon: 'lock' }, { id: 'adm_set', label: 'System Settings', icon: 'settings' }
+                    { id: 'adm_usr', label: 'User Mgt (Roles/Scope)', icon: 'users' }, { id: 'adm_loc', label: 'Location/Unit Tree', icon: 'git-merge' }, { id: 'adm_ppl', label: 'People Registry Master', icon: 'contact' }, { id: 'adm_exp_type', label: 'Expense Type Master', icon: 'list' }, { id: 'adm_mdm', label: 'Master Data Configs', icon: 'database' }, { id: 'adm_aud', label: 'System Audit Log', icon: 'list' }, { id: 'adm_perm', label: 'Permissions Matrix', icon: 'lock' }, { id: 'adm_set', label: 'System Settings', icon: 'settings' }, { id: 'freeze_chk', label: 'UI Freeze Contract', icon: 'shield-check' }
                 ]
             },
             'role_shark': {
@@ -280,3 +280,55 @@ def advance_paid_grid():
         <button class="mt-4 text-sm font-bold text-amber-700 hover:text-amber-900 flex items-center">+ Add Advance Line</button>
         <div class="flex justify-end mt-4"><div class="bg-white p-3 border border-amber-200 rounded text-right w-64 shadow-sm"><div class="text-xs text-amber-800 font-bold">Total Session Advances:</div><div class="text-xl font-black text-amber-900 font-mono mt-1">Rp 250,000</div></div></div>
     </div>'''
+
+def freeze_checklist_screen():
+    return screen("freeze_chk", "UI FREEZE CONTRACT LOCK v1",
+        """
+        <div class="bg-white p-8 rounded shadow border-t-8 border-emerald-600 max-w-5xl mb-8">
+            <h3 class="text-xl font-black text-slate-800 uppercase tracking-widest mb-6 border-b pb-2">Rule: Strict UI Versioning</h3>
+            <p class="text-slate-600 font-mono text-sm mb-8 bg-slate-50 p-4 border rounded">Any future UI change requires a new version tag and an entry in the changelog. The UI blueprint is now the immutable source of truth for the system's interactive constraints.</p>
+            
+            <div class="grid grid-cols-2 gap-8 mb-8">
+                <div>
+                    <h4 class="font-bold text-emerald-900 mb-3 uppercase text-sm flex items-center"><i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> 1. Approved Roles & Screens</h4>
+                    <ul class="text-xs space-y-2 text-slate-600 font-mono">
+                        <li>[x] Boat Operator (8 screens)</li>
+                        <li>[x] Factory Operator (8 screens)</li>
+                        <li>[x] Cold Storage Operator (10 screens)</li>
+                        <li>[x] Office Admin (6 screens)</li>
+                        <li>[x] Location Manager (10 screens)</li>
+                        <li>[x] Finance Officer (10 screens)</li>
+                        <li>[x] CEO Command (7 screens)</li>
+                        <li>[x] Investor (4 screens)</li>
+                        <li>[x] System Admin (8 screens)</li>
+                        <li>[x] Shark AI (5 screens)</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-emerald-900 mb-3 uppercase text-sm flex items-center"><i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> 2. Approved Documents & Print Layouts</h4>
+                    <ul class="text-xs space-y-2 text-slate-600 font-mono">
+                        <li>[x] Receiving Invoice & QR Layout</li>
+                        <li>[x] Expense Voucher & QR Layout</li>
+                        <li>[x] Sales Invoice & QR Layout</li>
+                        <li>[x] Processing Batch & QR Layout</li>
+                        <li>[x] Transfer Manifest (DO) & QR Layout</li>
+                        <li>[x] Session Closure Audit & QR Layout</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h4 class="font-bold text-emerald-900 mb-3 uppercase text-sm flex items-center"><i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> 3. Approved Session Workflows</h4>
+            <ul class="text-xs space-y-2 text-slate-600 font-mono mb-8 bg-emerald-50 p-4 rounded border border-emerald-200">
+                <li>[x] Start Session: Initialize Context, Validate Staff</li>
+                <li>[x] Initial Balances: Handover, Crew Advances</li>
+                <li>[x] Document Execution: Local receipts, expenditures, batches</li>
+                <li>[x] Validation View: Derived Wallet/Stock Snapshot</li>
+                <li>[x] Close Session: Settle Crew, Transfer Float, Lock State</li>
+            </ul>
+
+            <h4 class="font-bold text-slate-800 mb-3 uppercase text-sm flex items-center"><i data-lucide="clock" class="w-4 h-4 mr-2"></i> 4. Pending Items</h4>
+            <p class="text-xs text-slate-500 font-mono italic">None explicitly pending at this freeze level.</p>
+        </div>
+        """,
+        "Displays the immutable system interface freeze contract. Read-only."
+    )

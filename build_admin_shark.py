@@ -1,4 +1,4 @@
-from builder_utils import screen, doc_header, doc_actions, a4_preview
+from builder_utils import screen, doc_header, doc_actions, a4_preview, freeze_checklist_screen
 
 def get_admin_shark_screens():
     screens = []
@@ -126,5 +126,7 @@ def get_admin_shark_screens():
     screens.append(screen("shk_hist", "Alert Decay History", "<div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Logs when a Risk was cleared, by whom, and what mitigation was supplied.]</div>", ""))
     screens.append(screen("shk_wa", "C-Suite Broadcast", "<div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Configures WhatsApp / Telegram webhook texts triggered by specific system bounds (e.g. Daily EOD Recap).]</div>", ""))
     screens.append(screen("shk_rule", "Rule Adjustments", "<div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Manages the percentage limits triggering 'Yield Divergence' or 'Float Violation'.]</div>", ""))
+
+    screens.append(freeze_checklist_screen())
 
     return screens

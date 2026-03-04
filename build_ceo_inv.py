@@ -1,4 +1,4 @@
-from builder_utils import screen, doc_header, doc_actions, a4_preview
+from builder_utils import screen, doc_header, doc_actions, a4_preview, freeze_checklist_screen
 
 def get_ceo_inv_screens():
     screens = []
@@ -45,6 +45,8 @@ def get_ceo_inv_screens():
     screens.append(screen("ceo_risk", "Risk Dashboard", "<div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Displays unapproved expenses > 7 days, aging AR > 30 days, high cash float balances on disconnected boats.]</div>", ""))
     screens.append(screen("ceo_appr", "Approvals (Overrides)", "<div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Unlocks specific documents blocked by Finance Policy logic.]</div>", ""))
     screens.append(screen("ceo_shark", "Ask Shark AI", "<div class='bg-slate-900 border-slate-700 p-6 rounded shadow max-w-4xl text-emerald-400 font-mono text-sm leading-relaxed border-t-8 border-t-purple-600 h-96'>OPS_SHARK_V4 ONLINE.<br>_ <span class='animate-pulse text-white'>_</span></div>", ""))
+
+    screens.append(freeze_checklist_screen())
 
     # INVESTOR (READ-ONLY)
     screens.append(screen("inv_dash", "Investor Dashboard",
