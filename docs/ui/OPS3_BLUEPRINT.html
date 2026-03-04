@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCEAN PEARL | OPS3 COMPLETE PROTOTYPE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap'); body{font-family:'Inter',sans-serif;background-color:#f8fafc;color:#0f172a;margin:0;overflow:hidden;} .screen{display:none;height:100%;overflow-y:auto;padding:1.5rem;background-color:#f1f5f9;} .screen.active{display:block;} .nav-item{cursor:pointer;transition:all 0.2s;} .nav-item.active{background-color:rgba(255,255,255,0.2)!important;color:white;border-left:4px solid #fff;} .a4-preview{width:210mm;min-height:297mm;background:white;margin:2rem auto;padding:15mm;box-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1);position:relative;} @media print { body * { visibility: hidden; } .a4-preview, .a4-preview * { visibility: visible; } .a4-preview { position: absolute; left: 0; top: 0; margin: 0; padding: 0mm; box-shadow: none; width: 100%; height: auto; } .no-print { display: none !important; } } .inv-table th { @apply bg-slate-800 text-white font-bold text-xs uppercase tracking-wider py-2 px-3 text-left border-b-2 border-slate-900; } .inv-table td { @apply py-2 px-3 text-sm border-b border-slate-200 bg-white; } .spec-panel{ @apply border border-slate-300 bg-slate-100 p-4 rounded-lg mt-8 text-xs text-slate-800 font-mono shadow-inner no-print;} .doc-header { @apply flex justify-between items-center bg-white p-4 border border-slate-200 rounded-lg shadow-sm mb-6; } .total-box { @apply bg-slate-50 border border-slate-300 p-4 rounded; } .btn-primary { @apply bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded shadow flex items-center justify-center cursor-pointer; } .btn-success { @apply bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-6 rounded shadow flex items-center justify-center cursor-pointer; } .btn-secondary { @apply bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 font-bold py-2 px-4 rounded shadow flex items-center justify-center cursor-pointer; }</style>
+</head>
+<body class="flex h-screen w-screen">
+    <aside id="mainSidebar" class="w-72 bg-slate-900 text-slate-300 flex flex-col shadow-xl z-20 flex-shrink-0 transition-colors duration-300">
+        <div class="h-16 bg-black/50 flex items-center justify-between px-4 border-b border-white/10"><span class="font-black tracking-widest text-white text-lg flex items-center"><i data-lucide="anchor" class="w-5 h-5 mr-3 text-white"></i> OPS3 WORKFLOW</span><span class="text-[0.6rem] font-bold bg-white/20 text-white px-1.5 py-0.5 rounded tracking-widest uppercase border border-white/30">H-REV 4.0</span></div>
+        <div class="p-4 bg-black/20 border-b border-white/10">
+            <label class="text-xs font-bold text-slate-300 uppercase tracking-widest mb-1 block">Context Loader</label>
+            <select id="roleSelector" class="w-full bg-slate-800 border border-slate-700 text-white text-sm rounded px-2 py-2 outline-none font-bold shadow-inner focus:ring-2 focus:ring-blue-500" onchange="switchRoleContext(this.value)">
+                <optgroup label="A) Unit-Level Users">
+                    <option value="role_boat">Boat Operator (Vessel)</option>
+                    <option value="role_factory">Factory Operator (Proc)</option>
+                    <option value="role_coldstorage">Cold Storage Operator</option>
+                    <option value="role_office">Office Admin</option>
+                </optgroup>
+                <optgroup label="B/C/D) Aggregation">
+                    <option value="role_locationmgr">Location Manager</option>
+                    <option value="role_finance">Finance Officer</option>
+                    <option value="role_ceo" selected>CEO Command</option>
+                    <option value="role_investor">Investor (Read-Only)</option>
+                </optgroup>
+                <optgroup label="E/F) System & Ops">
+                    <option value="role_admin">System Admin</option>
+                    <option value="role_shark">Shark AI Ops</option>
+                </optgroup>
+            </select>
+        </div>
+        <nav id="dynamicNav" class="flex-1 overflow-y-auto py-2 space-y-1 px-3 custom-scrollbar"></nav>
+        <div class="p-4 border-t border-black/30 text-xs text-center font-mono opacity-50">Blueprint UI Mode Only<br>Strict Render</div>
+    </aside>
+
+    <div class="flex-1 flex flex-col h-screen overflow-hidden bg-slate-100 relative">
+        <header class="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between shadow-sm flex-shrink-0 z-10 no-print">
+            <div class="flex items-center text-sm font-semibold text-slate-600"><span id="topbarRole" class="uppercase tracking-widest text-slate-400 font-bold"></span><i data-lucide="chevron-right" class="w-4 h-4 mx-3 text-slate-300"></i><span id="topbarScreen" class="text-slate-800 uppercase tracking-wider font-black text-lg"></span></div>
+            <div class="flex flex-col items-end"><div class="text-xs font-bold text-slate-500">John Doe (budi@oceanpearl)</div><div class="text-[0.65rem] text-slate-400 font-mono">Location: Kaimana Hub | UI-Proto</div></div>
+        </header>
+        <main id="mainContainer" class="flex-1 overflow-y-auto relative p-8">
+<div id="boat_start" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">1. Start Trip</h2>
+        
+        <div class="bg-white p-8 rounded border max-w-4xl mb-8 shadow-sm border-t-4 border-blue-600">
+            <div class="grid grid-cols-2 gap-6 mb-6"><div><label class="block text-xs font-bold text-slate-500 mb-1">Trip ID</label><input type="text" class="border p-2 w-full rounded font-mono bg-slate-50" value="TRIP-[Auto]" disabled></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Vessel / Unit</label><select class="border p-2 w-full"><option>Boat Faris</option></select></div></div>
+            <div class="grid grid-cols-2 gap-6 mb-6"><div><label class="block text-xs font-bold text-slate-500 mb-1">Date & Time Out</label><input type="datetime-local" class="border p-2 w-full rounded" value="2026-03-01T08:00"></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Trip Goal/Zone</label><input type="text" class="border p-2 w-full rounded" placeholder="e.g., Zone C South"></div></div>
+            <div class="bg-blue-50 border border-blue-200 p-6 rounded mb-8 shadow-sm">
+        <h3 class="font-black text-blue-900 uppercase tracking-widest mb-4 flex items-center border-b border-blue-200 pb-2"><i data-lucide="users" class="w-5 h-5 mr-2"></i> Session Staff Roster</h3>
+        <table class="w-full inv-table rounded overflow-hidden">
+            <thead><tr><th class="!bg-blue-900 !text-blue-100">Name</th><th class="!bg-blue-900 !text-blue-100">Role</th><th class="!bg-blue-900 !text-blue-100 text-right">Ext. Advance Bal</th><th class="!bg-blue-900 !text-blue-100">Action</th></tr></thead>
+            <tbody>
+                <tr><td>Pak Budi (ID-011)</td><td>Captain / Shift Lead</td><td class="text-right text-red-600 font-mono">Rp 500,000</td><td class="text-red-500 font-bold p-2"><i data-lucide="x" class="w-4 h-4 cursor-pointer hover:bg-red-50"></i></td></tr>
+                <tr><td>Maman (ID-042)</td><td>Crew / Employee</td><td class="text-right text-slate-400 font-mono">Rp 0</td><td class="text-red-500 font-bold p-2"><i data-lucide="x" class="w-4 h-4 cursor-pointer hover:bg-red-50"></i></td></tr>
+            </tbody>
+        </table>
+        <button class="mt-4 text-sm font-bold text-blue-700 hover:text-blue-900 block flex items-center">+ Add Staff Member (via People Registry)</button>
+    </div>
+            <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold w-full text-lg py-3 rounded"><i data-lucide="play" class="w-5 h-5 mr-2 inline"></i> INITIATE VESSEL TRIP</button>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Locks down the context bounds for this trip. The staff roster defines who gets paid and who takes advances. No DB insert terminology. Generates Trip ID visually. Blocks if Vessel not selected.</div>
+    </div><div id="boat_init" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">2. Opening Balances</h2>
+        <div class="doc-header"><div><div class="text-2xl font-black font-mono text-slate-800">TRIP-B1-0226</div><div class="text-xs font-bold text-slate-500">2026-03-01 10:00 | Loc: Kaimana Hub</div></div><div class="px-3 py-1 bg-amber-100 text-amber-800 font-bold rounded shadow-sm text-sm uppercase tracking-wide">Draft</div></div>
+        <div class="bg-white p-6 rounded border mb-8 max-w-4xl border-t-4 border-blue-600">
+            <h3 class="font-bold text-blue-900 mb-4 border-b pb-2 uppercase tracking-widest text-xs">Vessel Load & Fuel Status</h3>
+            <div class="grid grid-cols-3 gap-4 mb-4">
+                <div class="bg-slate-50 p-3 rounded border border-slate-200"><label class="text-[0.6rem] font-bold text-slate-500 uppercase">Fuel Loading (Liters)</label><input type="number" class="w-full mt-1 border border-slate-300 p-1 text-right font-mono text-blue-700 font-bold" value="1500"></div>
+                <div class="bg-slate-50 p-3 rounded border border-slate-200"><label class="text-[0.6rem] font-bold text-slate-500 uppercase">Ice Block Loading (Satuan)</label><input type="number" class="w-full mt-1 border border-slate-300 p-1 text-right font-mono text-cyan-600 font-bold" value="45"></div>
+            </div>
+            <h3 class="font-bold text-blue-900 mt-8 mb-4 border-b pb-2 uppercase tracking-widest text-xs">Trip Cash Wallet Declaration</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-emerald-50 p-4 rounded border border-emerald-200"><label class="text-[0.7rem] font-bold text-emerald-800 uppercase block mb-2">Physical Cash On Board</label><input type="number" class="w-full border-emerald-300 p-2 text-right font-mono text-emerald-700 font-black text-xl" value="5000000"></div>
+                <div class="p-4 rounded border border-slate-200 bg-white"><label class="text-[0.7rem] font-bold text-slate-500 uppercase block mb-1">Wallet Tag Creation</label><div class="font-mono text-sm font-bold text-slate-800 mt-3 pt-3 border-t border-slate-100">"TRIP-WALLET-B1"</div><p class="text-[0.6rem] mt-2 text-slate-400">This balance is dynamically tracked for the duration of the trip.</p></div>
+            </div>
+            <div class="bg-amber-50 border border-amber-200 p-6 rounded mt-8">
+        <h3 class="font-black text-amber-900 uppercase tracking-widest mb-4 flex items-center border-b border-amber-200 pb-2"><i data-lucide="coins" class="w-5 h-5 mr-2"></i> Employee Advances Paid at Start</h3>
+        <table class="w-full inv-table rounded overflow-hidden shadow-sm">
+            <thead><tr><th class="!bg-amber-800 !text-amber-100">Staff Member</th><th class="!bg-amber-800 !text-amber-100">Reason/Detail</th><th class="!bg-amber-800 !text-amber-100 text-right">Amount (Rp)</th><th class="!bg-amber-800 !text-amber-100 text-right">Wallet Source</th><th class="!bg-amber-800 !text-amber-100"></th></tr></thead>
+            <tbody><tr><td><select class="w-full p-1 border"><option>Pak Budi</option><option>Maman</option><option>+ Inline Add Person</option></select></td><td><input type="text" class="w-full p-1 border" value="Weekly Food Advance"></td><td><input type="number" class="w-full p-1 border text-right font-mono text-red-600 font-bold" value="250000"></td><td><select class="w-full p-1 border text-xs bg-slate-50"><option>Session Wallet</option></select></td><td><i data-lucide="x" class="text-red-500 w-4 h-4 cursor-pointer"></i></td></tr></tbody>
+        </table>
+        <button class="mt-4 text-sm font-bold text-amber-700 hover:text-amber-900 flex items-center">+ Add Advance Line</button>
+        <div class="flex justify-end mt-4"><div class="bg-white p-3 border border-amber-200 rounded text-right w-64 shadow-sm"><div class="text-xs text-amber-800 font-bold">Total Session Advances:</div><div class="text-xl font-black text-amber-900 font-mono mt-1">Rp 250,000</div></div></div>
+    </div>
+        </div>
+        <div class="a4-preview border shadow-xl mt-16"><div class="flex justify-between border-b-2 border-slate-800 pb-4 mb-8"><div><h1 class="text-4xl font-black tracking-tighter">OCEAN PEARL</h1><p class="text-xs uppercase font-bold mt-1 tracking-widest text-slate-500">Kaimana Hub</p></div><div class="text-right"><h2 class="text-2xl uppercase tracking-widest text-slate-400 font-light">OPENING TRIP SHEET</h2><p class="font-mono mt-2 font-bold text-sm">DOC-QR-#991202</p></div></div><div><span class='font-bold uppercase'>Trip Wallet Seed:</span> Rp 5,000,000</div><div class="absolute bottom-12 flex justify-between px-8 w-[calc(100%-30mm)]"><div class="border-t border-black pt-2 w-40 text-center text-xs font-bold uppercase">Captain</div><div class="border-t border-black pt-2 w-40 text-center text-xs font-bold uppercase">Hub Treasury</div></div><div class="absolute bottom-2 right-2 text-[0.6rem] font-mono text-slate-400">OPS3 SYSTEM GENERATED</div></div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Locks starting variables. Establishes the Trip Wallet balance constraint. Visually logs Kasbon/Panjar amounts against rostered crew before departure.</div>
+    </div><div id="boat_exp" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">3. Trip Expenses</h2>
+        <div class="doc-header"><div><div class="text-2xl font-black font-mono text-slate-800">EXP-B1-0226</div><div class="text-xs font-bold text-slate-500">2026-03-01 10:00 | Loc: Kaimana Hub</div></div><div class="px-3 py-1 bg-amber-100 text-amber-800 font-bold rounded shadow-sm text-sm uppercase tracking-wide">Draft</div></div>
+        <div class="bg-white p-6 rounded shadow-sm mb-8 border-l-4 border-yellow-400 max-w-5xl">
+            <h3 class="uppercase font-black text-slate-400 text-sm tracking-widest mb-4">Expense Voucher</h3>
+            <div class="grid grid-cols-3 gap-4 mb-4">
+                <div><label class="text-xs font-bold text-slate-500 block">Vendor/Payee</label><select class="border p-2 w-full"><option>Pertamina (Fuel)</option><option>Crew/Employee Payment</option></select></div>
+                <div><label class="text-xs font-bold text-slate-500 block">Selected Payer/Wallet</label><select class="border p-2 w-full bg-slate-50 font-mono text-xs"><option>TRIP WALLET [Bal: 4.75M]</option><option>Unpaid (AP generated to Location Hub)</option></select></div>
+            </div>
+            
+            <div id="crew_payment_expander" class="bg-indigo-50 p-4 border border-indigo-200 rounded mb-4">
+                 <h4 class="font-bold text-xs uppercase text-indigo-800 mb-2 tracking-wide block"><i data-lucide="info" class="w-3 h-3 inline mr-1"></i> Staff Payment Details</h4>
+                 <div class="flex space-x-4">
+                     <div class="w-1/3"><label class="text-[0.6rem] text-indigo-600 font-bold block">Person Name</label><select class="border p-1 w-full text-sm"><option>Pak Budi</option><option>+ Add Person via Registry</option></select></div>
+                     <div class="w-2/3"><label class="text-[0.6rem] text-indigo-600 font-bold block">Wallet Impact</label><div class="font-mono text-xs mt-1 p-1 bg-white border rounded">Minus Rp 250,000 (Expense) -> Reduces Trip Wallet by 250,000.</div></div>
+                 </div>
+            </div>
+
+            <table class="w-full inv-table shadow-sm border mb-4">
+                <thead><tr><th>Expense Type (Cat)</th><th>Description</th><th class="text-right">Amount IDR</th><th></th></tr></thead>
+                <tbody>
+                    <tr>
+                        <td class="w-1/4 align-top"><select class="border p-1 w-full text-xs font-bold"><option>Crew/Employee Payment / Advance</option><option>+ Add New Expense Type</option></select></td>
+                        <td class="w-1/2 p-2 align-top bg-slate-50"><input type="text" class="border p-1 w-full text-xs" value="Additional provisioning advance"></td>
+                        <td class="w-1/6 align-top pt-3"><input type="number" class="w-full border p-1 text-right font-bold text-red-600 font-mono" value="250000"></td>
+                        <td class="align-top pt-3 text-center"><i data-lucide="x" class="text-red-500 w-4 h-4 cursor-pointer"></i></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="flex justify-end"><div class="total-box w-64 text-right"><div class="flex justify-between font-black text-2xl text-slate-800 border-b pb-2 mb-2"><span class="text-sm">TOTAL</span><span class="font-mono">250,000</span></div></div></div>
+            <div class="mt-6 border-t border-slate-200 pt-6 flex justify-between items-center bg-slate-50 p-4 rounded no-print">
+        <button class="btn-secondary" onclick="window.print()"><i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print Preview</button>
+        <div class="flex space-x-3"><button class="btn-secondary px-8">Save Draft</button><button class="btn-success px-12 uppercase tracking-wide"><i data-lucide="lock" class="w-4 h-4 mr-2"></i> Post Document</button></div>
+    </div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Validates wallet balance delta upon post. Requires 'Person Name' selection if 'Crew/Employee Payment' is the chosen vendor. Dropdowns link to Admin master registries via inline additions.</div>
+    </div><div id="boat_recv_own" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">4. Receive Own Catch</h2>
+        <div class="doc-header"><div><div class="text-2xl font-black font-mono text-slate-800">RCV-OWN-0226</div><div class="text-xs font-bold text-slate-500">2026-03-01 10:00 | Loc: Kaimana Hub</div></div><div class="px-3 py-1 bg-amber-100 text-amber-800 font-bold rounded shadow-sm text-sm uppercase tracking-wide">Draft</div></div>
+        <div class="bg-white p-6 border rounded shadow-sm border-t-8 border-cyan-600 max-w-5xl mb-6">
+            <h3 class="font-black text-cyan-900 border-b border-cyan-200 pb-2 mb-4 uppercase tracking-widest flex items-center"><i data-lucide="anchor" class="w-5 h-5 mr-3"></i> Physical Fish Onboarding (Own Vessel)</h3>
+            <table class="w-full inv-table shadow-sm border border-cyan-200 mb-6 rounded overflow-hidden">
+                <thead><tr class="!bg-cyan-900"><th class="!text-white">Fish SKU / Species</th><th class="!text-white text-right">Gross Weight KG</th><th class="!text-white text-center">Quality / Temp</th><th class="!text-white"></th></tr></thead>
+                <tbody>
+                    <tr><td class="bg-white"><select class="border p-2 w-full text-sm"><option>Snapper (Grade A)</option></select></td><td class="bg-white"><input type="number" class="border p-2 w-full text-right font-black text-xl font-mono text-cyan-700" value="120.5"></td><td class="bg-white text-center text-sm font-bold text-slate-400">Standard / Cold</td><td class="bg-white text-center"><i data-lucide="trash-2" class="w-4 h-4 text-red-400 cursor-pointer inline"></i></td></tr>
+                </tbody>
+            </table>
+            <button class="text-sm font-bold text-cyan-600 flex items-center mb-6">+ Add Fish SKU Row</button>
+            <div class="bg-cyan-50 border border-cyan-300 p-4 rounded text-right mb-6"><div class="text-xs uppercase tracking-widest text-cyan-800 font-bold mb-1">Total Trip Catch Volume</div><div class="font-black font-mono text-3xl text-cyan-900">120.5 KG</div></div>
+            <div class="mt-6 border-t border-slate-200 pt-6 flex justify-between items-center bg-slate-50 p-4 rounded no-print">
+        <button class="btn-secondary" onclick="window.print()"><i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print Preview</button>
+        <div class="flex space-x-3"><button class="btn-secondary px-8">Save Draft</button><button class="btn-success px-12 uppercase tracking-wide"><i data-lucide="lock" class="w-4 h-4 mr-2"></i> Post Document</button></div>
+    </div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Visually increases Boat Inventory Quantity. Does not affect AP or Wallets (zero cost basis onboarding).</div>
+    </div><div id="boat_recv_buy" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">5. Receive via Purchase</h2>
+        <div class="doc-header"><div><div class="text-2xl font-black font-mono text-slate-800">RCV-BUY-0226</div><div class="text-xs font-bold text-slate-500">2026-03-01 10:00 | Loc: Kaimana Hub</div></div><div class="px-3 py-1 bg-amber-100 text-amber-800 font-bold rounded shadow-sm text-sm uppercase tracking-wide">Draft</div></div>
+        <div class="bg-white p-6 border rounded shadow-sm border-t-8 border-indigo-600 max-w-5xl mb-6">
+            <h3 class="font-black text-indigo-900 border-b border-indigo-200 pb-2 mb-4 uppercase tracking-widest flex items-center"><i data-lucide="shopping-bag" class="w-5 h-5 mr-3"></i> Buy Catch from Local Fishermen</h3>
+            
+            <div class="grid grid-cols-2 gap-6 bg-slate-50 p-4 rounded border mb-6">
+                <div><label class="text-xs font-bold text-slate-500 block mb-1">Supplier Fisherman</label><select class="border p-2 w-full font-bold text-indigo-800"><option>Pak Nelayan A</option><option>+ New Fisherman</option></select></div>
+                <div><label class="text-[0.6rem] font-black uppercase text-indigo-800 tracking-widest block mb-1">Settlement Method</label><select class="border p-2 w-full bg-white font-mono text-sm border-indigo-300"><option>Create AP Hutang to Location HQ</option><option>Pay Cash via TRIP WALLET</option></select><p class="text-[0.6rem] text-slate-400 mt-2 font-bold italic">Selecting AP flags HQ Finance for payment run.</p></div>
+            </div>
+
+            <table class="w-full inv-table shadow border border-indigo-300 mb-6 rounded overflow-hidden">
+                <thead><tr class="!bg-indigo-900 !text-white"><th>SKU Tag</th><th class="text-right">Acquired KG</th><th class="text-right">Agreed Price / KG</th><th class="text-right">Line Total Value</th><th></th></tr></thead>
+                <tbody>
+                    <tr><td class="bg-white"><select class="border p-1 w-full text-xs font-bold"><option>Grouper (Live)</option></select></td><td class="bg-white"><input type="number" class="border p-1 w-full text-right font-mono font-bold" value="25.0"></td><td class="bg-white"><input type="number" class="border p-1 w-full text-right font-mono text-slate-500" value="85000"></td><td class="bg-white"><input type="text" class="border p-1 w-full text-right font-mono font-black text-red-600 bg-red-50" value="2,125,000" disabled></td><td class="bg-white text-center"><i data-lucide="x" class="w-4 h-4 text-red-400 inline cursor-pointer"></i></td></tr>
+                </tbody>
+            </table>
+            
+            <div class="flex justify-between items-end mb-6">
+                 <button class="text-sm font-bold text-indigo-600 flex items-center">+ Add Fish Row</button>
+                 <div class="total-box text-right bg-indigo-50 border-indigo-200"><div class="text-xs font-bold text-indigo-800 uppercase tracking-widest">Gross Document Obligation</div><div class="font-black text-3xl font-mono text-indigo-900 mt-1 pb-1 border-b border-indigo-300">Rp 2,125,000</div></div>
+            </div>
+            <div class="mt-6 border-t border-slate-200 pt-6 flex justify-between items-center bg-slate-50 p-4 rounded no-print">
+        <button class="btn-secondary" onclick="window.print()"><i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print Preview</button>
+        <div class="flex space-x-3"><button class="btn-secondary px-8">Save Draft</button><button class="btn-success px-12 uppercase tracking-wide"><i data-lucide="lock" class="w-4 h-4 mr-2"></i> Post Document</button></div>
+    </div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Simultaneous block mapping: Increases inventory quantity. Checks payment method choice to preview either a reduction in Trip Wallet OR the creation of a pending AP invoice for the Hub.</div>
+    </div><div id="boat_sale" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">6. Boat Sales</h2>
+        <div class="doc-header"><div><div class="text-2xl font-black font-mono text-slate-800">INV-B1-SALE-0226</div><div class="text-xs font-bold text-slate-500">2026-03-01 10:00 | Loc: Kaimana Hub</div></div><div class="px-3 py-1 bg-amber-100 text-amber-800 font-bold rounded shadow-sm text-sm uppercase tracking-wide">Draft</div></div>
+        <div class="bg-white p-6 border rounded shadow-sm border-t-8 border-emerald-500 max-w-5xl mb-6 flex flex-col">
+            <h3 class="font-black text-emerald-900 border-b border-emerald-200 pb-2 mb-4 uppercase tracking-widest flex items-center"><i data-lucide="shopping-cart" class="w-5 h-5 mr-3 text-emerald-600"></i> Direct Outbound Sale (Commercial)</h3>
+            
+            <div class="grid grid-cols-2 gap-6 bg-slate-50 p-4 border rounded mb-6">
+                <div><label class="text-xs font-bold text-slate-500 block mb-1">Customer Entity</label><select class="border p-2 w-full text-sm font-bold"><option>Local Market Trader</option></select></div>
+                <div><label class="text-[0.6rem] font-bold text-slate-500 uppercase tracking-widest block mb-1">Funds Receipt Path</label><select class="border p-2 w-full text-sm font-mono border-emerald-300"><option>Paid into TRIP WALLET</option><option>Unpaid (Generates Corporate AR)</option></select></div>
+            </div>
+            
+            <table class="w-full inv-table border border-emerald-300 shadow-sm mb-6">
+                <thead><tr class="!bg-emerald-900 !text-white"><th>SKU Sold From Stock</th><th class="text-right">Outbound Qty KG</th><th class="text-right">Unit Sale Price</th><th class="text-right">Revenue Generation</th></tr></thead>
+                <tbody>
+                    <tr><td class="bg-white"><select class="border p-1 w-full text-xs font-bold bg-emerald-50"><option>Snapper (Grade A) [Bal: 120.5kg]</option></select></td><td class="bg-white"><input type="number" class="w-full border p-1 text-right font-mono font-black" value="20.0"></td><td class="bg-white"><input type="number" class="w-full border p-1 text-right font-mono" value="100000"></td><td class="bg-white"><input type="text" disabled class="w-full border p-1 text-right font-mono font-black text-emerald-700 bg-emerald-50" value="2,000,000"></td></tr>
+                </tbody>
+            </table>
+            
+            <div class="flex justify-end mb-6"><div class="text-right bg-white border border-emerald-400 p-4 rounded shadow"><div class="uppercase text-emerald-800 text-[0.6rem] font-black tracking-widest">Total Invoice Recognition</div><div class="text-3xl font-black font-mono text-emerald-600">Rp 2,000,000</div></div></div>
+            <div class="mt-6 border-t border-slate-200 pt-6 flex justify-between items-center bg-slate-50 p-4 rounded no-print">
+        <button class="btn-secondary" onclick="window.print()"><i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print Preview</button>
+        <div class="flex space-x-3"><button class="btn-secondary px-8">Save Draft</button><button class="btn-success px-12 uppercase tracking-wide"><i data-lucide="lock" class="w-4 h-4 mr-2"></i> Post Document</button></div>
+    </div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Deducts SKU quantity identically to a transfer. Determines if Trip Wallet increases immediately or if global AR is incremented for Hub Finance tracking.</div>
+    </div><div id="boat_wallet" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">7. Wallet Transfers</h2>
+        <div class="doc-header"><div><div class="text-2xl font-black font-mono text-slate-800">TRF-WALL-B1-0226</div><div class="text-xs font-bold text-slate-500">2026-03-01 10:00 | Loc: Kaimana Hub</div></div><div class="px-3 py-1 bg-amber-100 text-amber-800 font-bold rounded shadow-sm text-sm uppercase tracking-wide">Draft</div></div>
+        <div class="bg-white p-6 border rounded shadow-sm border-t-8 border-slate-700 max-w-5xl mb-6">
+            <h3 class="font-black text-slate-800 border-b-2 border-slate-800 pb-2 mb-4 uppercase tracking-widest flex items-center"><i data-lucide="arrow-right-left" class="w-5 h-5 mr-3 text-slate-700"></i> Cash Remittance & Sweeps</h3>
+            
+            <div class="flex items-center space-x-6 bg-slate-50 p-6 border rounded shadow-inner mb-6">
+                <div class="w-1/3 text-center"><div class="text-[0.6rem] font-black uppercase text-slate-400 tracking-widest mb-1">Source Wallet Target</div><div class="font-bold text-slate-800 border-b border-slate-300 pb-2 mb-2 bg-white rounded p-2 shadow border">TRIP WALLET [B1]</div><div class="font-mono font-black text-xl text-emerald-600">Bal: 6,500,000</div></div>
+                <div class="w-1/3 flex flex-col items-center"><i data-lucide="chevrons-right" class="w-8 h-8 text-slate-300"></i><input type="number" class="mt-2 border-2 border-emerald-400 p-2 text-center font-mono font-black text-xl w-3/4 rounded shadow" placeholder="Amount To Sweep" value="6500000"></div>
+                <div class="w-1/3 text-center"><div class="text-[0.6rem] font-black uppercase text-slate-400 tracking-widest mb-1">Destination Wallet Target</div><select class="w-full p-2 border bg-white rounded shadow text-sm font-bold text-blue-900 border-blue-400"><option>Kaimana Hub Central Treasury</option><option>HQ Central Bank Tags</option></select><div class="text-[0.6rem] font-bold text-slate-400 mt-3 italic">Remitting cash physical end-of-trip.</div></div>
+            </div>
+            <div class="mt-6 border-t border-slate-200 pt-6 flex justify-between items-center bg-slate-50 p-4 rounded no-print">
+        <button class="btn-secondary" onclick="window.print()"><i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print Preview</button>
+        <div class="flex space-x-3"><button class="btn-secondary px-8">Save Draft</button><button class="btn-success px-12 uppercase tracking-wide"><i data-lucide="lock" class="w-4 h-4 mr-2"></i> Post Document</button></div>
+    </div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Verifies outbound requested transfer amount against current active wallet state. Status 'Posted' implies recipient Hub wallet increases while Trip Wallet decreases.</div>
+    </div><div id="boat_close" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">8. Close Trip & Settle</h2>
+        
+        <div class="bg-white p-6 border-t-8 border-slate-900 rounded shadow-2xl max-w-5xl mb-12 relative overflow-hidden">
+            <div class="absolute -right-16 -top-16 opacity-5 pointer-events-none text-slate-900"><i data-lucide="anchor" class="w-96 h-96"></i></div>
+            <h1 class="text-4xl font-black uppercase text-slate-900 tracking-tight mb-2">Trip Closure & Final Settlement</h1>
+            <p class="text-slate-500 text-sm mb-8 font-mono tracking-widest bg-slate-100 inline-block px-3 py-1 rounded">TRIP-B1-0226 | Boat Faris</p>
+
+            <div class="grid grid-cols-2 gap-6 text-left mb-8 relative z-10">
+                <div class="bg-slate-50 border p-6 font-mono text-sm leading-relaxed rounded shadow-inner border-t-4 border-t-blue-500">
+                    <span class="text-slate-500 font-bold uppercase block mb-2 border-b-2 border-slate-200 pb-1 text-xs tracking-widest">Aggregate Catch Flow</span>
+                    <div class="flex justify-between mb-1"><span class="text-slate-400">Total Own Catch:</span> <span class="font-black text-base text-slate-700">120.5 KG</span></div>
+                    <div class="flex justify-between mb-1"><span class="text-slate-400">Total Purchased:</span> <span class="font-black text-base text-slate-700">25.0 KG</span></div>
+                    <div class="flex justify-between font-bold text-blue-800 border-t border-blue-100 pt-2 mt-2 bg-blue-50/50 -mx-6 px-6 pb-2"><span class="uppercase">Net Trip Stock Retained:</span> <span class="text-xl tracking-tighter text-blue-600 shadow-sm bg-white px-2 py-0.5 rounded border border-blue-200">145.5 KG</span></div>
+                </div>
+                <div class="border p-6 font-mono text-sm rounded bg-emerald-50 border-emerald-200 border-t-4 border-t-emerald-500 shadow-sm relative">
+                    <div class="absolute top-2 right-2 flex space-x-1"><div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div></div>
+                    <span class="text-emerald-800 font-bold uppercase block mb-2 border-b-2 border-emerald-200 pb-1 text-xs tracking-widest text-shadow-sm">Trip Final Cash Audit</span>
+                    <div class="flex justify-between mb-1"><span class="text-emerald-700/70 uppercase text-[0.6rem] font-bold tracking-widest">Opening Bal:</span> <span class="text-emerald-900">Rp 5,000,000</span></div>
+                    <div class="flex justify-between mb-1 bg-white border border-emerald-100/50 p-1 rounded-sm"><span class="text-emerald-700/70 uppercase text-[0.6rem] font-bold tracking-widest">Net Sales/Trf (In):</span> <span class="text-emerald-600 font-bold">+ Rp 2,000,000</span></div>
+                    <div class="flex justify-between mb-1 bg-white border border-red-50 p-1 rounded-sm"><span class="text-red-400 uppercase text-[0.6rem] font-bold tracking-widest">Exp/Purch (Out):</span> <span class="text-red-500 font-bold">- Rp 500,000</span></div>
+                    <div class="flex justify-between mb-1 bg-white border border-amber-50 p-1 rounded-sm"><span class="text-amber-500 uppercase text-[0.6rem] font-bold tracking-widest">Remitted HQ (Out):</span> <span class="text-amber-600 font-bold">- Rp 6,500,000</span></div>
+                    <div class="flex justify-between border-t-2 border-emerald-300 pt-3 mt-3 shadow-[0_-4px_6px_-6px_rgba(0,0,0,0.1)]"><span class="font-black text-emerald-900 text-sm uppercase">Wallet Close Sys Bal:</span> <span class="font-black text-2xl tracking-tighter text-emerald-600">Rp 0</span></div>
+                </div>
+            </div>
+
+            <div class="mt-8 bg-orange-50 p-6 rounded border border-orange-200 shadow-inner relative z-10">
+                <h3 class="font-black text-orange-900 border-b border-orange-300 pb-2 mb-4 uppercase tracking-widest flex items-center text-sm"><i data-lucide="users" class="w-4 h-4 mr-2 text-orange-600"></i> Final Crew Settlement Table</h3>
+                <p class="text-xs text-orange-800 mb-4 bg-white p-2 border border-orange-100 rounded">Net clearance of all advances pulled from opening and mid-trip against actual wage/profit share earned.</p>
+                <table class="w-full inv-table shadow border border-orange-300 rounded overflow-hidden">
+                    <thead><tr class="!bg-orange-900 !text-orange-100 pr-2"><th>Crew Roster Name</th><th class="text-right">Total Advance/Kasbon (Owed)</th><th class="text-right">Wages/Share (Earned)</th><th class="text-right">Net Immediate Settle</th><th class="text-right">Carry Forward Bal (Dept HR)</th></tr></thead>
+                    <tbody>
+                        <tr><td class="font-bold text-slate-800 border-l border-white bg-white">Pak Budi (ID-011)</td><td class="text-right text-red-600 font-mono bg-red-50 border-r border-red-100">Rp 750,000</td><td class="text-right text-emerald-600 font-mono border-r border-slate-100 bg-white">Rp 1,000,000</td><td class="text-right text-slate-800 font-mono font-bold bg-white"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded border border-emerald-300">Pay: Rp 250,000</span></td><td class="text-right text-slate-400 font-mono italic bg-slate-50 border-r border-white">0</td></tr>
+                        <tr><td class="font-bold text-slate-800 border-l border-white bg-white">Maman (ID-042)</td><td class="text-right text-red-600 font-mono bg-red-50 border-r border-red-100">Rp 100,000</td><td class="text-right text-emerald-600 font-mono border-r border-slate-100 bg-white">0</td><td class="text-right text-slate-800 font-mono font-bold bg-white text-xs uppercase tracking-widest text-red-500 font-black">-</td><td class="text-right text-red-600 font-mono font-bold bg-red-50 border-r border-white border border-red-200 rounded shadow-sm">OWES: Rp 100,000</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <button class="bg-slate-800 hover:bg-black text-white w-full py-5 text-xl tracking-widest mt-8 font-black rounded shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-700 relative z-10 transition-transform active:scale-[0.98] flex justify-center items-center"><i data-lucide="lock" class="w-6 h-6 mr-3"></i> ATTEST / LOCK TRIP DATA</button>
+        </div>
+        <div class="a4-preview border shadow-xl mt-16"><div class="flex justify-between border-b-2 border-slate-800 pb-4 mb-8"><div><h1 class="text-4xl font-black tracking-tighter">OCEAN PEARL</h1><p class="text-xs uppercase font-bold mt-1 tracking-widest text-slate-500">Kaimana Hub</p></div><div class="text-right"><h2 class="text-2xl uppercase tracking-widest text-slate-400 font-light">TRIP CLOSURE SETTLEMENT</h2><p class="font-mono mt-2 font-bold text-sm">DOC-QR-#991202</p></div></div><div class='text-center uppercase font-bold tracking-widest h-64 text-slate-500 flex items-center justify-center border-dashed border-2 border-slate-300 bg-slate-50'>[A4 Summary of Catch, Wallet Zero-out, and Crew Signature Ledger Prints Here]</div><div class="absolute bottom-12 flex justify-between px-8 w-[calc(100%-30mm)]"><div class="border-t border-black pt-2 w-40 text-center text-xs font-bold uppercase">Captain Signature</div><div class="border-t border-black pt-2 w-40 text-center text-xs font-bold uppercase">Hub Finance Manager</div></div><div class="absolute bottom-2 right-2 text-[0.6rem] font-mono text-slate-400">OPS3 SYSTEM GENERATED</div></div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Ultimate end state. Renders visually if trip cash is not zeroed. Compares all known staff advances against logged expenses to output net settlement paths. Generates paper trail.</div>
+    </div><div id="boat_docs" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">My Documents</h2>
+        <div class='bg-white p-6 border rounded shadow-sm text-center text-blue-900 border-blue-100 bg-blue-50 font-mono'>READ-ONLY SEARCH: All Docs matching active Boat constraint.</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="boat_print" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Print Center</h2>
+        <div class='bg-white p-6 border text-slate-500 text-center font-bold py-24 bg-slate-50 border-dashed border-4'>[Search Doc ID to inject A4 Print Template -> window.print()]</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="fac_start" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">1. Start Shift / Batch</h2>
+        
+        <div class="bg-white p-8 rounded border max-w-4xl mb-8 shadow-sm border-t-4 border-indigo-600">
+            <div class="grid grid-cols-2 gap-6 mb-6"><div><label class="block text-xs font-bold text-slate-500 mb-1">Shift / Batch ID</label><input class="border p-2 w-full rounded font-mono bg-slate-50" value="SHF-FAC-0226" disabled></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Facility Target</label><select class="border p-2 w-full"><option>Kaimana Main Flr</option></select></div></div>
+            <div class="grid grid-cols-2 gap-6 mb-6"><div><label class="block text-xs font-bold text-slate-500 mb-1">Date & Time Target</label><input type="datetime-local" class="border p-2 w-full rounded" value="2026-03-01T08:00"></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Lead Supervisor</label><input type="text" class="border p-2 w-full rounded font-bold" value="Mandor Rudi"></div></div>
+            <div class="bg-indigo-50 border border-indigo-200 p-6 rounded mb-8 shadow-sm">
+        <h3 class="font-black text-indigo-900 uppercase tracking-widest mb-4 flex items-center border-b border-indigo-200 pb-2"><i data-lucide="users" class="w-5 h-5 mr-2"></i> Session Staff Roster</h3>
+        <table class="w-full inv-table rounded overflow-hidden">
+            <thead><tr><th class="!bg-indigo-900 !text-blue-100">Name</th><th class="!bg-indigo-900 !text-blue-100">Role</th><th class="!bg-indigo-900 !text-blue-100 text-right">Ext. Advance Bal</th><th class="!bg-indigo-900 !text-blue-100">Action</th></tr></thead>
+            <tbody>
+                <tr><td>Pak Budi (ID-011)</td><td>Supervisor / Shift Lead</td><td class="text-right text-red-600 font-mono">Rp 500,000</td><td class="text-red-500 font-bold p-2"><i data-lucide="x" class="w-4 h-4 cursor-pointer hover:bg-red-50"></i></td></tr>
+                <tr><td>Maman (ID-042)</td><td>Crew / Employee</td><td class="text-right text-slate-400 font-mono">Rp 0</td><td class="text-red-500 font-bold p-2"><i data-lucide="x" class="w-4 h-4 cursor-pointer hover:bg-red-50"></i></td></tr>
+            </tbody>
+        </table>
+        <button class="mt-4 text-sm font-bold text-blue-700 hover:text-indigo-900 block flex items-center">+ Add Staff Member (via People Registry)</button>
+    </div>
+            <button class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold w-full text-lg py-3 rounded shadow"><i data-lucide="play" class="w-5 h-5 mr-2 inline"></i> OPEN FACTORY SHIFT</button>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Locks down the context bounds for this factory session. Ensures staff assigned matches system people registry.</div>
+    </div><div id="fac_init" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">2. Factory Opening Checks</h2>
+        <div class="doc-header"><div><div class="text-2xl font-black font-mono text-slate-800">INIT-FAC</div><div class="text-xs font-bold text-slate-500">2026-03-01 10:00 | Loc: Kaimana Hub</div></div><div class="px-3 py-1 bg-amber-100 text-amber-800 font-bold rounded shadow-sm text-sm uppercase tracking-wide">Draft</div></div>
+        <div class="bg-white p-6 rounded border mb-8 max-w-4xl border-t-4 border-indigo-600">
+            <h3 class="font-bold text-indigo-900 mb-4 border-b pb-2 uppercase tracking-widest text-xs">Floor Consumables & Cash Handover</h3>
+            <div class="grid grid-cols-2 gap-y-4 gap-x-6">
+                <div class="bg-slate-50 p-3 rounded border border-slate-200"><label class="block text-[0.6rem] font-bold text-slate-500 uppercase">Ice Reserves (KG)</label><input type="number" class="border p-2 w-full rounded font-mono text-cyan-700 font-bold" value="1200"></div>
+                <div class="bg-slate-50 p-3 rounded border border-slate-200"><label class="block text-[0.6rem] font-bold text-slate-500 uppercase">Empty Boxes (Satuan)</label><input type="number" class="border p-2 w-full rounded font-mono text-slate-600 font-bold" value="80"></div>
+                <div class="bg-emerald-50 p-4 border border-emerald-200 col-span-2 mt-4 rounded shadow-sm"><label class="block text-[0.6rem] font-bold text-emerald-800 uppercase mb-2">Ops Cash Target Wal Bal (Handover)</label><input type="number" class="w-1/2 border-emerald-300 p-2 rounded text-right font-mono text-emerald-700 font-black text-xl bg-white shadow-inner" value="2500000"></div>
+            </div>
+            <div class="bg-amber-50 border border-amber-200 p-6 rounded mt-8">
+        <h3 class="font-black text-amber-900 uppercase tracking-widest mb-4 flex items-center border-b border-amber-200 pb-2"><i data-lucide="coins" class="w-5 h-5 mr-2"></i> Employee Advances Paid at Start</h3>
+        <table class="w-full inv-table rounded overflow-hidden shadow-sm">
+            <thead><tr><th class="!bg-amber-800 !text-amber-100">Staff Member</th><th class="!bg-amber-800 !text-amber-100">Reason/Detail</th><th class="!bg-amber-800 !text-amber-100 text-right">Amount (Rp)</th><th class="!bg-amber-800 !text-amber-100 text-right">Wallet Source</th><th class="!bg-amber-800 !text-amber-100"></th></tr></thead>
+            <tbody><tr><td><select class="w-full p-1 border"><option>Pak Budi</option><option>Maman</option><option>+ Inline Add Person</option></select></td><td><input type="text" class="w-full p-1 border" value="Weekly Food Advance"></td><td><input type="number" class="w-full p-1 border text-right font-mono text-red-600 font-bold" value="250000"></td><td><select class="w-full p-1 border text-xs bg-slate-50"><option>Session Wallet</option></select></td><td><i data-lucide="x" class="text-red-500 w-4 h-4 cursor-pointer"></i></td></tr></tbody>
+        </table>
+        <button class="mt-4 text-sm font-bold text-amber-700 hover:text-amber-900 flex items-center">+ Add Advance Line</button>
+        <div class="flex justify-end mt-4"><div class="bg-white p-3 border border-amber-200 rounded text-right w-64 shadow-sm"><div class="text-xs text-amber-800 font-bold">Total Session Advances:</div><div class="text-xl font-black text-amber-900 font-mono mt-1">Rp 250,000</div></div></div>
+    </div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Logs physical consumables. Validates opening operational cash limits. Assigns and records advances natively within the shift UI context.</div>
+    </div><div id="fac_exp" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">3. Factory Expenses</h2>
+        <div class="doc-header"><div><div class="text-2xl font-black font-mono text-slate-800">EXP-FAC-01</div><div class="text-xs font-bold text-slate-500">2026-03-01 10:00 | Loc: Kaimana Hub</div></div><div class="px-3 py-1 bg-amber-100 text-amber-800 font-bold rounded shadow-sm text-sm uppercase tracking-wide">Draft</div></div>
+        <div class="bg-white p-6 rounded shadow-sm mb-8 border-l-4 border-yellow-400 max-w-5xl">
+            <h3 class="uppercase font-black text-slate-400 text-sm tracking-widest mb-4">Factory Ops Voucher</h3>
+            <div class="grid grid-cols-3 gap-4 mb-4">
+                <div><label class="text-xs font-bold text-slate-500 block">Vendor</label><select class="border p-2 w-full"><option>Local PLN Agent (Token)</option><option>Crew/Employee Payment</option></select></div>
+                <div><label class="text-xs font-bold text-slate-500 block">Current Wallet</label><select class="border p-2 w-full bg-slate-50 font-mono text-sm"><option>FAC OPS CASH [Bal: 2.25M]</option></select></div>
+            </div>
+            
+            <table class="w-full inv-table shadow-sm border mb-4">
+                <thead><tr><th>Expense Type (Cat)</th><th>Line Item Notes</th><th class="text-right">Line Total</th><th></th></tr></thead>
+                <tbody>
+                    <tr>
+                         <td class="w-1/4 align-top"><select class="border p-1 w-full text-xs font-bold"><option>Electricity (PLN)</option><option>+ Add New Expense Type</option></select></td>
+                         <td class="w-1/2 p-2 align-top bg-slate-50"><input type="text" class="border p-1 w-full text-xs" value="Token Listrik Sift Pagi"></td>
+                         <td class="w-1/6 align-top pt-3"><input type="number" class="w-full border p-1 text-right font-bold text-red-600 font-mono" value="150000"></td>
+                         <td class="align-top pt-3 text-center"><i data-lucide="x" class="text-red-500 w-4 h-4 cursor-pointer"></i></td>
+                    </tr>
+                </tbody>
+            </table>
+            <button class="text-sm font-bold text-indigo-600 flex items-center mb-6">+ Add Doc Line</button>
+
+            <div class="flex justify-end"><div class="total-box w-64 text-right"><div class="flex justify-between font-black text-2xl text-slate-800 border-b pb-2 mb-2"><span class="text-sm">TOTAL</span><span class="font-mono">150,000</span></div></div></div>
+            <div class="mt-6 border-t border-slate-200 pt-6 flex justify-between items-center bg-slate-50 p-4 rounded no-print">
+        <button class="btn-secondary" onclick="window.print()"><i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print Preview</button>
+        <div class="flex space-x-3"><button class="btn-secondary px-8">Save Draft</button><button class="btn-success px-12 uppercase tracking-wide"><i data-lucide="lock" class="w-4 h-4 mr-2"></i> Post Document</button></div>
+    </div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Maps immediately to 'FAC OPS CASH'. Ensures operator provides explanation.</div>
+    </div><div id="fac_recv" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">4. Internal Inbound Receiving</h2>
+        <div class="doc-header"><div><div class="text-2xl font-black font-mono text-slate-800">RCV-TRF-01</div><div class="text-xs font-bold text-slate-500">2026-03-01 10:00 | Loc: Kaimana Hub</div></div><div class="px-3 py-1 bg-amber-100 text-amber-800 font-bold rounded shadow-sm text-sm uppercase tracking-wide">Draft</div></div>
+        <div class="bg-indigo-50 border border-indigo-200 p-6 shadow-sm mb-6 max-w-5xl rounded">
+            <h3 class="font-black text-indigo-900 border-b border-indigo-200 pb-2 mb-4 uppercase tracking-widest flex items-center"><i data-lucide="download" class="w-5 h-5 mr-2"></i> Receive Raw Materials</h3>
+             <table class="w-full inv-table rounded bg-white shadow mb-6">
+                <thead><tr class="!bg-indigo-900 !text-white"><th>Source Document ID</th><th>Originating Unit</th><th class="text-right">Expected Vol</th><th class="text-center">Acknowledge Receipts (KG)</th></tr></thead>
+                <tbody>
+                    <tr>
+                        <td class="font-mono text-slate-700 bg-white">DO-BOAT-TRF-099</td>
+                        <td class="font-bold uppercase tracking-widest text-xs bg-white text-indigo-800">Boat Faris (TRIP-B1)</td>
+                        <td class="text-right font-mono text-slate-500 bg-white">120.5 KG</td>
+                        <td class="bg-white px-8"><input type="number" class="border-2 border-emerald-400 p-2 w-full text-right font-black font-mono text-xl shadow-inner text-emerald-700" value="120.5"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div id="mismatch_alert" class="hidden bg-red-50 border-l-4 border-red-500 p-4 mb-4 text-red-700 font-bold text-sm shadow-sm">
+                Warning: Receiving short limits flagged! 120.0 received vs 120.5 expected. Justification REQUIRED.
+            </div>
+            <div class="mt-6 border-t border-slate-200 pt-6 flex justify-between items-center bg-slate-50 p-4 rounded no-print">
+        <button class="btn-secondary" onclick="window.print()"><i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print Preview</button>
+        <div class="flex space-x-3"><button class="btn-secondary px-8">Save Draft</button><button class="btn-success px-12 uppercase tracking-wide"><i data-lucide="lock" class="w-4 h-4 mr-2"></i> Post Document</button></div>
+    </div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Direct fulfillment of a transfer document. Moves inventory quantity into 'Kaimana Main Flr' node. Validation triggered upon mismatch forcing operator explanation.</div>
+    </div><div id="fac_proc" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">5. Processing Batch Output Matrix</h2>
+        <div class="doc-header"><div><div class="text-2xl font-black font-mono text-slate-800">PRC-BAT-0226</div><div class="text-xs font-bold text-slate-500">2026-03-01 10:00 | Loc: Kaimana Hub</div></div><div class="px-3 py-1 bg-amber-100 text-amber-800 font-bold rounded shadow-sm text-sm uppercase tracking-wide">Draft</div></div>
+        <div class="bg-white border rounded shadow-md border-t-8 border-purple-600 max-w-6xl p-6 mb-8">
+            <h3 class="font-black text-purple-900 mb-6 uppercase tracking-widest text-xl flex items-center"><i data-lucide="scissors" class="w-6 h-6 mr-3"></i> Yield Extraction Event</h3>
+            
+            <div class="grid grid-cols-2 gap-8 mb-8">
+                <div class="bg-slate-50 border p-4 rounded shadow-inner border-slate-300">
+                    <h4 class="font-black text-slate-500 uppercase tracking-widest text-xs mb-3 border-b-2 border-slate-300 pb-2">Step 1: Raw Stock Drawdown (-)</h4>
+                    <table class="w-full text-sm mb-4">
+                        <tr class="border-b font-bold"><td class="py-2 text-slate-600">Species/SKU</td><td class="py-2 text-right text-slate-600">Draw KG</td></tr>
+                        <tr><td class="py-2"><select class="w-full p-1 border text-xs font-bold text-purple-900 shadow-sm"><option>Snapper Whole [Avail: 120.5]</option></select></td><td class="py-2 pl-2"><input type="number" class="w-full p-1 border text-right font-mono font-black text-red-600 bg-red-50" value="100.0"></td></tr>
+                    </table>
+                    <button class="text-xs font-bold text-purple-600 flex items-center">+ Add Input Source</button>
+                    <div class="mt-4 pt-3 border-t text-right font-black font-mono text-xl text-slate-800">Input: 100.0 KG</div>
+                </div>
+
+                <div class="bg-emerald-50 border border-emerald-200 p-4 rounded shadow-md border-t-4 border-t-emerald-500">
+                     <h4 class="font-black text-emerald-800 uppercase tracking-widest text-xs mb-3 border-b-2 border-emerald-300 pb-2 text-shadow">Step 2: Clean Finished Target (+)</h4>
+                     <table class="w-full text-sm mb-4">
+                        <tr class="border-b border-emerald-200 font-bold"><td class="py-2 text-emerald-800">Final SKU Spec</td><td class="py-2 text-right text-emerald-800">Net Target KG</td></tr>
+                        <tr><td class="py-2"><select class="w-full p-1 border text-xs font-bold bg-white text-emerald-900 shadow-sm"><option>Snapper Fillet A</option></select></td><td class="py-2 pl-2"><input type="number" class="w-full p-1 border text-right font-mono font-black text-emerald-600" value="45.0"></td></tr>
+                    </table>
+                    <button class="text-xs font-bold text-emerald-600 flex items-center">+ Add Product Cut</button>
+                    <div class="mt-4 pt-3 border-t border-emerald-300 text-right font-black font-mono text-xl text-emerald-900">Output: 45.0 KG</div>
+                </div>
+            </div>
+
+             <div class="bg-red-50 p-4 rounded border border-red-200 shadow-inner mb-6">
+                 <div class="flex justify-between items-center"><div class="font-bold text-red-900 uppercase text-xs tracking-widest">Step 3: Document Shrink/Waste</div><div class="font-mono text-sm bg-red-100 px-3 py-1 font-bold text-red-900 shadow-sm border border-red-300">(100.0 In - 45.0 Out = 55.0 KG Missing)</div></div>
+                 <table class="w-full text-sm border-t border-red-200 mt-2">
+                     <tbody><tr><td class="py-2 pr-2 w-1/3"><select class="w-full p-2 border font-bold text-amber-800"><option>Byproduct: Fish Heads</option></select></td><td class="py-2 w-1/3"><input type="number" class="w-full p-2 border text-right font-mono text-amber-600 font-bold" value="15.0"></td></tr><tr><td class="py-2 pr-2 font-bold text-slate-500 text-right text-xs uppercase pt-4">Untracked Pure Waste & Sludge Delta:</td><td class="py-2 pt-4"><input type="text" class="w-full p-2 border text-right font-mono text-red-700 bg-red-100 font-black shadow-inner" value="40.0" disabled></td></tr></tbody>
+                 </table>
+             </div>
+             
+             <div class="bg-purple-900 p-4 rounded text-purple-200 font-mono text-xs flex justify-between items-center shadow-lg uppercase tracking-widest border border-purple-600">
+                 <div><i data-lucide="cpu" class="inline w-4 h-4 mr-2"></i>Yield Extraction: <span class="text-white font-black text-lg ml-1 bg-purple-950 px-2 py-0.5 rounded border border-purple-800 shadow-inner">45.0%</span></div>
+                 <div class="text-emerald-400 font-bold text-shadow">(Passing bounds. Hist. Avg: ~43%)</div>
+             </div>
+             
+            <div class="mt-6 border-t border-slate-200 pt-6 flex justify-between items-center bg-slate-50 p-4 rounded no-print">
+        <button class="btn-secondary" onclick="window.print()"><i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print Preview</button>
+        <div class="flex space-x-3"><button class="btn-secondary px-8">Save Draft</button><button class="btn-success px-12 uppercase tracking-wide"><i data-lucide="lock" class="w-4 h-4 mr-2"></i> Post Document</button></div>
+    </div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Handles simultaneous multi-leg inventory transformation. Deducts raw weights. Increments final SKU and Byproduct weights. Auto-calculates system waste.</div>
+    </div><div id="fac_transfer" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">6. Transfer Out (To Loc / CS)</h2>
+        <div class="doc-header"><div><div class="text-2xl font-black font-mono text-slate-800">DO-FAC-TRF-02</div><div class="text-xs font-bold text-slate-500">2026-03-01 10:00 | Loc: Kaimana Hub</div></div><div class="px-3 py-1 bg-amber-100 text-amber-800 font-bold rounded shadow-sm text-sm uppercase tracking-wide">Draft</div></div>
+        <div class="bg-white p-6 border rounded shadow-sm border-t-8 border-indigo-500 max-w-5xl mb-6">
+            <h3 class="font-black text-indigo-900 border-b border-indigo-200 pb-2 mb-4 uppercase tracking-widest"><i data-lucide="truck" class="w-5 h-5 inline mr-2 text-indigo-600"></i> Dispatch Finished Goods Outbound</h3>
+            <div class="bg-slate-50 p-4 border rounded mb-6 w-1/2">
+                <label class="text-xs font-bold text-slate-500 block mb-1">Destination Target Unit Node</label>
+                <select class="border p-2 w-full text-sm font-bold shadow-sm font-mono"><option>Cold Storage (Kaimana Main)</option></select>
+            </div>
+            <table class="w-full inv-table shadow border border-indigo-300 rounded overflow-hidden">
+                <thead><tr class="!bg-indigo-900"><th class="!text-white">Internal Finished SKU [Live Fac Bal]</th><th class="!text-white text-right">Dispatch Target Qty (KG)</th></tr></thead>
+                <tbody>
+                    <tr><td class="bg-white"><select class="border p-2 w-full text-xs font-bold font-mono"><option>Snapper Fillet A [Bal: 45.0]</option></select></td><td class="bg-white"><input type="number" class="border p-2 w-full text-right font-black font-mono text-xl text-indigo-700 bg-indigo-50" value="45.0"></td></tr>
+                </tbody>
+            </table>
+             <button class="text-sm font-bold text-indigo-600 flex items-center mt-4 mb-4">+ Add SKU Box</button>
+            <div class="mt-6 border-t border-slate-200 pt-6 flex justify-between items-center bg-slate-50 p-4 rounded no-print">
+        <button class="btn-secondary" onclick="window.print()"><i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print Preview</button>
+        <div class="flex space-x-3"><button class="btn-secondary px-8">Save Draft</button><button class="btn-success px-12 uppercase tracking-wide"><i data-lucide="lock" class="w-4 h-4 mr-2"></i> Post Document</button></div>
+    </div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Subtracts Factory inventory immediately upon 'Post'. The target Cold Storage unit receives a pending Reception notice.</div>
+    </div><div id="fac_wallet" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">7. Wallet Sub-View</h2>
+        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Mirror of Boat Wallet sweeps but context bound to FACTORY_CASH.]</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="fac_close" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">8. Close Shift</h2>
+        
+        <div class="bg-white p-6 border-t-8 border-slate-900 rounded shadow-2xl max-w-5xl mb-12 relative overflow-hidden">
+            <h1 class="text-4xl font-black uppercase text-slate-900 tracking-tight mb-2">Factory Session Audit</h1>
+            <p class="text-slate-500 text-sm mb-8 font-mono tracking-widest bg-slate-100 inline-block px-3 py-1 rounded">SHF-FAC-0226</p>
+
+            <div class="grid grid-cols-2 gap-6 text-left mb-8">
+                <div class="bg-slate-50 border p-6 font-mono text-sm leading-relaxed rounded border-t-4 border-t-indigo-500">
+                    <span class="text-slate-500 font-bold uppercase block mb-2 border-b-2 border-slate-200 pb-1 text-xs">Gross Material Yield</span>
+                    <div class="flex justify-between mb-1"><span class="text-slate-400">Batches Run:</span> <span class="font-black text-slate-700">1</span></div>
+                    <div class="flex justify-between font-bold text-indigo-800 border-t border-indigo-100 pt-2"><span class="uppercase">Overall Shift Output:</span> <span>45.0 KG (45%)</span></div>
+                </div>
+                <div class="border p-6 font-mono text-sm rounded bg-emerald-50 border-emerald-200 border-t-4 border-t-emerald-500 flex flex-col justify-center items-center">
+                    <span class="text-emerald-800 font-bold uppercase block mb-2 border-b-2 border-emerald-200 pb-1 w-full text-center tracking-widest text-[0.6rem]">Physical Treasury Box Delta</span>
+                    <div class="text-4xl font-black tracking-tighter text-emerald-700 mt-2">Rp 2,350,000</div>
+                    <div class="text-xs text-red-500 mt-2 block font-bold">-150,000 Exp Drawdown</div>
+                </div>
+            </div>
+
+             <div class="mt-8 bg-orange-50 p-6 rounded border border-orange-200 shadow-inner">
+                <h3 class="font-black text-orange-900 border-b border-orange-300 pb-2 mb-4 uppercase tracking-widest text-sm text-shadow">Shift Handover & Balances</h3>
+                <p class="text-[0.6rem] text-orange-800 mb-4 font-bold uppercase tracking-widest">Calculates if internal advances override earned end-of-shift piecerate wages.</p>
+                <table class="w-full inv-table rounded overflow-hidden shadow-sm">
+                    <thead><tr class="!bg-orange-900 !text-orange-100"><th>Worker Ref</th><th class="text-right">Draw (Owed)</th><th class="text-right">Shift Earned</th><th class="text-right">Net Settle Action</th></tr></thead>
+                    <tbody>
+                        <tr><td class="font-bold border-l border-white bg-white">Pak Budi</td><td class="text-right text-red-600 font-mono bg-red-50">250,000</td><td class="text-right text-emerald-600 font-mono">0</td><td class="text-right bg-white"><span class="text-red-600 font-mono font-bold text-sm bg-red-50 border border-red-200 px-2 py-0.5 rounded shadow-sm">OWES 250,000 CFWD</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <button class="bg-indigo-900 hover:bg-black text-white w-full py-5 text-xl tracking-widest mt-8 font-black rounded shadow-lg flex justify-center items-center relative z-10 transition-transform active:scale-[0.98]"><i data-lucide="lock" class="w-6 h-6 mr-3 text-indigo-300"></i> HANDOVER SHIFT KEYS</button>
+        </div>
+        <div class="a4-preview border shadow-xl mt-16"><div class="flex justify-between border-b-2 border-slate-800 pb-4 mb-8"><div><h1 class="text-4xl font-black tracking-tighter">OCEAN PEARL</h1><p class="text-xs uppercase font-bold mt-1 tracking-widest text-slate-500">Kaimana Hub</p></div><div class="text-right"><h2 class="text-2xl uppercase tracking-widest text-slate-400 font-light">FACTORY SESSION AUDIT</h2><p class="font-mono mt-2 font-bold text-sm">DOC-QR-#991202</p></div></div><div class='text-center uppercase font-bold tracking-widest h-64 text-slate-500 flex items-center justify-center border-dashed border-2 border-slate-300 bg-slate-50'>[Includes yields, shift staff settlement nets, physical cash handover declarations]</div><div class="absolute bottom-12 flex justify-between px-8 w-[calc(100%-30mm)]"><div class="border-t border-black pt-2 w-40 text-center text-xs font-bold uppercase">Shift Mandor</div><div class="border-t border-black pt-2 w-40 text-center text-xs font-bold uppercase">Location Cashier</div></div><div class="absolute bottom-2 right-2 text-[0.6rem] font-mono text-slate-400">OPS3 SYSTEM GENERATED</div></div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Validates cash box balances. Enforces piece-rate or advance settlements for factory workers. Previews printed handover sheet.</div>
+    </div><div id="fac_docs" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">My Documents</h2>
+        <div class='bg-white p-6 border rounded shadow-sm text-center text-indigo-900 border-indigo-100 bg-indigo-50 font-mono'>READ-ONLY SEARCH: All Docs matching active Factory.</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="fac_print" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Print Center</h2>
+        <div class='bg-white p-6 border text-slate-500 text-center font-bold py-24 bg-slate-50 border-dashed border-4'>[Search Doc ID to inject A4 Print Template -> window.print()]</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="cs_start" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">1. Start Loading/Shipping Shift</h2>
+        
+        <div class="bg-white p-8 rounded border max-w-4xl mb-8 shadow-sm border-t-4 border-cyan-600">
+            <div class="grid grid-cols-2 gap-6 mb-6 pb-6 border-b border-cyan-100">
+                <div><label class="block text-xs font-bold text-slate-500 mb-1">Session</label><input class="border p-2 w-full rounded font-mono bg-slate-50" value="SHF-CS-0226" disabled></div>
+                <div><label class="block text-xs font-bold text-slate-500 mb-1">Facility Name</label><select class="border p-2 w-full"><option>Cold Storage (Kaimana Main)</option></select></div>
+            </div>
+            <div class="bg-cyan-50 border border-cyan-200 p-6 rounded mb-8 shadow-sm">
+        <h3 class="font-black text-cyan-900 uppercase tracking-widest mb-4 flex items-center border-b border-cyan-200 pb-2"><i data-lucide="users" class="w-5 h-5 mr-2"></i> Session Staff Roster</h3>
+        <table class="w-full inv-table rounded overflow-hidden">
+            <thead><tr><th class="!bg-cyan-900 !text-blue-100">Name</th><th class="!bg-cyan-900 !text-blue-100">Role</th><th class="!bg-cyan-900 !text-blue-100 text-right">Ext. Advance Bal</th><th class="!bg-cyan-900 !text-blue-100">Action</th></tr></thead>
+            <tbody>
+                <tr><td>Pak Budi (ID-011)</td><td>Gatekeeper / Shift Lead</td><td class="text-right text-red-600 font-mono">Rp 500,000</td><td class="text-red-500 font-bold p-2"><i data-lucide="x" class="w-4 h-4 cursor-pointer hover:bg-red-50"></i></td></tr>
+                <tr><td>Maman (ID-042)</td><td>Crew / Employee</td><td class="text-right text-slate-400 font-mono">Rp 0</td><td class="text-red-500 font-bold p-2"><i data-lucide="x" class="w-4 h-4 cursor-pointer hover:bg-red-50"></i></td></tr>
+            </tbody>
+        </table>
+        <button class="mt-4 text-sm font-bold text-blue-700 hover:text-cyan-900 block flex items-center">+ Add Staff Member (via People Registry)</button>
+    </div>
+            <button class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold w-full text-lg py-3 rounded"><i data-lucide="play" class="w-5 h-5 mr-2 inline"></i> START WAREHOUSE OPS</button>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Locks down the context bounds for this CS session. Assigns loading/unloading staff natively for piece-rate accumulation.</div>
+    </div><div id="cs_init" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">2. Cold Storage Opening Checklist</h2>
+        <div class="doc-header"><div><div class="text-2xl font-black font-mono text-slate-800">INIT-CS</div><div class="text-xs font-bold text-slate-500">2026-03-01 10:00 | Loc: Kaimana Hub</div></div><div class="px-3 py-1 bg-amber-100 text-amber-800 font-bold rounded shadow-sm text-sm uppercase tracking-wide">Draft</div></div>
+        <div class="bg-white p-6 rounded border mb-8 max-w-4xl border-t-4 border-cyan-600">
+            <h3 class="font-bold text-cyan-900 mb-4 border-b pb-2 uppercase tracking-widest text-xs">Environment & Ops Box</h3>
+            <div class="grid grid-cols-2 gap-y-4 gap-x-6">
+                <div class="bg-slate-50 p-3 border rounded border-slate-200"><label class="block text-[0.6rem] font-bold text-slate-500 uppercase">ABF Room Temp Target</label><input type="number" class="border p-2 w-full rounded font-mono text-cyan-600 font-bold bg-white" value="-20.5"></div>
+                <div class="bg-emerald-50 p-3 border rounded border-emerald-200"><label class="block text-[0.6rem] font-bold text-emerald-800 uppercase">Petty Cash Handover Val</label><input type="number" class="w-full border p-2 rounded text-right font-mono text-emerald-700 font-black text-xl bg-white shadow-sm" value="500000"></div>
+            </div>
+            <div class="bg-amber-50 border border-amber-200 p-6 rounded mt-8">
+        <h3 class="font-black text-amber-900 uppercase tracking-widest mb-4 flex items-center border-b border-amber-200 pb-2"><i data-lucide="coins" class="w-5 h-5 mr-2"></i> Employee Advances Paid at Start</h3>
+        <table class="w-full inv-table rounded overflow-hidden shadow-sm">
+            <thead><tr><th class="!bg-amber-800 !text-amber-100">Staff Member</th><th class="!bg-amber-800 !text-amber-100">Reason/Detail</th><th class="!bg-amber-800 !text-amber-100 text-right">Amount (Rp)</th><th class="!bg-amber-800 !text-amber-100 text-right">Wallet Source</th><th class="!bg-amber-800 !text-amber-100"></th></tr></thead>
+            <tbody><tr><td><select class="w-full p-1 border"><option>Pak Budi</option><option>Maman</option><option>+ Inline Add Person</option></select></td><td><input type="text" class="w-full p-1 border" value="Weekly Food Advance"></td><td><input type="number" class="w-full p-1 border text-right font-mono text-red-600 font-bold" value="250000"></td><td><select class="w-full p-1 border text-xs bg-slate-50"><option>Session Wallet</option></select></td><td><i data-lucide="x" class="text-red-500 w-4 h-4 cursor-pointer"></i></td></tr></tbody>
+        </table>
+        <button class="mt-4 text-sm font-bold text-amber-700 hover:text-amber-900 flex items-center">+ Add Advance Line</button>
+        <div class="flex justify-end mt-4"><div class="bg-white p-3 border border-amber-200 rounded text-right w-64 shadow-sm"><div class="text-xs text-amber-800 font-bold">Total Session Advances:</div><div class="text-xl font-black text-amber-900 font-mono mt-1">Rp 250,000</div></div></div>
+    </div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Establishes initial state variables and ensures staff loading advances are mapped.</div>
+    </div><div id="cs_exp" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">3. CS Expense Invoice</h2>
+        <div class="doc-header"><div><div class="text-2xl font-black font-mono text-slate-800">EXP-CS-01</div><div class="text-xs font-bold text-slate-500">2026-03-01 10:00 | Loc: Kaimana Hub</div></div><div class="px-3 py-1 bg-amber-100 text-amber-800 font-bold rounded shadow-sm text-sm uppercase tracking-wide">Draft</div></div>
+        <div class="bg-white p-6 rounded shadow-sm mb-8 border-l-4 border-yellow-400 max-w-5xl">
+            <h3 class="uppercase font-black text-slate-400 text-sm tracking-widest mb-4">CS Operating Voucher</h3>
+            <table class="w-full inv-table shadow-sm border mb-4">
+                <thead><tr><th>Expense Type (Cat)</th><th>Description</th><th class="text-right">Line Total</th><th></th></tr></thead>
+                <tbody>
+                    <tr>
+                         <td class="w-1/4 align-top"><select class="border p-1 w-full text-xs font-bold"><option>Labor/Loaders (Daily)</option><option>+ Add</option></select></td>
+                         <td class="w-1/2 p-2 align-top bg-slate-50"><input type="text" class="border p-1 w-full text-xs" value="Gaji Harian Buruh Angkut"></td>
+                         <td class="w-1/6 align-top pt-3"><input type="number" class="w-full border p-1 text-right font-bold text-red-600 font-mono" value="100000"></td>
+                         <td class="align-top pt-3 text-center"><i data-lucide="x" class="text-red-500 w-4 h-4 cursor-pointer"></i></td>
+                    </tr>
+                </tbody>
+            </table>
+            <button class="text-sm font-bold text-cyan-600 flex items-center mb-6">+ Add Row</button>
+            <div class="flex justify-end"><div class="total-box w-64 text-right"><div class="flex justify-between font-black text-2xl text-slate-800 border-b pb-2 mb-2"><span class="text-sm">TOTAL</span><span class="font-mono">100,000</span></div></div></div>
+            <div class="mt-6 border-t border-slate-200 pt-6 flex justify-between items-center bg-slate-50 p-4 rounded no-print">
+        <button class="btn-secondary" onclick="window.print()"><i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print Preview</button>
+        <div class="flex space-x-3"><button class="btn-secondary px-8">Save Draft</button><button class="btn-success px-12 uppercase tracking-wide"><i data-lucide="lock" class="w-4 h-4 mr-2"></i> Post Document</button></div>
+    </div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Identical logic to Factory/Boat logic but pulls from 'CS Ops Cash'.</div>
+    </div><div id="cs_recv" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">4. Finished Goods Acceptance</h2>
+        <div class="doc-header"><div><div class="text-2xl font-black font-mono text-slate-800">RCV-CS-TRF-02</div><div class="text-xs font-bold text-slate-500">2026-03-01 10:00 | Loc: Kaimana Hub</div></div><div class="px-3 py-1 bg-amber-100 text-amber-800 font-bold rounded shadow-sm text-sm uppercase tracking-wide">Draft</div></div>
+        <div class="bg-cyan-50 border border-cyan-200 p-6 shadow-sm mb-6 max-w-5xl rounded">
+            <h3 class="font-black text-cyan-900 border-b border-cyan-200 pb-2 mb-4 uppercase tracking-widest"><i data-lucide="download-cloud" class="w-5 h-5 mr-2 inline text-cyan-600"></i> Accept Internal Transfer</h3>
+             <table class="w-full inv-table rounded bg-white shadow mb-6 hidden-border">
+                <thead><tr class="!bg-cyan-900 !text-white"><th>Dispatched Ref</th><th>Originating Yield Station</th><th class="text-right">Awaiting Net KG</th><th class="text-center w-1/4">Confirm Stored Qty</th></tr></thead>
+                <tbody>
+                    <tr>
+                        <td class="font-mono text-slate-700 bg-white">DO-FAC-TRF-02</td>
+                        <td class="font-bold uppercase tracking-widest text-xs bg-white text-indigo-800">Kaimana Main Flr</td>
+                        <td class="text-right font-mono text-slate-500 bg-white">45.0 KG (Snapper Fillet A)</td>
+                        <td class="bg-white px-4"><input type="number" class="border-2 border-emerald-400 p-2 w-full text-right font-black font-mono text-xl shadow-inner text-emerald-700" value="45.0"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="mt-6 border-t border-slate-200 pt-6 flex justify-between items-center bg-slate-50 p-4 rounded no-print">
+        <button class="btn-secondary" onclick="window.print()"><i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print Preview</button>
+        <div class="flex space-x-3"><button class="btn-secondary px-8">Save Draft</button><button class="btn-success px-12 uppercase tracking-wide"><i data-lucide="lock" class="w-4 h-4 mr-2"></i> Post Document</button></div>
+    </div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Completes the transfer linkage from Factory. Inflates Kaimana CS Inventory quantities physically.</div>
+    </div><div id="cs_stock" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">5. Live Stock Availability</h2>
+        
+        <div class="bg-white p-6 border rounded shadow-sm max-w-5xl mb-6">
+            <h3 class="font-black text-slate-800 uppercase tracking-widest mb-4 border-b-2 border-slate-800 pb-2 flex items-center justify-between"><span><i data-lucide="boxes" class="w-5 h-5 mr-2 inline"></i> Cold Room Grid</span><span class="text-xs bg-emerald-100 text-emerald-800 px-3 py-1 rounded shadow-sm border border-emerald-300">Hub Verified</span></h3>
+            <table class="w-full inv-table shadow border border-slate-300">
+                <thead><tr class="!bg-slate-800 text-white"><th>Verified SKU Master Tag</th><th class="text-right">Present Vol (KG)</th><th class="text-right">Global Est Val Basis</th></tr></thead>
+                <tbody>
+                    <tr><td class="font-bold text-slate-800 border-l-4 border-cyan-500 pl-4 bg-cyan-50">Snapper Fillet A</td><td class="text-right font-mono font-black text-xl text-cyan-700 bg-cyan-50">45.0</td><td class="text-right font-mono text-slate-500 bg-cyan-50">Rp 4.2M</td></tr>
+                    <tr><td class="font-bold text-slate-800 border-l-4 border-slate-300 pl-4">Grouper Whole</td><td class="text-right font-mono font-bold text-lg text-slate-600">0.0</td><td class="text-right font-mono text-slate-500">Rp 0</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Real-time grid viewing local stock mapped to context Unit ID. Read-only presentation of live totals.</div>
+    </div><div id="cs_outbound" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">6. Packing / Loading Manifest (DO)</h2>
+        <div class="doc-header"><div><div class="text-2xl font-black font-mono text-slate-800">DO-MAN-0226</div><div class="text-xs font-bold text-slate-500">2026-03-01 10:00 | Loc: Kaimana Hub</div></div><div class="px-3 py-1 bg-amber-100 text-amber-800 font-bold rounded shadow-sm text-sm uppercase tracking-wide">Draft</div></div>
+        <div class="bg-white p-6 border rounded shadow-md border-t-8 border-cyan-600 max-w-5xl mb-6">
+            <h3 class="font-black text-cyan-900 border-b border-cyan-200 pb-2 mb-4 uppercase tracking-widest"><i data-lucide="truck" class="inline text-cyan-600 mr-2"></i> Draft Commercial Manifest (Pre-Sale)</h3>
+            <div class="bg-slate-50 p-4 rounded border grid grid-cols-2 gap-6 mb-6">
+                <div><label class="text-xs font-bold text-slate-500 mb-1 block">Consignee Target (Optional)</label><input type="text" class="border p-2 w-full bg-white shadow-inner" placeholder="e.g. Jakarta Hub Transpo"></div>
+                <div><label class="text-[0.6rem] font-bold text-slate-500 uppercase tracking-widest mb-1 block">Carrier Ext</label><input type="text" class="border p-2 w-full bg-white font-mono" placeholder="Flight / Vessel ID"></div>
+            </div>
+            
+             <table class="w-full inv-table shadow border border-cyan-300 rounded mb-6">
+                <thead><tr class="!bg-cyan-900 !text-white"><th>SKU Pulled Target</th><th class="text-right">Container Seal #</th><th class="text-right w-1/4">Packed Outbound Qty (KG)</th></tr></thead>
+                <tbody>
+                    <tr>
+                        <td class="bg-white"><select class="border p-1 w-full text-xs font-bold font-mono"><option>Snapper Fillet A [Bal: 45.0]</option></select></td>
+                        <td class="bg-white"><input type="text" class="border p-1 w-full text-right font-mono text-xs" value="SEAL-XP-12"></td>
+                        <td class="bg-white"><input type="number" class="border p-1 w-full text-right font-black font-mono text-xl text-cyan-700 bg-cyan-50 shadow-inner" value="45.0"></td>
+                    </tr>
+                </tbody>
+            </table>
+             <button class="text-sm font-bold text-cyan-600 flex items-center mb-6">+ Add Master Carton Line</button>
+            <div class="mt-6 border-t border-slate-200 pt-6 flex justify-between items-center bg-slate-50 p-4 rounded no-print">
+        <button class="btn-secondary" onclick="window.print()"><i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print Preview</button>
+        <div class="flex space-x-3"><button class="btn-secondary px-8">Save Draft</button><button class="btn-success px-12 uppercase tracking-wide"><i data-lucide="lock" class="w-4 h-4 mr-2"></i> Post Document</button></div>
+    </div>
+        </div>
+        <div class="a4-preview border shadow-xl mt-16"><div class="flex justify-between border-b-2 border-slate-800 pb-4 mb-8"><div><h1 class="text-4xl font-black tracking-tighter">OCEAN PEARL</h1><p class="text-xs uppercase font-bold mt-1 tracking-widest text-slate-500">Kaimana Hub</p></div><div class="text-right"><h2 class="text-2xl uppercase tracking-widest text-slate-400 font-light">LOADING DO MANIFEST</h2><p class="font-mono mt-2 font-bold text-sm">DOC-QR-#991202</p></div></div><strong>Dispatch Totals:</strong> 45.0 KG (Snapper Fillet A)<div class="absolute bottom-12 flex justify-between px-8 w-[calc(100%-30mm)]"><div class="border-t border-black pt-2 w-40 text-center text-xs font-bold uppercase">Gatehouse Sig</div><div class="border-t border-black pt-2 w-40 text-center text-xs font-bold uppercase">Carrier Acceptance</div></div><div class="absolute bottom-2 right-2 text-[0.6rem] font-mono text-slate-400">OPS3 SYSTEM GENERATED</div></div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Generates physical Delivery Order prior to financial clearing. Subtracts physical inventory locally without writing to global AP/AR yet.</div>
+    </div><div id="cs_sale" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">7. Commercial Sales Invoice (Link DO)</h2>
+        <div class="doc-header"><div><div class="text-2xl font-black font-mono text-slate-800">INV-CS-001</div><div class="text-xs font-bold text-slate-500">2026-03-01 10:00 | Loc: Kaimana Hub</div></div><div class="px-3 py-1 bg-amber-100 text-amber-800 font-bold rounded shadow-sm text-sm uppercase tracking-wide">Draft</div></div>
+        <div class="bg-amber-50 p-6 border border-amber-200 rounded shadow-md border-t-8 border-amber-500 max-w-5xl mb-6 flex flex-col">
+            <h3 class="font-black text-amber-900 border-b border-amber-300 pb-2 mb-4 uppercase tracking-widest flex items-center"><i data-lucide="file-text" class="w-5 h-5 mr-3 text-amber-600"></i> Final Commercial Invoice Execution</h3>
+            
+            <div class="grid grid-cols-2 gap-6 bg-white p-4 border border-amber-100 rounded mb-6 shadow-sm">
+                 <div>
+                    <label class="text-xs font-bold text-slate-500 block mb-1">Bind To Extant Outbound DO</label>
+                    <select class="border p-2 w-full font-mono text-sm shadow-inner bg-slate-50"><option>DO-MAN-0226 (Snapper Fillet A x45.0)</option></select>
+                 </div>
+                 <div>
+                    <label class="text-[0.6rem] font-black tracking-widest text-amber-800 uppercase block mb-1">Funds Target Path</label>
+                    <select class="border p-2 w-full text-sm font-mono border-amber-300 focus:outline-none"><option>Corporate Account Receivable (AR HQ)</option><option>Physical CS Wallet Immediate Cash</option></select>
+                    <p class="text-[0.6rem] text-amber-700 mt-2 font-bold italic">Selecting AR binds this commercial paper to Hub Finance Collection boards.</p>
+                 </div>
+            </div>
+            
+            <table class="w-full inv-table shadow border border-amber-400 rounded overflow-hidden">
+                <thead><tr class="!bg-amber-800 !text-white"><th>SKU (Inherited from DO)</th><th class="text-right">Billed Qty KG</th><th class="text-right">Unit B2B Sales Price (Rp)</th><th class="text-right w-1/4">Line Extension</th></tr></thead>
+                <tbody>
+                    <tr><td class="font-bold text-slate-700 bg-white">Snapper Fillet A</td><td class="text-right font-mono text-slate-500 bg-white">45.0</td><td class="bg-white"><input type="number" class="border p-2 w-full text-right font-mono bg-yellow-50 shadow-inner text-lg font-bold" value="150000"></td><td class="bg-white"><input type="text" disabled class="border p-1 w-full text-right font-mono font-black text-amber-700 bg-amber-50 text-xl" value="6,750,000"></td></tr>
+                </tbody>
+            </table>
+            
+           <div class="flex justify-between items-end mt-6">
+                <button class="text-sm font-bold text-amber-700 hover:text-amber-900 bg-amber-100 px-4 py-2 rounded">+ Add Surcharge Line</button>
+                <div class="text-right bg-white border-2 border-amber-400 p-4 rounded shadow-lg"><div class="uppercase text-amber-800 text-xs font-black tracking-widest border-b border-amber-200 pb-1 mb-1">Accounts Receivable Delta</div><div class="text-4xl font-black font-mono text-amber-600">Rp 6,750,000</div></div>
+            </div>
+            <div class="mt-6 border-t border-slate-200 pt-6 flex justify-between items-center bg-slate-50 p-4 rounded no-print">
+        <button class="btn-secondary" onclick="window.print()"><i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print Preview</button>
+        <div class="flex space-x-3"><button class="btn-secondary px-8">Save Draft</button><button class="btn-success px-12 uppercase tracking-wide"><i data-lucide="lock" class="w-4 h-4 mr-2"></i> Post Document</button></div>
+    </div>
+        </div>
+        <div class="a4-preview border shadow-xl mt-16"><div class="flex justify-between border-b-2 border-slate-800 pb-4 mb-8"><div><h1 class="text-4xl font-black tracking-tighter">OCEAN PEARL</h1><p class="text-xs uppercase font-bold mt-1 tracking-widest text-slate-500">Kaimana Hub</p></div><div class="text-right"><h2 class="text-2xl uppercase tracking-widest text-slate-400 font-light">COMMERCIAL TAX INVOICE</h2><p class="font-mono mt-2 font-bold text-sm">DOC-QR-#991202</p></div></div><strong>Billed Entity:</strong> Local Trader<br><strong>Sale Value Subtotal:</strong> Rp 6,750,000<div class="absolute bottom-12 flex justify-between px-8 w-[calc(100%-30mm)]"><div class="border-t border-black pt-2 w-40 text-center text-xs font-bold uppercase">Authorized Finance</div><div class="border-t border-black pt-2 w-40 text-center text-xs font-bold uppercase">Unit CS Stamp</div></div><div class="absolute bottom-2 right-2 text-[0.6rem] font-mono text-slate-400">OPS3 SYSTEM GENERATED</div></div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Links to previously dispatched DO. Assigns final financial basis to the shipped quantity. Binds to global AR matrix.</div>
+    </div><div id="cs_waste" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">8. Expiry, Spoil & Waste Log</h2>
+        <div class="doc-header"><div><div class="text-2xl font-black font-mono text-slate-800">WST-CS-0226</div><div class="text-xs font-bold text-slate-500">2026-03-01 10:00 | Loc: Kaimana Hub</div></div><div class="px-3 py-1 bg-amber-100 text-amber-800 font-bold rounded shadow-sm text-sm uppercase tracking-wide">Draft</div></div>
+        <div class="bg-white p-6 border rounded shadow border-t-8 border-red-700 max-w-5xl mb-6">
+             <h3 class="font-black text-red-900 border-b border-red-200 pb-2 mb-4 uppercase tracking-widest"><i data-lucide="trash-2" class="w-5 h-5 inline mr-2 text-red-600"></i> Pure Stock Reduction Event</h3>
+             <table class="w-full inv-table border border-red-300 shadow-sm mb-4">
+                <thead><tr class="!bg-red-900 !text-white"><th>Destroyed SKU</th><th>Explanation Text</th><th class="text-right">Deducted Weight KG</th></tr></thead>
+                <tbody>
+                    <tr><td class="bg-white"><select class="border p-1 w-full text-xs font-bold text-red-800"><option>Snapper Fillet A [Bal: 45.0]</option></select></td><td class="bg-white"><input type="text" class="border p-1 w-full text-xs shadow-inner" value="Compressor failure sector B. Thawed out."></td><td class="bg-white"><input type="number" class="w-full border p-1 text-right font-mono font-black text-red-600 bg-red-100" value="5.0"></td></tr>
+                </tbody>
+            </table>
+            <button class="bg-red-600 hover:bg-red-800 text-white font-black px-8 py-3 rounded shadow shadow-red-300 mt-4 tracking-widest flex items-center justify-center w-full"><i data-lucide="alert-triangle" class="w-5 h-5 mr-3 text-red-200"></i> COMMIT CARGO CULL TO IMMUTABLE LOG</button>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Bypasses dispatch mechanisms and destroys local stock value silently alerting Location Manager.</div>
+    </div><div id="cs_wallet" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">9. Wallet Sub-View</h2>
+        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Mirror of Factory Wallet logic bound strictly to CS_PettyCash tag.]</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="cs_close" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">10. Settle Session Operations</h2>
+        
+        <div class="bg-white p-6 border-t-8 border-cyan-800 rounded shadow-2xl max-w-5xl mb-12 relative overflow-hidden">
+             <!-- Settlement Table rendering logic identical to Boat but displaying CS Crew -->
+             <h1 class="text-4xl font-black uppercase text-cyan-900 tracking-tight mb-2">Warehouse Session Stop</h1>
+             <p class="text-slate-500 text-sm mb-8 font-mono tracking-widest bg-cyan-50 inline-block px-3 py-1 border border-cyan-200 rounded">SHF-CS-0226</p>
+             
+             <div class="bg-slate-50 border p-6 font-mono text-sm leading-relaxed rounded border-t-4 border-t-emerald-500 flex justify-between items-center mb-8">
+                <div><span class="text-emerald-800 font-bold uppercase block mb-2 border-b-2 border-emerald-200 pb-1 w-full tracking-widest text-xs">Petty Cash Handover End</span><span class="text-slate-400">Opening 500k -> Exp 100k</span></div>
+                <div class="text-3xl font-black tracking-tighter text-emerald-700 bg-emerald-100 px-4 py-2 border border-emerald-300 rounded shadow-inner">Rp 400,000</div>
+             </div>
+
+             <!-- Employee Settlements placeholder for visual representation -->
+             <div class="bg-orange-50 p-6 rounded border border-orange-200 shadow mb-8">
+                 <h3 class="font-black text-orange-900 mb-2 uppercase tracking-widest text-sm"><i data-lucide="users" class="w-4 h-4 mr-2 text-orange-600 inline"></i> Session Gang/Loader Settlements</h3>
+                 <div class="font-mono text-xs bg-white border p-2 tracking-wide text-orange-800 font-bold italic">Similiar logic matrix mapping Loaders against specific piecewise payments vs advances...</div>
+             </div>
+             
+             <button class="bg-cyan-900 hover:bg-black text-white w-full py-5 text-xl tracking-widest font-black rounded shadow flex justify-center items-center relative z-10 transition-transform active:scale-[0.98]"><i data-lucide="lock" class="w-6 h-6 mr-3"></i> CLOSE STATION</button>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Requires zero pending inbound transfers. Reconciles loader balances vs petty cash layout prints the handover sign-offs.</div>
+    </div><div id="cs_docs" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">My Documents</h2>
+        <div class='bg-white p-6 border rounded shadow-sm text-center text-cyan-900 border-cyan-100 bg-cyan-50 font-mono'>READ-ONLY SEARCH: All Docs matching active CS Unit.</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="cs_print" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Print Center</h2>
+        <div class='bg-white p-6 border text-slate-500 text-center font-bold py-24 bg-slate-50 border-dashed border-4'>[Search Doc ID to inject A4 Print Template -> window.print()]</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="off_start" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">1. Start Office Day</h2>
+        
+        <div class="bg-white p-8 rounded border max-w-4xl mb-8 shadow-sm border-t-4 border-teal-600">
+            <div class="grid grid-cols-2 gap-6 mb-6 pb-6 border-b border-teal-100">
+                <div><label class="block text-xs font-bold text-slate-500 mb-1">Session ID</label><input class="border p-2 w-full rounded font-mono bg-slate-50" value="OFC-DAY-0226" disabled></div>
+                <div><label class="block text-xs font-bold text-slate-500 mb-1">Location</label><select class="border p-2 w-full"><option>Kaimana HQ Desk</option></select></div>
+                <div><label class="block text-xs font-bold text-teal-600 mb-1">Admin User</label><input type="text" disabled class="border p-2 w-full font-bold bg-teal-50" value="Budi Admin"></div>
+            </div>
+            <div class="bg-teal-50 border border-teal-200 p-6 rounded mb-8 shadow-sm">
+        <h3 class="font-black text-teal-900 uppercase tracking-widest mb-4 flex items-center border-b border-teal-200 pb-2"><i data-lucide="users" class="w-5 h-5 mr-2"></i> Session Staff Roster</h3>
+        <table class="w-full inv-table rounded overflow-hidden">
+            <thead><tr><th class="!bg-teal-900 !text-blue-100">Name</th><th class="!bg-teal-900 !text-blue-100">Role</th><th class="!bg-teal-900 !text-blue-100 text-right">Ext. Advance Bal</th><th class="!bg-teal-900 !text-blue-100">Action</th></tr></thead>
+            <tbody>
+                <tr><td>Pak Budi (ID-011)</td><td>Captain / Shift Lead</td><td class="text-right text-red-600 font-mono">Rp 500,000</td><td class="text-red-500 font-bold p-2"><i data-lucide="x" class="w-4 h-4 cursor-pointer hover:bg-red-50"></i></td></tr>
+                <tr><td>Maman (ID-042)</td><td>Crew / Employee</td><td class="text-right text-slate-400 font-mono">Rp 0</td><td class="text-red-500 font-bold p-2"><i data-lucide="x" class="w-4 h-4 cursor-pointer hover:bg-red-50"></i></td></tr>
+            </tbody>
+        </table>
+        <button class="mt-4 text-sm font-bold text-blue-700 hover:text-teal-900 block flex items-center">+ Add Staff Member (via People Registry)</button>
+    </div>
+            <button class="bg-teal-600 hover:bg-teal-700 text-white font-bold w-full text-lg py-3 rounded"><i data-lucide="sun" class="w-5 h-5 mr-2 inline"></i> OPEN ADMIN DAY</button>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Binds office staff and establishes the administrative cash timeline for local expenditures.</div>
+    </div><div id="off_init" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">2. Petty Cash Opening Checks</h2>
+        
+        <div class="bg-white p-6 rounded border mb-8 max-w-4xl border-t-4 border-teal-600">
+            <h3 class="font-bold text-teal-900 mb-4 border-b pb-2 uppercase tracking-widest text-xs">Petty Cash Confirmation</h3>
+            <div class="grid grid-cols-2 gap-y-4 gap-x-6">
+                <div><label class="block text-xs font-bold text-slate-500">Declared Physical Cash</label><input type="number" class="border p-2 w-full rounded font-mono text-teal-800 font-bold bg-teal-50 border-teal-300" placeholder="Count notes in drawer..."></div>
+                <div><label class="block text-xs font-bold text-slate-500">System Expected Wallet Bal</label><input type="number" value="2500000" class="border p-2 w-full rounded font-mono text-emerald-600 font-bold bg-emerald-50" disabled></div>
+            </div>
+            <div class="bg-amber-50 border border-amber-200 p-6 rounded mt-8">
+        <h3 class="font-black text-amber-900 uppercase tracking-widest mb-4 flex items-center border-b border-amber-200 pb-2"><i data-lucide="coins" class="w-5 h-5 mr-2"></i> Employee Advances Paid at Start</h3>
+        <table class="w-full inv-table rounded overflow-hidden shadow-sm">
+            <thead><tr><th class="!bg-amber-800 !text-amber-100">Staff Member</th><th class="!bg-amber-800 !text-amber-100">Reason/Detail</th><th class="!bg-amber-800 !text-amber-100 text-right">Amount (Rp)</th><th class="!bg-amber-800 !text-amber-100 text-right">Wallet Source</th><th class="!bg-amber-800 !text-amber-100"></th></tr></thead>
+            <tbody><tr><td><select class="w-full p-1 border"><option>Pak Budi</option><option>Maman</option><option>+ Inline Add Person</option></select></td><td><input type="text" class="w-full p-1 border" value="Weekly Food Advance"></td><td><input type="number" class="w-full p-1 border text-right font-mono text-red-600 font-bold" value="250000"></td><td><select class="w-full p-1 border text-xs bg-slate-50"><option>Session Wallet</option></select></td><td><i data-lucide="x" class="text-red-500 w-4 h-4 cursor-pointer"></i></td></tr></tbody>
+        </table>
+        <button class="mt-4 text-sm font-bold text-amber-700 hover:text-amber-900 flex items-center">+ Add Advance Line</button>
+        <div class="flex justify-end mt-4"><div class="bg-white p-3 border border-amber-200 rounded text-right w-64 shadow-sm"><div class="text-xs text-amber-800 font-bold">Total Session Advances:</div><div class="text-xl font-black text-amber-900 font-mono mt-1">Rp 250,000</div></div></div>
+    </div>
+            <div class="mt-6 pt-4 border-t flex justify-end space-x-4"><button class="btn-success bg-teal-600"><i data-lucide="check" class="inline w-4 h-4 mr-2"></i> Verify Cash Drawer & Start</button></div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Crucial fraud-prevention step locking the physical cash count vs internal system expectation at shift start.</div>
+    </div><div id="off_exp" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">3. Admin Expense Invoice</h2>
+        <div class="doc-header"><div><div class="text-2xl font-black font-mono text-slate-800">EXP-OFF-01</div><div class="text-xs font-bold text-slate-500">2026-03-01 10:00 | Loc: Kaimana Hub</div></div><div class="px-3 py-1 bg-amber-100 text-amber-800 font-bold rounded shadow-sm text-sm uppercase tracking-wide">Draft</div></div>
+        <div class="bg-white p-6 border rounded shadow-sm mb-8 border-l-4 border-yellow-400 max-w-5xl">
+            <h3 class="uppercase font-black text-slate-400 text-sm tracking-widest mb-4">Office & Local Purchasing</h3>
+            <div class="grid grid-cols-3 gap-4 mb-4">
+                <div><label class="text-xs font-bold text-slate-500 block">Vendor</label><select class="border p-2 w-full"><option>Local Stationary Store</option><option>Crew/Employee Payment</option></select></div>
+                <div><label class="text-xs font-bold text-slate-500 block">Wallet Origin</label><select class="border p-2 w-full bg-slate-50 font-mono"><option>OFFICE PETTY CASH [Bal: 2.5M]</option></select></div>
+            </div>
+            
+             <div id="crew_payment_expander_off" class="bg-indigo-50 p-4 border border-indigo-200 rounded mb-4">
+                 <h4 class="font-bold text-xs uppercase text-indigo-800 mb-2 tracking-wide block"><i data-lucide="info" class="w-3 h-3 inline mr-1"></i> Staff Payment Details</h4>
+                 <div class="flex space-x-4">
+                     <div class="w-1/3"><label class="text-[0.6rem] text-indigo-600 font-bold block">Person Name</label><select class="border p-1 w-full text-sm"><option>Rina (Admin)</option><option>+ Add Person via Registry</option></select></div>
+                     <div class="w-2/3"><label class="text-[0.6rem] text-indigo-600 font-bold block">Wallet Impact</label><div class="font-mono text-xs mt-1 p-1 bg-white border rounded">Minus Rp 450,000 (Expense) -> Reduces Petty Cash by 450,000.</div></div>
+                 </div>
+            </div>
+
+            <table class="w-full inv-table shadow-sm border mb-4">
+                <thead><tr><th>Account Type</th><th>Item Detail</th><th class="text-right">Line Total</th><th></th></tr></thead>
+                <tbody>
+                    <tr>
+                        <td class="w-1/4 align-top"><select class="border p-1 w-full text-sm font-bold"><option>Stationary & Prints</option><option>+ Add New Expense Type</option></select></td>
+                        <td class="w-1/2 p-2 align-top bg-slate-50"><input type="text" class="border p-1 w-full text-xs" value="Printer ink cartridges (3x)"></td>
+                        <td class="w-1/6 align-top pt-3"><input type="number" class="w-full border p-1 text-right font-bold text-red-600 font-mono" value="450000"></td>
+                        <td class="align-top pt-3 text-center"><i data-lucide="x" class="text-red-500 w-4 h-4 cursor-pointer"></i></td>
+                    </tr>
+                </tbody>
+            </table>
+            <button class="text-sm font-bold text-teal-600 flex items-center mb-6">+ Add Invoice Row</button>
+            <div class="flex justify-end items-end">
+                <div class="total-box w-64 text-right">
+                    <div class="flex justify-between font-black text-2xl text-slate-800 border-b pb-2 mb-2"><span class="text-sm">TOTAL</span><span class="font-mono">450,000</span></div>
+                </div>
+            </div>
+            <div class="mt-6 border-t border-slate-200 pt-6 flex justify-between items-center bg-slate-50 p-4 rounded no-print">
+        <button class="btn-secondary" onclick="window.print()"><i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print Preview</button>
+        <div class="flex space-x-3"><button class="btn-secondary px-8">Save Draft</button><button class="btn-success px-12 uppercase tracking-wide"><i data-lucide="lock" class="w-4 h-4 mr-2"></i> Post Document</button></div>
+    </div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Admin equivalent of an operational expense. Draws from petty cash instead of trip funds.</div>
+    </div><div id="off_payreq" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">4. Payment Requests</h2>
+        
+        <div class="bg-blue-50 border border-blue-200 p-6 rounded shadow-sm mb-6 max-w-6xl text-sm">
+            <h3 class="font-black text-blue-900 border-b border-blue-200 pb-2 mb-4 uppercase tracking-widest"><i data-lucide="upload-cloud" class="inline mr-2"></i> Submit AP Bundle Request To HQ Finance</h3>
+            <p class="mb-4 text-xs text-blue-800">Select pending vendor payables (from Boat purchases) to bundle into a formal funding request.</p>
+            <table class="w-full inv-table shadow-sm border border-blue-300">
+                <thead><tr><th class="!bg-blue-900"><input type="checkbox"></th><th class="!bg-blue-900">Source Doc</th><th class="!bg-blue-900">Creditor / Fisherman</th><th class="!bg-blue-900 text-right">Age</th><th class="!bg-blue-900 text-right">Requested Amt</th></tr></thead>
+                <tbody>
+                    <tr><td class="bg-white"><input type="checkbox" checked></td><td class="bg-white font-mono font-bold text-blue-700">RCV-BUY-099</td><td class="bg-white font-bold">Pak Rudi</td><td class="bg-white text-right text-red-600 font-bold bg-red-50">3 Days</td><td class="bg-white text-right font-mono font-black text-lg">6,500,000</td></tr>
+                </tbody>
+            </table>
+            
+            <div class="mt-6 p-4 bg-white border border-blue-300 shadow flex justify-between items-center rounded">
+                <div><div class="text-xs uppercase font-bold text-slate-500">Total Bundle Request Amount</div><div class="text-2xl font-black text-blue-900 font-mono mt-1">Rp 6,500,000</div></div>
+                <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded shadow"><i data-lucide="send" class="mr-2 inline"></i> TRANSMIT REQUEST TO FINANCE</button>
+            </div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Moves local AP responsibility into the Global AP Queue (Finance level). Acts as an internal memo envelope.</div>
+    </div><div id="off_ar" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">5. Collection / AR Follow-up Log</h2>
+        
+        <div class="bg-amber-50 border border-amber-200 p-6 rounded shadow-sm mb-6 max-w-5xl">
+            <h3 class="font-black text-amber-900 border-b border-amber-200 pb-2 mb-4 uppercase tracking-widest"><i data-lucide="phone-call" class="inline mr-2"></i> Local Accounts Receivable Follow-up</h3>
+            <table class="w-full inv-table shadow-sm border border-amber-300 mb-6 text-sm">
+                <thead><tr><th class="!bg-amber-900">Doc Ref</th><th class="!bg-amber-900">Debtor Name</th><th class="!bg-amber-900 text-right">Owed</th><th class="!bg-amber-900">Action Status Logging</th></tr></thead>
+                <tbody>
+                    <tr><td class="font-mono text-slate-500 bg-white">INV-CS-001</td><td class="font-bold bg-white text-amber-900">Jakarta Seafood HQ</td><td class="bg-white text-right font-mono text-red-700 font-bold">1,900,000</td><td class="bg-white w-1/3 p-2 leading-none"><input type="text" class="border p-2 w-full shadow-inner text-xs" placeholder="Left voicemail on March 1st..."></td></tr>
+                </tbody>
+            </table>
+            <div class="flex justify-end"><button class="btn-secondary py-2 px-6 font-bold shadow-sm">Save Note Logs</button></div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Admin task for chasing active AR generated by Cold Storage Sales. Simple UI annotation table.</div>
+    </div><div id="off_close" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">6. Close Office Day</h2>
+        
+        <div class="bg-white p-6 border-t-8 border-teal-800 rounded shadow-xl max-w-4xl pt-8 pb-12 mb-12">
+            <h1 class="text-3xl font-black uppercase text-teal-900 tracking-tight mb-2">Office Daily Check-Out</h1>
+            <p class="text-slate-500 text-sm mb-8 font-mono tracking-widest bg-teal-50 inline-block px-3 py-1 rounded">OFC-DAY-0226</p>
+            
+            <div class="grid grid-cols-2 gap-6 text-left mb-8">
+                <div class="bg-slate-50 border p-6 font-mono text-sm leading-relaxed rounded border-red-200">
+                    <span class="text-slate-500 font-bold uppercase block mb-2 border-b border-red-200 pb-1">Petty Cash Status</span>
+                    <span class="text-slate-400">Opening:</span> <span class="font-black text-lg text-slate-700">2,500,000</span><br>
+                    <span class="text-slate-400">Expenses:</span> <span class="font-black text-lg text-red-600">450,000</span><br>
+                    <span class="text-slate-400">Closing Sys:</span> <span class="font-black text-xl text-blue-600 block mt-2 border-t pt-2 border-blue-200">2,050,000</span>
+                </div>
+                <div class="border p-6 font-mono text-sm rounded bg-amber-50 border-amber-200">
+                    <span class="text-slate-500 font-bold uppercase block mb-2 border-b border-amber-200 pb-1">Bundled Payment Requests</span>
+                    <span class="font-black text-2xl text-amber-900 block mt-4">Rp 6,500,000</span>
+                    <span class="italic text-xs text-amber-700 mt-2 block">Sent to Finance Queue</span>
+                </div>
+            </div>
+            
+        <div class="bg-teal-50 p-6 rounded shadow border border-teal-200 mt-8 mb-8">
+            <h3 class="font-black text-teal-900 uppercase tracking-widest mb-4 flex items-center border-b border-teal-200 pb-2"><i data-lucide="users" class="w-5 h-5 mr-2"></i> Office Staff Advances Summary</h3>
+            <table class="w-full inv-table mb-4">
+                <thead><tr><th>Ext ID</th><th>Staff Name</th><th class="text-right">Daily Advances Handed Out</th><th class="text-right">OS Balance Update</th></tr></thead>
+                <tbody>
+                    <tr><td class="font-mono text-slate-400">ID-331</td><td class="font-bold">Rina (Admin)</td><td class="text-right text-red-600 font-mono">100,000</td><td class="text-right font-bold text-red-700 font-mono text-lg">Rp 100,000</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+            <button class="bg-teal-700 hover:bg-teal-900 text-white w-full py-5 text-xl tracking-widest mt-4 font-black rounded shadow-lg"><i data-lucide="lock" class="w-6 h-6 mr-3 inline"></i> LOCK DAY & PRINT RECON</button>
+        </div>
+        <div class="a4-preview border shadow-xl mt-16"><div class="flex justify-between border-b-2 border-slate-800 pb-4 mb-8"><div><h1 class="text-4xl font-black tracking-tighter">OCEAN PEARL</h1><p class="text-xs uppercase font-bold mt-1 tracking-widest text-slate-500">Kaimana Hub</p></div><div class="text-right"><h2 class="text-2xl uppercase tracking-widest text-slate-400 font-light">DAILY ADMIN SUMMARY</h2><p class="font-mono mt-2 font-bold text-sm">DOC-QR-#991202</p></div></div>Displays reconciled petty cash logic and prints AP Request cover sheets internally.<div class="absolute bottom-12 flex justify-between px-8 w-[calc(100%-30mm)]"><div class="border-t border-black pt-2 w-40 text-center text-xs font-bold uppercase">Admin</div><div class="border-t border-black pt-2 w-40 text-center text-xs font-bold uppercase">Loc Mgr</div></div><div class="absolute bottom-2 right-2 text-[0.6rem] font-mono text-slate-400">OPS3 SYSTEM GENERATED</div></div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Settles administrative cash layer natively within the same workflow boundaries.</div>
+    </div><div id="off_docs" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">My Documents</h2>
+        <div class='bg-white p-6 border rounded shadow-sm text-center text-teal-900 border-teal-100 bg-teal-50 font-mono'>OFFICE DOC BROWSER (EXP, REQ)</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="off_print" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Print Center</h2>
+        <div class='bg-white p-6 border text-slate-500 text-center font-bold py-24 bg-slate-50 border-dashed border-4'>[Search Doc ID to inject A4 Print Template -> window.print()]</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="loc_dash" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Location Dashboard</h2>
+        
+        <div class="grid grid-cols-4 gap-4 mb-8">
+            <div class="bg-blue-900 border-blue-700 border p-4 shadow-xl rounded"><h4 class="text-[0.6rem] uppercase tracking-widest text-blue-300 font-bold mb-1">Active Boats</h4><div class="text-3xl font-black text-white">4</div></div>
+            <div class="bg-indigo-900 border-indigo-700 border p-4 shadow-xl rounded"><h4 class="text-[0.6rem] uppercase tracking-widest text-indigo-300 font-bold mb-1">Shifts Running</h4><div class="text-3xl font-black text-white">2</div></div>
+            <div class="bg-emerald-900 border-emerald-700 border p-4 shadow-xl rounded"><h4 class="text-[0.6rem] uppercase tracking-widest text-emerald-300 font-bold mb-1">Unapproved Exp</h4><div class="text-3xl font-black text-white font-mono">1.2M</div></div>
+            <div class="bg-amber-900 border-amber-700 border p-4 shadow-xl rounded"><h4 class="text-[0.6rem] uppercase tracking-widest text-amber-300 font-bold mb-1">Pending Pay Reqs</h4><div class="text-3xl font-black text-white">6</div></div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Aggregates truth from children nodes globally. Provides birds eye view.</div>
+    </div><div id="loc_app_exp" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Approve: Expenses</h2>
+        
+        <div class="bg-white p-6 border rounded shadow max-w-5xl">
+            <table class="w-full inv-table shadow-sm border border-slate-300 rounded mb-4 text-xs font-mono">
+                <thead><tr class="!bg-slate-800 text-slate-100"><th>Doc Ref</th><th>Unit Context</th><th class="text-right">Line Val</th><th class="text-center">Action</th></tr></thead>
+                <tbody>
+                     <tr><td>EXP-B1-0226</td><td class="font-bold text-blue-900">Boat Faris</td><td class="text-right text-red-600 font-bold">250,000</td><td class="text-center p-2"><button class="bg-emerald-500 text-white font-bold px-3 py-1 rounded shadow text-xs uppercase hover:bg-emerald-700">Approve</button></td></tr>
+                     <tr><td>EXP-FAC-01</td><td class="font-bold text-indigo-900">Kaimana Main Flr</td><td class="text-right text-red-600 font-bold">150,000</td><td class="text-center p-2"><button class="bg-emerald-500 text-white font-bold px-3 py-1 rounded shadow text-xs uppercase hover:bg-emerald-700">Approve</button></td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Transitions document state 'Draft' -> 'Posted'. Locked rows vanish from view.</div>
+    </div><div id="loc_app_trans" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Approve: Transfers</h2>
+        
+        <div class="bg-emerald-50 p-6 border border-emerald-200 shadow-sm max-w-5xl rounded">
+            <p class="text-sm text-emerald-800 font-bold uppercase tracking-widest mb-4">Location Cash Clearing Queue</p>
+             <table class="w-full inv-table shadow border border-emerald-300 rounded overflow-hidden">
+                <thead><tr class="!bg-emerald-800 text-white"><th>Reference</th><th>From Wallet String</th><th>To Target Layer</th><th class="text-right w-1/4">Sweep Target</th><th class="text-center w-1/4">Confirmation</th></tr></thead>
+                <tbody>
+                    <tr><td class="bg-white text-xs font-mono">TRF-WALL-B1-0226</td><td class="bg-white font-bold text-slate-600 text-xs text-blue-800">TRIP WALLET [B1]</td><td class="bg-white font-bold text-slate-600 text-xs">Kaimana Hub Treasury</td><td class="bg-white font-mono text-emerald-600 text-lg font-black text-right pr-4">6,500,000</td><td class="bg-white p-2 text-center"><button class="bg-emerald-600 text-white text-xs uppercase font-bold py-1 px-4 rounded shadow-sm hover:shadow active:bg-emerald-800">Receive Cash</button></td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Authorizes physical cash returning from field wallets. Inflates Kaimana Hub central treasury directly.</div>
+    </div><div id="loc_app_recv" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Review: Receivings</h2>
+        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Grid showing DO mismatches flagged at CS or Factory]</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="loc_perf" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Unit Performance Grid</h2>
+        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Read-only analytic rollups of yield % and fuel consumption metrics per Boat/Factory.]</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="loc_inv" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Location Inventory Master</h2>
+        
+        <div class="bg-white p-6 border rounded shadow max-w-5xl">
+            <table class="w-full inv-table shadow-sm border border-slate-300 mb-4 font-mono text-xs">
+                 <thead><tr class="!bg-slate-900 text-slate-100"><th>Location Hierarchy</th><th>SKU Tag</th><th class="text-right">Global Qty KG</th></tr></thead>
+                 <tbody>
+                     <tr><td class="text-cyan-800 font-bold border-l-4 border-cyan-500 pl-4 bg-cyan-50">Kaimana Hub / CS Main</td><td>Snapper Fillet A</td><td class="text-right font-black text-emerald-600 text-base shadow-inner bg-emerald-50">45.0</td></tr>
+                     <tr><td class="text-blue-800 font-bold border-l-4 border-blue-500 pl-4 bg-blue-50">Kaimana Hub / Boat Faris</td><td>Red Snapper (Live)</td><td class="text-right font-black text-emerald-600 text-base shadow-inner bg-emerald-50">145.5</td></tr>
+                 </tbody>
+            </table>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Sub-tree visual query of inventory aggregated across location boundaries.</div>
+    </div><div id="loc_wallet" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Location Wallets Master</h2>
+        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Tree view: Kaimana Hub Central -> Petty Cash + Factory Cash + Trip Cash B1 + Trip Cash B2]</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="loc_staff" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Unit Staff Assignment</h2>
+        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Moves People from Loc pool into Boat/Factory default roster templates.]</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="loc_ppl" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">People Registry View</h2>
+        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Location filter applied to Global People Registry. Read-only]</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="loc_print" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Doc Center (Location)</h2>
+        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Search all Docs where Loc=Kaimana]</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="fin_dash" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Finance Dashboard</h2>
+        
+        <div class="grid grid-cols-4 gap-4 mb-4">
+            <div class="bg-emerald-900 border-emerald-700 border p-4 shadow-xl"><h4 class="text-[0.6rem] uppercase tracking-widest text-emerald-300 font-bold mb-1">Global AP Due</h4><div class="text-3xl font-black font-mono text-white">6.5M</div></div>
+            <div class="bg-amber-900 border-amber-700 border p-4 shadow-xl"><h4 class="text-[0.6rem] uppercase tracking-widest text-amber-300 font-bold mb-1">Global AR Out</h4><div class="text-3xl font-black font-mono text-white">6.7M</div></div>
+            <div class="bg-red-900 border-red-700 border p-4 shadow-xl"><h4 class="text-[0.6rem] uppercase tracking-widest text-red-300 font-bold mb-1">Advances (Emp)</h4><div class="text-3xl font-black font-mono text-white text-shadow">350K</div></div>
+            <div class="bg-slate-900 border-slate-700 border p-4 shadow-xl"><h4 class="text-[0.6rem] uppercase tracking-widest text-slate-300 font-bold mb-1">Central Float</h4><div class="text-3xl font-black font-mono text-white">45M</div></div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Aggregates financial truth natively from unit operations.</div>
+    </div><div id="fin_wall" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Global Wallets Matrix</h2>
+        
+        <div class="bg-white p-6 border rounded shadow-md max-w-6xl">
+            <h3 class="font-black text-slate-800 border-b-2 border-slate-800 pb-2 mb-4 uppercase tracking-widest text-sm flex items-center justify-between"><span><i data-lucide="layout-grid" class="w-5 h-5 mr-3 inline text-slate-500"></i> Corporate Treasury Topology</span><span class="text-xs font-mono bg-slate-100 text-slate-500 px-2 py-1 border rounded shadow-sm">Global Scope</span></h3>
+            <table class="w-full inv-table shadow text-sm">
+                <thead><tr class="!bg-slate-900 text-white font-mono"><th class="w-1/2">Entity / Node Structure</th><th class="text-right">Logical Balance IDR</th><th class="text-right">Action</th></tr></thead>
+                <tbody>
+                    <tr><td class="font-bold border-l-4 border-slate-800 bg-slate-100 pl-4 py-3"><i data-lucide="globe" class="inline w-4 h-4 mr-2 text-slate-400"></i> HQ Master Bank (BCA)</td><td class="text-right font-black font-mono text-xl text-emerald-800 bg-emerald-50 px-4">40,000,000</td><td class="p-2 text-right"><button class="text-xs bg-slate-300 hover:bg-slate-400 px-3 py-1 font-bold rounded shadow-inner uppercase tracking-widest text-slate-700">Trf Out <i data-lucide="chevron-down" class="inline w-3 h-3 ml-1"></i></button></td></tr>
+                    <tr><td class="font-bold text-slate-600 border-l-4 border-amber-600 pl-8 bg-amber-50 py-2">├─ Kaimana Hub Treasury Node</td><td class="text-right font-bold font-mono text-emerald-700 bg-emerald-50 px-4">6,500,000</td><td class="p-1"></td></tr>
+                    <tr><td class="font-mono text-xs text-slate-500 border-l-4 border-blue-600 pl-12 py-1">│ ├─ BOAT FARIS (Trip Wallet)</td><td class="text-right font-mono text-xs bg-emerald-50 px-4">0</td><td class="p-1"></td></tr>
+                    <tr><td class="font-mono text-xs text-slate-500 border-l-4 border-cyan-600 pl-12 py-1">│ ├─ Kaimana CS Petty Cash</td><td class="text-right font-mono text-xs font-bold text-emerald-600 bg-emerald-50 px-4">400,000</td><td class="p-1"></td></tr>
+                    <tr><td class="font-mono text-xs text-slate-500 border-l-4 border-indigo-600 pl-12 py-1">│ ├─ Factory Ops Cash</td><td class="text-right font-mono text-xs font-bold text-emerald-600 bg-emerald-50 px-4">2,350,000</td><td class="p-1"></td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Moves money centrally down to hub location wallets. Global wallet tree representation.</div>
+    </div><div id="fin_ap" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">AP Workflow & Runs</h2>
+        
+        <div class="bg-white p-6 border rounded shadow-md border-t-8 border-red-700 max-w-5xl">
+             <h3 class="font-black text-red-900 border-b border-red-200 pb-2 mb-4 uppercase tracking-widest flex items-center justify-between text-sm"><span><i data-lucide="arrow-down-right" class="inline mr-2 text-red-600"></i> Global AP Obligations</span><span class="text-xs font-bold text-red-600 bg-red-100 px-3 py-1 rounded shadow-inner flex items-center"><i data-lucide="alert-circle" class="w-3 h-3 mr-1"></i> Action Required</span></h3>
+             
+             <!-- Bulk Select AP rows -->
+             <div class="bg-slate-50 border border-slate-200 p-4 rounded mb-6">
+                <table class="w-full inv-table shadow border border-red-300 text-xs font-mono">
+                    <thead><tr class="!bg-red-900 text-white"><th><input type="checkbox"></th><th>Doc Request Link</th><th>Vendor Entity Target</th><th class="text-right">Approved Run Amount</th></tr></thead>
+                    <tbody>
+                        <tr><td class="bg-white"><input type="checkbox" checked></td><td class="bg-white font-bold text-slate-600 uppercase text-[0.6rem] tracking-widest">HQ-REQ-KAIMANA-04<br><span class="text-blue-600">RCV-BUY-099</span></td><td class="bg-white font-bold text-slate-800 uppercase tracking-widest text-xs">Pak Rudi (Fisherman)</td><td class="bg-white text-right font-black text-lg text-red-700 bg-red-50">6,500,000</td></tr>
+                    </tbody>
+                </table>
+             </div>
+
+             <!-- Bulk Settlement Context -->
+             <div class="grid grid-cols-2 gap-6 bg-red-50 p-6 border border-red-200 rounded">
+                 <div>
+                     <label class="text-[0.6rem] font-bold text-red-800 uppercase tracking-widest block mb-2">Funding Source Wallet Target</label>
+                     <select class="border p-2 w-full font-mono text-sm bg-white shadow-inner focus:outline-none"><option>HQ Master Bank (BCA) - [Bal: 40M]</option><option>Kaimana Hub Central Treasury - [Bal: 6.5M]</option></select>
+                     <p class="mt-2 text-[0.6rem] text-slate-500 font-bold italic">Sweep funds digitally. Generates immutable ledger proof.</p>
+                 </div>
+                 <div class="flex flex-col items-end">
+                     <span class="text-[0.6rem] uppercase tracking-widest font-black text-red-800 mb-1 border-b border-red-300 w-full text-right pb-1">Payment Run Authorization</span>
+                     <span class="text-4xl font-black font-mono text-red-700 tracking-tighter w-full text-right block my-2 pr-4 bg-white border border-red-100 rounded shadow-inner">Rp 6,500,000</span>
+                 </div>
+             </div>
+             
+             <button class="bg-red-800 hover:bg-black text-white w-full py-4 text-xl tracking-widest mt-6 font-black rounded shadow-[0_8px_30px_rgb(0,0,0,0.12)] uppercase flex justify-center items-center relative z-10 transition-transform active:scale-[0.98] border border-red-950"><i data-lucide="lock" class="w-6 h-6 mr-3 text-red-300"></i> EXECUTE BATCH TRANSFER / SETTLE</button>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Consumes AP rows created via Boat Receive processes. Slices corporate wallets directly globally decreasing AP load.</div>
+    </div><div id="fin_ar" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Receivables Log</h2>
+        
+        <div class="bg-amber-50 border border-amber-200 p-6 rounded shadow-sm mb-6 max-w-5xl">
+            <h3 class="font-black text-amber-900 border-b border-amber-200 pb-2 mb-4 uppercase tracking-widest text-sm flex items-center justify-between"><span><i data-lucide="arrow-up-right" class="inline mr-2 text-amber-600"></i> Active Collection Boards (AR)</span><span class="text-xs bg-amber-200 text-amber-900 px-3 py-1 font-bold rounded shadow-inner">Corporate Wide</span></h3>
+            <table class="w-full inv-table shadow-sm border border-amber-300 mb-6 text-sm">
+                <thead><tr class="!bg-amber-900 text-white font-mono"><th>Invoice Ref</th><th>Debtor Master</th><th class="text-right">Outstanding (Rp)</th><th class="text-center w-48">Banking Action / Recv</th></tr></thead>
+                <tbody>
+                    <tr><td class="font-mono text-slate-600 bg-white">INV-CS-001</td><td class="font-bold bg-white text-slate-800 uppercase tracking-widest text-xs">Jakarta Seafood Hub</td><td class="bg-white text-right font-mono text-emerald-700 font-bold bg-emerald-50 text-lg">6,750,000</td><td class="bg-white text-center p-2"><button class="bg-amber-500 text-white font-bold py-1 px-4 text-xs uppercase shadow rounded hover:bg-amber-600 w-full">Record Deposit <i data-lucide="chevron-right" class="w-3 h-3 inline"></i></button></td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Maps collections against Commercial invoices posted in CS. Clicking 'Deposit' displays a modal to determine which Wallet the funds landed into.</div>
+    </div><div id="fin_crew" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Advances (Kasbon) Monitor</h2>
+        
+        <div class="bg-purple-50 border border-purple-200 p-6 shadow rounded shadow border-t-8 border-purple-500 max-w-5xl">
+            <p class="text-sm text-purple-800 font-bold uppercase tracking-widest mb-4 border-b border-purple-200 pb-2"><i data-lucide="users" class="w-4 h-4 mr-2 inline text-purple-600"></i> Corporate Payroll / Advance Overview</p>
+             <table class="w-full inv-table shadow border border-purple-300 rounded text-xs font-mono">
+                <thead><tr class="!bg-purple-900 text-purple-100"><th>Worker Ref</th><th>Node Group</th><th class="text-right">Historical Outstanding Advances (Rp)</th></tr></thead>
+                <tbody>
+                    <tr><td class="bg-white font-bold text-slate-800 text-sm">Pak Budi</td><td class="bg-white uppercase tracking-widest text-slate-500 font-bold">Boat Captains</td><td class="bg-white text-right text-red-600 text-xl font-black bg-red-50 p-2 shadow-inner">250,000</td></tr>
+                     <tr><td class="bg-white font-bold text-slate-800 text-sm">Maman</td><td class="bg-white uppercase tracking-widest text-slate-500 font-bold">Boat Crew</td><td class="bg-white text-right text-red-600 text-base font-bold bg-red-50 p-2">100,000</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Read-only consolidated view of all outstanding Staff balances.</div>
+    </div><div id="fin_ledger" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Global Master Ledger View</h2>
+        
+        <div class="bg-white p-6 border rounded shadow max-w-6xl font-mono text-xs text-slate-600 border-l-8 border-slate-800">
+             <h3 class="font-black text-slate-800 border-b-2 border-slate-300 pb-2 mb-4 uppercase tracking-widest text-sm flex items-center "><i data-lucide="book-open" class="inline mr-2 text-slate-500 h-5 w-5"></i> Immutable Universal Ledger Log</h3>
+             <table class="w-full border-collapse border border-slate-300 shadow">
+                 <thead><tr class="bg-slate-200 text-slate-700 uppercase tracking-widest text-[0.6rem] font-bold"><th class="border border-slate-300 p-2 text-left">Timestamp (UTC)</th><th class="border border-slate-300 p-2 text-left">Source Document ID</th><th class="border border-slate-300 p-2 text-left">Account Label (Chart of Acc)</th><th class="border border-slate-300 p-2 text-right text-emerald-800">Debit (Dr) (+)</th><th class="border border-slate-300 p-2 text-right text-red-800">Credit (Cr) (-)</th></tr></thead>
+                 <tbody>
+                     <tr class="bg-white hover:bg-slate-50"><td class="border border-slate-200 p-2 bg-slate-50">2026-03-01T08:15Z</td><td class="border border-slate-200 p-2 font-bold text-slate-800 bg-slate-100 uppercase text-[0.6rem] tracking-widest">TRF-WALL-B1-0226</td><td class="border border-slate-200 p-2 text-blue-800 font-bold">Cash - Kaimana Hub Treasury</td><td class="border border-slate-200 p-2 text-right font-black text-emerald-600 shadow-inner w-32 tracking-wider">6,500,000</td><td class="border border-slate-200 p-2 text-right"></td></tr>
+                     <tr class="bg-white hover:bg-slate-50"><td class="border border-slate-200 p-2 bg-slate-50">2026-03-01T08:15Z</td><td class="border border-slate-200 p-2 font-bold text-slate-800 bg-slate-100 uppercase text-[0.6rem] tracking-widest border-t-0 text-transparent">TRF-WALL-B1-0226</td><td class="border border-slate-200 p-2 text-slate-500 pl-8 font-bold text-[0.6rem] uppercase tracking-wide">Cash - Trip Wallet B1</td><td class="border border-slate-200 p-2 text-right"></td><td class="border border-slate-200 p-2 text-right font-black text-red-600 shadow-inner w-32 tracking-wider">6,500,000</td></tr>
+                 </tbody>
+             </table>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Double-entry raw immutable log representation visually. Dr Cash, Cr Revenue mappings display here mapped by Timestamp and source Doc ID.</div>
+    </div><div id="fin_recon" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Bank Recon</h2>
+        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Reconciliation logic vs uploaded CSV.]</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="fin_pol" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Policy Monitor</h2>
+        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Rules engine output: e.g. Flag expenses > 5M]</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="fin_rep" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Reports Export</h2>
+        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Excel/PDF generator for Balance Sheet / P&L based on Ledger.]</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="fin_print" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Print Center (Docs)</h2>
+        <div class='bg-white p-6 border text-slate-500 text-center font-bold py-24 bg-slate-50 border-dashed border-4'>[Search Doc ID to inject A4 Print Template -> window.print()]</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="ceo_dash" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Executive Pulse</h2>
+        
+        <div class="grid grid-cols-4 gap-4 mb-4">
+            <div class="bg-slate-900 border-slate-700 border p-4 shadow-xl"><h4 class="text-[0.6rem] uppercase tracking-widest text-slate-400 font-bold mb-1"><i data-lucide="activity" class="inline w-3 h-3 mr-1 text-emerald-400"></i> Active Core Units</h4><div class="text-3xl font-black font-mono text-white">42</div></div>
+            <div class="bg-indigo-900 border-indigo-700 border p-4 shadow-xl"><h4 class="text-[0.6rem] uppercase tracking-widest text-indigo-300 font-bold mb-1"><i data-lucide="anchor" class="inline w-3 h-3 mr-1 text-blue-400"></i> Live Catch Tonnage (Today)</h4><div class="text-3xl font-black font-mono text-white">12.5T</div></div>
+            <div class="bg-red-900 border-red-700 border p-4 shadow-xl"><h4 class="text-[0.6rem] uppercase tracking-widest text-red-300 font-bold mb-1"><i data-lucide="alert-triangle" class="inline w-3 h-3 mr-1 text-red-400 animate-pulse"></i> Level 1 Escalations</h4><div class="text-3xl font-black font-mono text-white">3</div></div>
+            <div class="bg-emerald-900 border-emerald-700 border p-4 shadow-xl"><h4 class="text-[0.6rem] uppercase tracking-widest text-emerald-300 font-bold mb-1"><i data-lucide="pie-chart" class="inline w-3 h-3 mr-1 text-emerald-400"></i> Corporate Float (Total)</h4><div class="text-3xl font-black font-mono text-white">75B</div></div>
+        </div>
+        <div class="mt-8 bg-slate-800 p-6 rounded border border-slate-700 shadow-inner">
+             <h3 class="font-black text-slate-300 uppercase tracking-widest text-sm mb-4 border-b border-slate-600 pb-2"><i data-lucide="cpu" class="inline text-purple-400 mr-2 w-4 h-4"></i> Shark AI Ops Summary</h3>
+             <ul class="text-xs font-mono text-slate-400 space-y-2">
+                <li>System running fully nominal. Processing 124 concurrent active sessions.</li>
+                <li><span class="text-red-400 font-bold">[YIELD ALERT]</span> Kaimana Factory #2 producing fillets at 38% (Expected >43%). Flagging for review.</li>
+                <li><span class="text-amber-400 font-bold">[FRAUD PROBABILITY]</span> Unusually high consecutive fuel expenses (Boat F-14). Triggering audit request to Loc Mgr.</li>
+             </ul>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Bird's-eye view across all layers. Summarizes AI findings.</div>
+    </div><div id="ceo_map" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Global Inventory Map</h2>
+        
+        <div class="bg-white p-6 border rounded shadow-md max-w-6xl font-mono text-xs">
+             <table class="w-full border-collapse border border-slate-300 shadow">
+                 <thead><tr class="bg-slate-900 text-white uppercase tracking-widest text-[0.6rem] font-bold"><th class="border border-slate-700 p-2 text-left">Location / Unit Level</th><th class="border border-slate-700 p-2 text-left text-blue-300">Total KG Volume</th><th class="border border-slate-700 p-2 text-right text-emerald-300">Est Master Val (Rp)</th><th class="border border-slate-700 p-2 text-center text-red-300 w-24">Risk / Spoil</th></tr></thead>
+                 <tbody>
+                     <tr class="bg-slate-100 hover:bg-white"><td class="border border-slate-200 p-2 font-bold text-slate-800 uppercase tracking-wide"><i data-lucide="map-pin" class="w-4 h-4 inline mr-2 text-slate-400"></i> Kaimana Hub (Aggregate)</td><td class="border border-slate-200 p-2 font-black text-blue-700 text-base">4,250.0</td><td class="border border-slate-200 p-2 text-right font-black text-emerald-700 text-lg shadow-inner">245,000,000</td><td class="border border-slate-200 p-2 text-center">Low</td></tr>
+                     <tr class="bg-white hover:bg-slate-50"><td class="border border-slate-200 p-2 pl-12 text-slate-600 font-bold text-[0.6rem] uppercase tracking-widest">├─ CS Main Storage</td><td class="border border-slate-200 p-2 text-blue-600 font-bold">4,104.5</td><td class="border border-slate-200 p-2 text-right text-emerald-600 font-bold shadow-inner w-48">241,000,000</td><td class="border border-slate-200 p-2 text-center hidden-border"><span class="bg-red-100 text-red-700 px-2 py-0.5 rounded font-black shadow-sm">5.0 Waste</span></td></tr>
+                     <tr class="bg-white hover:bg-slate-50"><td class="border border-slate-200 p-2 pl-12 text-slate-600 font-bold text-[0.6rem] uppercase tracking-widest">├─ Boat Faris (Trip B1) [Live]</td><td class="border border-slate-200 p-2 text-blue-600 font-bold">145.5</td><td class="border border-slate-200 p-2 text-right text-emerald-600 font-bold shadow-inner w-48">4,000,000</td><td class="border border-slate-200 p-2 text-center">Nominal</td></tr>
+                 </tbody>
+             </table>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Maps every physical asset (stock) and estimated value recursively.</div>
+    </div><div id="ceo_yield" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Yield Anomalies</h2>
+        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Flags processing batches that fall outside statistical norm expectations. Powered by Shark AI history.]</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="ceo_health" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Financial Health</h2>
+        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Charts derived from global Ledger view. Real-time P&L estimates.]</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="ceo_risk" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Risk Dashboard</h2>
+        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Displays unapproved expenses > 7 days, aging AR > 30 days, high cash float balances on disconnected boats.]</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="ceo_appr" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Approvals (Overrides)</h2>
+        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Unlocks specific documents blocked by Finance Policy logic.]</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="ceo_shark" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Ask Shark AI</h2>
+        <div class='bg-slate-900 border-slate-700 p-6 rounded shadow max-w-4xl text-emerald-400 font-mono text-sm leading-relaxed border-t-8 border-t-purple-600 h-96'>OPS_SHARK_V4 ONLINE.<br>_ <span class='animate-pulse text-white'>_</span></div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="inv_dash" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Investor Dashboard</h2>
+        
+        <div class="grid grid-cols-3 gap-6 mb-8">
+            <div class="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700 border p-6 shadow-2xl rounded"><h4 class="text-xs uppercase tracking-widest text-slate-300 font-bold mb-2">Total Managed Asset Val</h4><div class="text-4xl font-black font-mono text-white text-shadow-sm">Rp 128B</div></div>
+            <div class="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700 border p-6 shadow-2xl rounded"><h4 class="text-xs uppercase tracking-widest text-slate-300 font-bold mb-2">YTD Realized Rev</h4><div class="text-4xl font-black font-mono text-emerald-400 text-shadow-sm">Rp 42B</div></div>
+            <div class="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700 border p-6 shadow-2xl rounded"><h4 class="text-xs uppercase tracking-widest text-slate-300 font-bold mb-2">Active Field Ops</h4><div class="text-4xl font-black font-mono text-blue-400 text-shadow-sm">54 Nodes</div></div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> High-level sanitized read-only metrics aggregated directly from immutable underlying datasets.</div>
+    </div><div id="inv_val" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Inventory Valuation</h2>
+        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Grid displaying estimated mark-to-market value of all cold storage.]</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="inv_rev" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Revenue/Margin</h2>
+        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Chart of Commercial Sales invoices grouped by Hub.]</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="inv_risk" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Risk Summary</h2>
+        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Summary of waste deductions & uncollected AR ratios.]</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="adm_usr" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">User Management</h2>
+        
+        <div class="bg-white p-6 border rounded shadow-md max-w-5xl text-sm font-mono border-t-8 border-fuchsia-800">
+             <h3 class="font-black text-fuchsia-900 border-b border-fuchsia-200 pb-2 mb-4 uppercase tracking-widest text-sm flex items-center justify-between"><i data-lucide="users" class="w-5 h-5 mr-3 inline text-fuchsia-600"></i> Corporate Access Control Registry</h3>
+             <table class="w-full border-collapse border border-fuchsia-200 shadow">
+                 <thead><tr class="bg-fuchsia-900 text-fuchsia-100 uppercase tracking-widest text-[0.6rem] font-bold"><th class="border border-fuchsia-700 p-2 text-left">Internal Name</th><th class="border border-fuchsia-700 p-2 text-left">Login Email / Auth ID</th><th class="border border-fuchsia-700 p-2 text-center text-amber-300">Base Role Matrix Level</th><th class="border border-fuchsia-700 p-2 text-center">Node Bound Restrict</th><th class="border border-fuchsia-700 p-2 text-right">Settings</th></tr></thead>
+                 <tbody>
+                     <tr class="bg-white hover:bg-fuchsia-50"><td class="border border-fuchsia-100 p-2 font-bold text-fuchsia-900">John Doe</td><td class="border border-fuchsia-100 p-2 text-slate-500 text-xs">john.d@ops3.internal</td><td class="border border-fuchsia-100 p-2 text-center font-bold text-amber-600 bg-amber-50">role_locationmgr</td><td class="border border-fuchsia-100 p-2 text-center text-xs tracking-widest font-black text-blue-800 bg-blue-50">Kaimana Hub</td><td class="border border-fuchsia-100 p-2 text-right"><i data-lucide="settings" class="inline text-slate-400 w-4 h-4 cursor-pointer"></i></td></tr>
+                     <tr class="bg-white hover:bg-fuchsia-50"><td class="border border-fuchsia-100 p-2 font-bold text-fuchsia-900">Budi</td><td class="border border-fuchsia-100 p-2 text-slate-500 text-xs">budi@ops3.boat</td><td class="border border-fuchsia-100 p-2 text-center font-bold text-slate-600">role_boat</td><td class="border border-fuchsia-100 p-2 text-center text-xs tracking-widest font-black text-indigo-800 bg-indigo-50">Boat Faris</td><td class="border border-fuchsia-100 p-2 text-right text-red-400"><i data-lucide="lock" class="inline w-4 h-4 cursor-pointer"></i></td></tr>
+                 </tbody>
+             </table>
+             <button class="bg-fuchsia-100 hover:bg-fuchsia-200 text-fuchsia-900 font-bold px-6 py-2 mt-4 rounded border border-fuchsia-300 shadow text-xs tracking-widest uppercase"><i data-lucide="plus" class="w-4 h-4 inline mr-1"></i> Provision New Auth Node</button>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Maps Google Auth records to OPS3 internal roles and hard-binds them to explicit location node contexts. Affects Firestore Rules natively.</div>
+    </div><div id="adm_loc" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Location Builder</h2>
+        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Visual drag-n-drop or explicit tree editor placing Boats -> Hubs -> Global]</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="adm_ppl" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Global People Registry Master</h2>
+        
+        <div class="bg-slate-50 border p-6 rounded shadow-sm max-w-5xl border-t-8 border-slate-700 text-sm">
+             <h3 class="font-black text-slate-800 border-b border-slate-300 pb-2 mb-4 uppercase tracking-widest"><i data-lucide="contact" class="inline mr-2 w-5 h-5 text-slate-500"></i> Personnel Reference Directory</h3>
+             <table class="w-full inv-table rounded border border-slate-300 font-mono shadow-inner mb-4">
+                <thead><tr class="!bg-slate-800 text-white"><th>Registry ID</th><th>Legal Full Name</th><th>Default Group Mapping</th><th class="text-center">Status</th></tr></thead>
+                <tbody>
+                    <tr class="bg-white"><td class="font-bold text-blue-700 bg-blue-50 w-32 border-r border-slate-100">ID-011</td><td class="font-bold">Pak Budi Santoso</td><td class="text-slate-500 italic">Boat Captains / Kaimana</td><td class="text-center"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded text-xs">Active</span></td></tr>
+                    <tr class="bg-white"><td class="font-bold text-red-700 bg-red-50 w-32 border-r border-slate-100">ID-042</td><td class="font-bold text-slate-600">Maman</td><td class="text-slate-500 italic">Boat Crew Pool</td><td class="text-center"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded text-xs">Active</span></td></tr>
+                </tbody>
+            </table>
+            <button class="bg-slate-800 hover:bg-black text-white px-4 py-2 font-bold text-xs uppercase shadow tracking-widest rounded">+ Mint Employee ID</button>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Central dictionary for Staff. Any addition here populates dropdowns across Boat, Factory, CS, and Office advance logic.</div>
+    </div><div id="adm_exp_type" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Expense Typology Configs</h2>
+        
+        <div class="bg-slate-50 border p-6 rounded shadow-sm max-w-5xl border-t-8 border-slate-600 text-sm">
+            <h3 class="font-black text-slate-800 border-b border-slate-300 pb-2 mb-4 uppercase tracking-widest flex justify-between"><span><i data-lucide="list" class="inline w-5 h-5 mr-2 text-slate-500"></i> Ledger Type Mappings</span><span class="text-xs bg-slate-200 text-slate-600 px-3 py-1 font-bold rounded shadow-inner">Config Mode</span></h3>
+             <table class="w-full inv-table shadow border border-slate-300 text-xs font-mono">
+                <thead><tr class="!bg-slate-700 text-slate-100"><th>Friendly App Name (Dropdown)</th><th>Backing Chart of Accounts (COA) ID</th><th class="text-center">Scope Limit</th></tr></thead>
+                <tbody>
+                    <tr><td class="bg-white font-bold text-slate-700 p-2">Crew/Employee Payment / Advance</td><td class="bg-white p-2 text-slate-500 border-r tracking-widest border-slate-100">COA-5100: Direct Labor / Advances</td><td class="bg-white text-center p-2"><span class="text-[0.6rem] bg-indigo-50 border border-indigo-200 text-indigo-700 font-bold px-1 rounded uppercase">All Operatives</span></td></tr>
+                    <tr><td class="bg-white font-bold text-slate-700 p-2 border-t border-slate-100">Electricity (PLN)</td><td class="bg-white p-2 text-slate-500 border-r tracking-widest border-t border-slate-100">COA-6200: Utilities Provision</td><td class="bg-white text-center p-2 border-t border-slate-100"><span class="text-[0.6rem] bg-indigo-50 border border-indigo-200 text-indigo-700 font-bold px-1 rounded uppercase">Fac / CS Only</span></td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Binds UI operational expense dropdown items directly to Finance-layer Chart of Accounts strings.</div>
+    </div><div id="adm_mdm" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Master Data Config</h2>
+        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Manage SKU tables, standard conversion yields, and pricing minimums limit blocks.]</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="adm_aud" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">System Audit Tool</h2>
+        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Raw immutable append-log viewer capturing every Firebase interaction bound by UID.]</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="adm_perm" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Permissions Matrix</h2>
+        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Overrides standard RoleConfig if exact granular blocks are required per user ID.]</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="adm_set" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Global Constants</h2>
+        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[System naming conventions, timezones, fiscal year start dates.]</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="shk_chat" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Shark Consult & Override</h2>
+        
+        <div class="bg-slate-900 border border-purple-900 shadow-2xl rounded max-w-4xl flex flex-col h-[600px] border-t-8 border-t-purple-500">
+            <div class="p-4 bg-black/40 border-b border-purple-800/50 flex items-center justify-between shadow-inner">
+                <span class="font-black tracking-widest text-purple-400 text-sm flex items-center"><i data-lucide="cpu" class="w-5 h-5 mr-3"></i> OPS3 SHARK COMPANION</span>
+                <span class="text-[0.6rem] text-emerald-400 font-bold uppercase tracking-widest animate-pulse border border-emerald-900/50 bg-emerald-900/20 px-2 py-0.5 rounded shadow">Ingesting Live Streams</span>
+            </div>
+            <div class="flex-1 overflow-y-auto p-6 font-mono text-xs space-y-6">
+                 <div class="flex items-start opacity-70">
+                    <div class="w-8 h-8 rounded bg-slate-800 text-slate-500 flex items-center justify-center mr-3 border border-slate-700 font-black">U</div>
+                    <div class="bg-slate-800 text-slate-300 p-3 rounded-tr-lg rounded-br-lg rounded-bl-lg shadow max-w-[80%] uppercase tracking-wide border border-slate-700 flex flex-col items-end">
+                        <span class="text-right">Run a fraud risk analysis on Boat F-14 last 3 trips. Did the Captain overdraw fuel compared to logged catch?</span>
+                    </div>
+                </div>
+                 <div class="flex items-start mt-4">
+                    <div class="w-8 h-8 rounded bg-gradient-to-br from-purple-800 to-purple-900 border border-purple-600 shadow-xl shadow-purple-900 text-purple-200 flex items-center justify-center mr-3 animate-pulse"><i data-lucide="zap" class="w-4 h-4"></i></div>
+                    <div class="bg-black/40 text-purple-300 font-bold p-4 rounded border border-purple-800/50 shadow-inner max-w-[85%] leading-relaxed flex flex-col group hover:border-purple-600 transition-colors">
+                        <span class="text-[0.6rem] font-black uppercase text-purple-500 tracking-widest mb-2 border-b border-purple-900/50 pb-1 w-[fit-content]">Shark Diagnostic Output</span>
+                        Running matrix correlation: (FUEL_EXP) vs (YIELD_KG/DISTANCE).<br><br>
+                        Trip B1-011: Nominal. Ratio 12:1.<br>
+                        Trip B1-012: Nominal. Ratio 11.5:1.<br>
+                        Trip B1-013: <span class="bg-red-900/50 text-red-400 px-1 font-black">ANOMALY.</span> Ratio spiked to 24:1. Fuel drawn: 2500L, Catch reported: 104kg.<br><br>
+                        <span class="text-amber-300">CONCLUSION: High probability of fuel diversion/theft on the 3rd trip. Automatically flagging Location Manager dashboard and suspending Auto-Approval for Captain's future EXP docs.</span>
+                        <div class="mt-4 pt-3 border-t border-purple-800/30 w-full flex space-x-3 opacity-50 group-hover:opacity-100 transition-opacity">
+                             <button class="bg-purple-900/40 border border-purple-700 hover:bg-purple-800 hover:text-white px-3 py-1 rounded text-[0.6rem] uppercase tracking-widest text-purple-400 flex items-center shadow"><i data-lucide="file-text" class="w-3 h-3 mr-1 inline"></i> View Trip 13 Audit</button>
+                             <button class="bg-red-900/20 border border-red-900 hover:bg-red-900 text-red-500 font-black hover:text-white px-3 py-1 rounded text-[0.6rem] uppercase tracking-widest transition shadow flex items-center"><i data-lucide="lock" class="w-3 h-3 mr-1 inline"></i> Lock User Matrix</button>
+                        </div>
+                    </div>
+                </div>
+                 <div class="flex items-center text-slate-600 text-[0.6rem] uppercase tracking-widest font-black mt-4 ml-12">
+                     <i data-lucide="cpu" class="w-3 h-3 mr-1 animate-spin"></i> Context Engine Idling...
+                 </div>
+            </div>
+            <div class="p-4 bg-slate-800 border-t border-purple-900">
+                <div class="relative flex items-center bg-black/30 border border-purple-800 p-2 rounded shadow-inner">
+                   <div class="absolute left-4 w-2 h-2 rounded-full bg-emerald-500 animate-pulse hidden md:block"></div>
+                   <input type="text" class="w-full bg-transparent text-white font-mono text-sm px-8 outline-none placeholder-purple-900 font-bold" placeholder="Command Shark AI (e.g. Generate weekly P&L estimation)...">
+                   <button class="bg-purple-700 hover:bg-purple-600 border border-purple-400 text-white p-2 rounded transition-colors shadow-lg"><i data-lucide="send" class="w-4 h-4"></i></button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Intelligent multi-agent orchestrator. Chat interface for systemic overrides and deep diagnostic querying directly into immutable ledgers.</div>
+    </div><div id="shk_grid" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Risk Matrix Watch (Active)</h2>
+        
+        <div class="bg-white p-6 border rounded shadow-md max-w-6xl font-mono text-xs border-t-8 border-purple-900">
+            <h3 class="font-black text-slate-800 border-b-2 border-slate-300 pb-2 mb-4 uppercase tracking-widest text-sm flex items-center "><i data-lucide="grid" class="inline mr-2 text-slate-400 h-5 w-5"></i> Systemic Anomaly Board</h3>
+             <table class="w-full border-collapse border border-slate-300 shadow">
+                 <thead><tr class="bg-slate-900 text-white uppercase tracking-widest text-[0.6rem] font-bold"><th class="border border-slate-700 p-2 text-left">Confidence</th><th class="border border-slate-700 p-2 text-left">Entity Context Bound</th><th class="border border-slate-700 p-2 text-left">Heuristic / Rule Triggered</th><th class="border border-slate-700 p-2 text-center">Auto-Action Attempted</th></tr></thead>
+                 <tbody>
+                     <tr class="bg-red-50 hover:bg-red-100"><td class="border border-slate-200 p-2 text-center text-red-600 font-black"><i data-lucide="alert-triangle" class="w-4 h-4 inline mr-1 animate-pulse"></i> 98.5%</td><td class="border border-slate-200 p-2 font-bold text-slate-800">Boat Faris (TRIP-B1-0226)</td><td class="border border-slate-200 p-2 text-slate-600">Yield Divergence: High fuel burn (2500L), low catch value (Rp 4M).</td><td class="border border-slate-200 p-2 text-center font-bold text-slate-700 uppercase"><span class="bg-amber-200 text-amber-900 text-[0.6rem] px-1 py-0.5 rounded border border-amber-400">Suspend Payments</span></td></tr>
+                     <tr class="bg-white hover:bg-slate-50"><td class="border border-slate-200 p-2 text-center text-amber-500 font-black">72.0%</td><td class="border border-slate-200 p-2 font-bold text-slate-800">HQ Master Bank (BCA) Node</td><td class="border border-slate-200 p-2 text-slate-600">Float Violation: Central funds dipped below Rp 50M reserve buffer limit.</td><td class="border border-slate-200 p-2 text-center font-bold text-slate-700 uppercase"><span class="bg-blue-100 text-blue-800 text-[0.6rem] px-1 py-0.5 rounded border border-blue-300">CEO SMS Alerted</span></td></tr>
+                 </tbody>
+             </table>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Presents the active, unfixed rules triggered via background asynchronous Cloud Functions monitoring the global ledger.</div>
+    </div><div id="shk_hist" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Alert Decay History</h2>
+        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Logs when a Risk was cleared, by whom, and what mitigation was supplied.]</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="shk_wa" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">C-Suite Broadcast</h2>
+        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Configures WhatsApp / Telegram webhook texts triggered by specific system bounds (e.g. Daily EOD Recap).]</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div><div id="shk_rule" class="screen">
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Rule Adjustments</h2>
+        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Manages the percentage limits triggering 'Yield Divergence' or 'Float Violation'.]</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+    </div>
+        <div id="screen_noconfig" class="screen bg-red-50 relative">
+            <div class="absolute inset-0 flex items-center justify-center">
+                <div class="bg-white p-8 border-4 border border-red-500 rounded-xl shadow-2xl max-w-lg text-center">
+                    <i data-lucide="alert-triangle" class="w-16 h-16 text-red-500 mx-auto mb-4"></i>
+                    <h2 class="text-3xl font-black text-red-900 mb-2 uppercase tracking-wide">ROLE CONFIG MISSING</h2>
+                    <p class="text-red-700 font-mono bg-red-100 p-2 rounded block" id="error_role_id_display"></p>
+                    <p class="mt-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Hard stopping. No default fallback provided.</p>
+                </div>
+            </div>
+        </div>
+        <div id="screen_missing" class="screen bg-amber-50 relative">
+            <div class="absolute inset-0 flex items-center justify-center">
+                <div class="bg-white p-8 border-4 border-amber-500 rounded-xl shadow-2xl max-w-lg text-center">
+                    <i data-lucide="alert-octagon" class="w-16 h-16 text-amber-500 mx-auto mb-4"></i>
+                    <h2 class="text-3xl font-black text-amber-900 mb-2 uppercase tracking-wide">SCREEN MISSING</h2>
+                    <p class="text-amber-700 font-mono bg-amber-100 p-2 rounded block" id="error_screen_id_display"></p>
+                    <p class="mt-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Hard stopping. Mockup block has not been created yet.</p>
+                </div>
+            </div>
+        </div>
+
+        </main>
+    </div>
+
+    <script>
+        const roleConfig = {
+            'role_boat': {
+                color: 'bg-blue-900', label: 'Boat Operator',
+                nav: [
+                    { id: 'boat_start', label: '1. Start Trip', icon: 'play' }, { id: 'boat_init', label: '2. Trip Start Balances', icon: 'battery-charging' }, { id: 'boat_exp', label: '3. Trip Expense Invoice', icon: 'receipt' }, { id: 'boat_recv_own', label: '4. Receiv: Own Catch', icon: 'anchor' }, { id: 'boat_recv_buy', label: '5. Receiv: Buy Fishermen', icon: 'file-input' }, { id: 'boat_sale', label: '6. Boat Sale Invoice', icon: 'shopping-cart' }, { id: 'boat_wallet', label: '7. Trip Wallet & Transfers', icon: 'wallet' }, { id: 'boat_close', label: '8. Close Trip', icon: 'check-square' }, { id: 'boat_docs', label: 'My Documents', icon: 'folder' }, { id: 'boat_print', label: 'Print Center', icon: 'printer' }
+                ]
+            },
+            'role_factory': {
+                color: 'bg-indigo-900', label: 'Factory Operator',
+                nav: [
+                    { id: 'fac_start', label: '1. Start Shift/Batch', icon: 'play' }, { id: 'fac_init', label: '2. Factory Opening Checks', icon: 'clipboard-check' }, { id: 'fac_exp', label: '3. Expense Invoice', icon: 'receipt' }, { id: 'fac_recv', label: '4. Inbound Receiving', icon: 'truck' }, { id: 'fac_proc', label: '5. Processing Batch', icon: 'scissors' }, { id: 'fac_transfer', label: '6. Internal Transfer Out', icon: 'arrow-right-circle' }, { id: 'fac_wallet', label: '7. Wallet Snapshot', icon: 'wallet' }, { id: 'fac_close', label: '8. Close Shift/Batch', icon: 'check-square' }, { id: 'fac_docs', label: 'My Documents', icon: 'folder' }, { id: 'fac_print', label: 'Print Center', icon: 'printer' }
+                ]
+            },
+            'role_coldstorage': {
+                color: 'bg-cyan-950', label: 'Cold Storage Op',
+                nav: [
+                    { id: 'cs_start', label: '1. Start Loading', icon: 'play' }, { id: 'cs_init', label: '2. CS Opening Checks', icon: 'clipboard-check' }, { id: 'cs_exp', label: '3. Expense Invoice', icon: 'receipt' }, { id: 'cs_recv', label: '4. Inbound Acceptance', icon: 'import' }, { id: 'cs_stock', label: '5. Stock On Hand', icon: 'boxes' }, { id: 'cs_outbound', label: '6. Outbound Loading', icon: 'package-minus' }, { id: 'cs_sale', label: '7. Sales Invoice', icon: 'shopping-cart' }, { id: 'cs_waste', label: '8. Damage/Waste Log', icon: 'trash-2' }, { id: 'cs_wallet', label: '9. Wallet Snapshot', icon: 'wallet' }, { id: 'cs_close', label: '10. Close Loading Session', icon: 'check-square' }, { id: 'cs_docs', label: 'My Documents', icon: 'folder' }, { id: 'cs_print', label: 'Print Center', icon: 'printer' }
+                ]
+            },
+            'role_office': {
+                color: 'bg-teal-900', label: 'Office Admin',
+                nav: [
+                    { id: 'off_start', label: '1. Start Day', icon: 'sun' }, { id: 'off_init', label: '2. Petty Cash Opening', icon: 'wallet' }, { id: 'off_exp', label: '3. Expense Invoice', icon: 'receipt' }, { id: 'off_payreq', label: '4. Payment Reqs', icon: 'banknote' }, { id: 'off_ar', label: '5. AR Follow-up Log', icon: 'phone-call' }, { id: 'off_close', label: '6. Close Day Summary', icon: 'moon' }, { id: 'off_docs', label: 'My Documents', icon: 'folder' }, { id: 'off_print', label: 'Print Center', icon: 'printer' }
+                ]
+            },
+            'role_locationmgr': {
+                color: 'bg-emerald-900', label: 'Location Manager',
+                nav: [
+                    { id: 'loc_dash', label: 'Location Dashboard', icon: 'layout' }, { id: 'loc_app_exp', label: 'Approve: Expenses', icon: 'check-square' }, { id: 'loc_app_trans', label: 'Approve: Transfers', icon: 'check-square' }, { id: 'loc_app_recv', label: 'Review: Receivings', icon: 'eye' }, { id: 'loc_perf', label: 'Unit Performance', icon: 'activity' }, { id: 'loc_inv', label: 'Location Inventory', icon: 'archive' }, { id: 'loc_wallet', label: 'Location Wallets', icon: 'credit-card' }, { id: 'loc_staff', label: 'Unit Staff Assignment', icon: 'users' }, { id: 'loc_ppl', label: 'People Registry View', icon: 'contact' }, { id: 'loc_print', label: 'Doc & Print Center', icon: 'printer' }
+                ]
+            },
+            'role_finance': {
+                color: 'bg-amber-900', label: 'Finance Officer',
+                nav: [
+                    { id: 'fin_dash', label: 'Finance Dashboard', icon: 'pie-chart' }, { id: 'fin_wall', label: 'Wallets Overview', icon: 'wallet' }, { id: 'fin_ap', label: 'Payables (AP) & Payment Run', icon: 'arrow-down-right' }, { id: 'fin_ar', label: 'Receivables (AR) & Collection', icon: 'arrow-up-right' }, { id: 'fin_crew', label: 'Crew/Emp Advances OS', icon: 'users' }, { id: 'fin_ledger', label: 'Global Ledger', icon: 'book-open' }, { id: 'fin_recon', label: 'Bank Recon', icon: 'refresh-cw' }, { id: 'fin_pol', label: 'Expense Policy Monitor', icon: 'shield-alert' }, { id: 'fin_rep', label: 'Reports Export', icon: 'download' }, { id: 'fin_print', label: 'Print Center', icon: 'printer' }
+                ]
+            },
+            'role_ceo': {
+                color: 'bg-slate-900', label: 'CEO Command',
+                nav: [
+                    { id: 'ceo_dash', label: 'Executive Pulse', icon: 'bar-chart-2' }, { id: 'ceo_map', label: 'Global Inventory Map', icon: 'globe' }, { id: 'ceo_yield', label: 'Yield Anomalies', icon: 'alert-triangle' }, { id: 'ceo_health', label: 'Financial Health', icon: 'dollar-sign' }, { id: 'ceo_risk', label: 'Risk Dashboard', icon: 'shield' }, { id: 'ceo_appr', label: 'Approvals / Overrides', icon: 'key' }, { id: 'ceo_shark', label: 'Shark AI Ops', icon: 'cpu' }
+                ]
+            },
+            'role_investor': {
+                color: 'bg-gray-800', label: 'Investor',
+                nav: [
+                    { id: 'inv_dash', label: 'Investor Dashboard', icon: 'trending-up' }, { id: 'inv_val', label: 'Inventory Valuation', icon: 'box' }, { id: 'inv_rev', label: 'Revenue/Margin', icon: 'pie-chart' }, { id: 'inv_risk', label: 'Risk Summary', icon: 'shield-check' }
+                ]
+            },
+            'role_admin': {
+                color: 'bg-fuchsia-900', label: 'System Admin',
+                nav: [
+                    { id: 'adm_usr', label: 'User Mgt (Roles/Scope)', icon: 'users' }, { id: 'adm_loc', label: 'Location/Unit Tree', icon: 'git-merge' }, { id: 'adm_ppl', label: 'People Registry Master', icon: 'contact' }, { id: 'adm_exp_type', label: 'Expense Type Master', icon: 'list' }, { id: 'adm_mdm', label: 'Master Data Configs', icon: 'database' }, { id: 'adm_aud', label: 'System Audit Log', icon: 'list' }, { id: 'adm_perm', label: 'Permissions Matrix', icon: 'lock' }, { id: 'adm_set', label: 'System Settings', icon: 'settings' }
+                ]
+            },
+            'role_shark': {
+                color: 'bg-purple-900', label: 'Shark AI',
+                nav: [
+                    { id: 'shk_chat', label: 'Ops Console Chat', icon: 'message-square' }, { id: 'shk_grid', label: 'Risk Monitor Grid', icon: 'grid' }, { id: 'shk_hist', label: 'Alert History', icon: 'clock' }, { id: 'shk_wa', label: 'WhatsApp Templates', icon: 'message-circle' }, { id: 'shk_rule', label: 'Rule Configuration', icon: 'sliders' }
+                ]
+            }
+        };
+
+        function switchRoleContext(roleId) {
+            document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+            const conf = roleConfig[roleId];
+            const sidebar = document.getElementById('mainSidebar');
+            
+            if(!conf) {
+                // HARD REQUIREMENT: NO FALLBACK. RENDER BLOCKING ERROR.
+                sidebar.className = `w-72 flex flex-col shadow-xl z-20 flex-shrink-0 bg-red-900 text-red-200`;
+                document.getElementById('dynamicNav').innerHTML = '';
+                document.getElementById('topbarRole').innerText = "ERROR";
+                document.getElementById('error_role_id_display').innerText = `Role ID [${roleId}] missing config!`;
+                document.getElementById('screen_noconfig').classList.add('active');
+                return;
+            }
+
+            sidebar.className = `w-72 flex flex-col shadow-xl z-20 flex-shrink-0 transition-colors duration-300 ${conf.color} text-slate-300`;
+            const nav = document.getElementById('dynamicNav');
+            nav.innerHTML = '';
+            document.getElementById('topbarRole').innerText = conf.label;
+
+            conf.nav.forEach((item, i) => {
+                const el = document.createElement('div');
+                el.className = `nav-item flex items-center px-4 py-3 text-sm rounded font-medium transition mt-1 text-slate-300 hover:text-white hover:bg-black/20`;
+                el.innerHTML = `<i data-lucide="${item.icon}" class="w-4 h-4 mr-3 opacity-80"></i> ${item.label}`;
+                el.onclick = () => activateScreen(item.id, el, item.label);
+                nav.appendChild(el);
+            });
+            
+            if(window.lucide) { lucide.createIcons(); }
+            nav.firstChild.click(); // Always explicit deterministic first selection per role config
+        }
+
+        function activateScreen(screenId, navEl, labelText) {
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            navEl.classList.add('active');
+
+            document.getElementById('topbarScreen').innerText = labelText;
+            document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+            
+            const target = document.getElementById(screenId);
+            if(target) { 
+                target.classList.add('active'); 
+            } else {
+                // HARD REQUIREMENT: NO FALLBACK. RENDER BLOCKING ERROR.
+                document.getElementById('error_screen_id_display').innerText = `Screen ID [${screenId}] missing markup block!`;
+                document.getElementById('screen_missing').classList.add('active');
+            }
+        }
+
+        window.onload = () => switchRoleContext('role_boat');
+    </script>
+</body>
+</html>

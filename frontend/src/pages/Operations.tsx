@@ -8,6 +8,32 @@ import { httpsCallable } from 'firebase/functions';
 import { functions } from '../firebase';
 import { getCurrentLanguage, t, type Language } from '../i18n';
 
+// Injected CSS for printing support
+const PrintStyles = () => (
+  <style>{`
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      .print-only, .print-only * {
+        visibility: visible;
+      }
+      .print-only {
+        display: block !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+  `}</style>
+);
+
 interface UserProfile {
   email: string;
   role: string;
@@ -116,6 +142,7 @@ const Operations = ({ userProfile }: OperationsProps) => {
 
   return (
     <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+      <PrintStyles />
       <h1 style={{ color: '#0f172a', marginBottom: '2rem' }}>{t('ops_hub', language)}</h1>
 
       {result && (
@@ -141,11 +168,52 @@ const Operations = ({ userProfile }: OperationsProps) => {
             {result.data?.tripId && (
               <div style={{ marginTop: '0.5rem' }}>
                 <strong>Trip ID:</strong> {result.data.tripId}
-                <button onClick={() => copyToClipboard(result.data.tripId)} style={{ marginLeft: '0.5rem', padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}>{t('common_copy', language)}</button>
+                <button onClick={() => copyToClipboard(result.data.tripId)} style={{ marginLeft: '0.5rem', padding: '0.2rem 0.5rem', fontSize: '0.75rem' }} className="no-print">{t('common_copy', language)}</button>
+              </div>
+            )}
+
+            {result.type === 'recordReceiving' && (
+              <div style={{ marginTop: '1rem' }} className="no-print">
+                <button onClick={() => window.print()} style={{ padding: '0.5rem 1rem', background: '#2563eb', color: 'white', borderRadius: '0.25rem', border: 'none', cursor: 'pointer' }}>Print Receiving Slip</button>
               </div>
             )}
           </div>
-          <button onClick={() => setResult(null)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '1.25rem' }}>×</button>
+          <button onClick={() => setResult(null)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '1.25rem' }} className="no-print">×</button>
+
+          {/* Printable Receipt Area */}
+          {result.type === 'recordReceiving' && (
+            <div className="print-only" style={{ display: 'none', position: 'absolute', top: 0, left: 0, width: '100%', padding: '2rem', background: 'white', color: 'black' }}>
+              <div style={{ display: 'flex', alignItems: 'center', borderBottom: '2px solid black', paddingBottom: '1rem', marginBottom: '1rem' }}>
+                <img src="/favicon.png" alt="Ocean Pearl Logo" style={{ width: '50px', height: '50px', marginRight: '1rem' }} />
+                <h2>Ocean Pearl Seafood - Receiving Slip</h2>
+              </div>
+              <p><strong>Date:</strong> {new Date().toLocaleDateString('en-US')}</p>
+              <p><strong>Batch ID:</strong> {result.data?.batchId}</p>
+              <p><strong>Location ID:</strong> {receiving.locationId}</p>
+              <p><strong>Unit ID:</strong> {receiving.unitId}</p>
+              <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '1rem' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid black' }}>
+                    <th style={{ textAlign: 'left', padding: '0.5rem' }}>SKU</th>
+                    <th style={{ textAlign: 'right', padding: '0.5rem' }}>Quantity (KG)</th>
+                    <th style={{ textAlign: 'right', padding: '0.5rem' }}>Unit Price (IDR)</th>
+                    <th style={{ textAlign: 'right', padding: '0.5rem' }}>Total Value (IDR)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ padding: '0.5rem' }}>{receiving.skuId}</td>
+                    <td style={{ textAlign: 'right', padding: '0.5rem' }}>{receiving.qtyKg}</td>
+                    <td style={{ textAlign: 'right', padding: '0.5rem' }}>{Number(receiving.unitCostIDR).toLocaleString('en-US')}</td>
+                    <td style={{ textAlign: 'right', padding: '0.5rem' }}>{(Number(receiving.qtyKg) * Number(receiving.unitCostIDR)).toLocaleString('en-US')}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div style={{ marginTop: '2rem', borderTop: '1px solid black', paddingTop: '1rem' }}>
+                <strong>Supplier / Vessel:</strong> {receiving.supplierName || receiving.vesselName || 'OWN CATCH'}
+              </div>
+            </div>
+          )}
         </div >
       )}
 

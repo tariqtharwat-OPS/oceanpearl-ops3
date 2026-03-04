@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCEAN PEARL | OPS3 MASTER BLUEPRINT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #0f172a; }
+        .section-break { page-break-before: always; }
+        
+        .a4-container {
+            width: 210mm;
+            min-height: 297mm;
+            background: white;
+            margin: 2rem auto;
+            padding: 15mm;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        
+        .print-only { display: none; }
+        
+        @media print {
+            body { background-color: white; }
+            .no-print { display: none !important; }
+            .a4-container { margin: 0; box-shadow: none; border: none; padding: 0mm; width: 100%; height: auto; }
+            .print-only { display: block; }
+            .section-break { page-break-before: always; }
+        }
+
+        .table-header { @apply bg-slate-800 text-white font-semibold text-sm uppercase tracking-wider text-left py-3 px-4; }
+        .table-cell { @apply py-3 px-4 text-sm border-b border-slate-200; }
+        
+        /* Mockup Layouts */
+        .mockup-sidebar { @apply w-64 bg-slate-900 text-slate-300 min-h-[500px] flex flex-col; }
+        .mockup-topbar { @apply h-14 bg-white border-b border-slate-200 flex items-center justify-between px-6; }
+    </style>
+</head>
+<body class="antialiased">
+
+<!-- NAVIGATION TABS -->
+<nav class="fixed top-0 w-full bg-slate-900 text-white shadow-xl z-50 no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+            <div class="flex items-center space-x-3">
+                <span class="font-black tracking-widest text-lg">OPS3 MASTER BLUEPRINT</span>
+                <span class="text-xs bg-red-600 px-2 py-0.5 rounded font-bold uppercase tracking-widest">FROZEN SPEC</span>
+            </div>
+            <div class="hidden md:block">
+                <div class="ml-10 flex items-baseline space-x-4 text-sm font-medium">
+                    <a href="#core" class="hover:bg-slate-700 px-3 py-2 rounded-md">1. Core</a>
+                    <a href="#roles" class="hover:bg-slate-700 px-3 py-2 rounded-md">2. Roles UX</a>
+                    <a href="#screens" class="hover:bg-slate-700 px-3 py-2 rounded-md">3. Screens</a>
+                    <a href="#invoices" class="hover:bg-slate-700 px-3 py-2 rounded-md">4. Invoice Mockups</a>
+                    <a href="#shark" class="hover:bg-slate-700 px-3 py-2 rounded-md">5. Shark AI</a>
+                    <a href="#phases" class="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-md">6. Implementation</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="pt-24 pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-24">
+
+    <!-- 1. SYSTEM CORE BLUEPRINT -->
+    <section id="core" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden section-break">
+        <div class="bg-slate-800 px-8 py-6">
+            <h2 class="text-2xl font-bold text-white tracking-widest uppercase">1. System Core Blueprint</h2>
+            <p class="text-slate-300 mt-2">The immutable foundation of OPS3. Goods and Money Control.</p>
+        </div>
+        <div class="p-8 space-y-10">
+            
+            <!-- Hierarchy -->
+            <div>
+                <h3 class="text-lg font-bold text-slate-900 border-b border-slate-200 pb-2 mb-4">A. Operational Hierarchy</h3>
+                <div class="bg-slate-50 p-6 rounded-lg border border-slate-200 font-mono text-sm leading-relaxed text-slate-700">
+                    <span class="font-bold text-slate-900">COMPANY</span> (Ocean Pearl)
+                    <br>├── <span class="font-bold text-blue-700">LOCATION</span> (Kaimana)
+                    <br>│   ├── <span class="font-bold text-emerald-700">UNIT</span> (Boat Faris)  <span class="text-slate-400"><i>- Captures Raw Stock, holds Trip Wallet</i></span>
+                    <br>│   ├── <span class="font-bold text-emerald-700">UNIT</span> (Factory)     <span class="text-slate-400"><i>- Transforms Raw -> Finished, holds Factory Wallet</i></span>
+                    <br>│   └── <span class="font-bold text-emerald-700">UNIT</span> (Office)      <span class="text-slate-400"><i>- Absorbs localized OPEX, holds Petty Cash</i></span>
+                    <br>└── <span class="font-bold text-blue-700">LOCATION</span> (Surabaya)
+                    <br>    └── <span class="font-bold text-emerald-700">UNIT</span> (Cold Storage) <span class="text-slate-400"><i>- Holds finished stock prior to export sales</i></span>
+                </div>
+                <p class="mt-3 text-sm text-slate-600"><strong>Rule:</strong> Units belong to Locations. Inventory belongs exclusively to Units. Operations occur at the Unit level. Approvals occur at the Location level.</p>
+            </div>
+
+            <!-- Roles -->
+            <div>
+                <h3 class="text-lg font-bold text-slate-900 border-b border-slate-200 pb-2 mb-4">B. Role Scopes</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="border border-slate-200 p-4 rounded-lg"><span class="font-bold text-slate-900 block mb-1">Admin</span><span class="text-sm text-slate-600">Full system override, settings, database tools, user management.</span></div>
+                    <div class="border border-slate-200 p-4 rounded-lg bg-blue-50"><span class="font-bold text-blue-900 block mb-1">CEO</span><span class="text-sm text-blue-800">Omni-directional read access. Global dashboards, cross-location transfers, anomaly resolution.</span></div>
+                    <div class="border border-slate-200 p-4 rounded-lg"><span class="font-bold text-slate-900 block mb-1">Location Manager</span><span class="text-sm text-slate-600">Sees only their assigned Location's aggregation. Approves local unit expenses and local transit.</span></div>
+                    <div class="border border-emerald-200 p-4 rounded-lg bg-emerald-50"><span class="font-bold text-emerald-900 block mb-1">Unit Operator</span><span class="text-sm text-emerald-800">Strict action-floor context. Cannot see financials of other units. Can only Receive, Process, Transfer, Waste.</span></div>
+                    <div class="border border-purple-200 p-4 rounded-lg bg-purple-50"><span class="font-bold text-purple-900 block mb-1">Finance Officer</span><span class="text-sm text-purple-800">Global ledger view. Manages Payables, Receivables, inter-wallet liquidity, and bank reconciliations.</span></div>
+                    <div class="border border-slate-200 p-4 rounded-lg"><span class="font-bold text-slate-900 block mb-1">Investor</span><span class="text-sm text-slate-600">Read-only, high-level sanitized dashboards. Revenue, margins, inventory valuation.</span></div>
+                </div>
+            </div>
+
+            <!-- Wallets & Ledger -->
+            <div>
+                <h3 class="text-lg font-bold text-slate-900 border-b border-slate-200 pb-2 mb-4">C. Wallet & Ledger Architecture</h3>
+                <ul class="list-disc list-inside space-y-2 text-sm text-slate-700">
+                    <li><strong>No Silent Balances:</strong> Every mutation must be backed by a double-entry ledger record.</li>
+                    <li><strong>No Negative Stock:</strong> Transactions mathematically causing negative unit inventory will throw a hard DB block.</li>
+                    <li><strong>Wallet Flows:</strong> 
+                        <code>Bank</code> -> <code>Company Wallet</code> -> <code>Location Wallet</code> -> <code>Unit Wallet</code> -> <code>Expenses/Suppliers</code>
+                    </li>
+                    <li><strong>Document Lifecycle:</strong> 
+                        <span class="px-2 py-0.5 bg-slate-200 rounded text-xs">DRAFT (No Ledger Posting)</span> -> 
+                        <span class="px-2 py-0.5 bg-blue-200 text-blue-800 rounded text-xs px-2 mx-1">POSTED (Locked, Posts to Ledger)</span> -> 
+                        <span class="px-2 py-0.5 bg-red-200 text-red-800 rounded text-xs px-2">CANCELLED (Creates Reversal Posting)</span>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 2. UX ARCHITECTURE -->
+    <section id="roles" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden section-break">
+        <div class="bg-slate-800 px-8 py-6">
+            <h2 class="text-2xl font-bold text-white tracking-widest uppercase">2. Role-by-Role UX Architecture</h2>
+            <p class="text-slate-300 mt-2">Visual isolation. No shared dashboards. Every role feels structurally distinct.</p>
+        </div>
+        <div class="p-8 space-y-12">
+            
+            <!-- Unit Operator -->
+            <div>
+                <h3 class="text-xl font-bold bg-emerald-100 text-emerald-900 p-3 rounded-md mb-6 inline-block">Unit Operator UX</h3>
+                <div class="flex border border-slate-300 rounded-lg overflow-hidden shadow-lg mb-4 h-96">
+                    <div class="mockup-sidebar !bg-emerald-950">
+                        <div class="h-14 flex items-center justify-center font-bold tracking-widest border-b border-emerald-900">UNIT: BOAT FARIS</div>
+                        <div class="p-4 space-y-2 text-sm opacity-90">
+                            <div class="bg-emerald-800 text-white p-2 rounded">Action: Record Receiving</div>
+                            <div class="p-2 hover:bg-emerald-900 rounded">Action: Process Yield</div>
+                            <div class="p-2 hover:bg-emerald-900 rounded">Action: Int. Transfer</div>
+                            <div class="p-2 hover:bg-emerald-900 rounded text-red-300">Action: Report Waste</div>
+                            <div class="mt-8 border-t border-emerald-900 pt-4 p-2 hover:bg-emerald-900 rounded">My Transit Docs</div>
+                        </div>
+                    </div>
+                    <div class="flex-1 bg-slate-100 flex flex-col">
+                        <div class="mockup-topbar">
+                            <span class="font-bold text-emerald-800 uppercase tracking-widest text-sm">Action Area</span>
+                            <span class="text-xs text-slate-500">operator.boat1@...</span>
+                        </div>
+                        <div class="p-8 text-slate-500 text-center flex-1 flex items-center justify-center flex-col">
+                            <svg class="w-16 h-16 text-emerald-200 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                            <h4 class="font-bold text-slate-700 text-lg">Strict Form UI</h4>
+                            <p class="text-sm max-w-sm mt-2">Operators do not see aggregate charts. They see massive, invoice-grade input forms designed for rapid, heads-down data entry in industrial environments.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CEO -->
+            <div class="border-t border-slate-200 pt-12">
+                <h3 class="text-xl font-bold bg-blue-100 text-blue-900 p-3 rounded-md mb-6 inline-block">CEO / Exec UX</h3>
+                <div class="flex border border-slate-300 rounded-lg overflow-hidden shadow-lg mb-4 h-96">
+                    <div class="mockup-sidebar !bg-slate-900 w-56">
+                        <div class="h-14 flex items-center justify-center font-bold tracking-widest border-b border-slate-800 text-blue-400">CEO PULSE</div>
+                        <div class="p-4 space-y-2 text-sm">
+                            <div class="bg-blue-600 text-white p-2 rounded shadow">Executive Overview</div>
+                            <div class="p-2 hover:bg-slate-800 rounded">Global Inventory Map</div>
+                            <div class="p-2 hover:bg-slate-800 rounded">Yield Anomalies</div>
+                            <div class="p-2 hover:bg-slate-800 rounded">Financial Health</div>
+                            <div class="mt-8 border-t border-slate-800 pt-4 p-2 bg-gradient-to-r from-purple-900 to-slate-900 hover:from-purple-800 rounded text-purple-200 font-bold flex items-center">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                Shark AI Ops
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex-1 bg-slate-50 flex flex-col">
+                        <div class="mockup-topbar">
+                            <span class="font-bold text-slate-800 uppercase tracking-widest text-sm">Global Command</span>
+                            <span class="text-xs text-slate-500">ceo@oceanpearlseafood.com</span>
+                        </div>
+                        <div class="p-6 grid grid-cols-3 gap-4 h-full">
+                            <div class="bg-white p-4 rounded border border-slate-200 shadow-sm flex flex-col">
+                                <span class="text-xs text-slate-500 font-bold uppercase tracking-wider">Group Liquidity</span>
+                                <span class="text-2xl font-black text-slate-800 mt-2">Rp 4.2B</span>
+                            </div>
+                            <div class="bg-white p-4 rounded border border-slate-200 shadow-sm flex flex-col">
+                                <span class="text-xs text-slate-500 font-bold uppercase tracking-wider">Stock Valuation</span>
+                                <span class="text-2xl font-black text-slate-800 mt-2">Rp 8.1B</span>
+                            </div>
+                            <div class="bg-red-50 p-4 rounded border border-red-200 shadow-sm flex flex-col justify-between">
+                                <span class="text-xs text-red-600 font-bold uppercase tracking-wider">Anomalies Detected</span>
+                                <div class="text-xl font-bold text-red-800">Maw Yield Drop (KAI)</div>
+                            </div>
+                            <div class="col-span-3 bg-white border border-slate-200 rounded p-4 flex-1 mt-2 flex items-center justify-center text-slate-400">[ Complex Multi-Location Charting Area ]</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 3. SCREEN-BY-SCREEN DESIGN -->
+    <section id="screens" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden section-break">
+        <div class="bg-slate-800 px-8 py-6">
+            <h2 class="text-2xl font-bold text-white tracking-widest uppercase">3. Screen-by-Screen Field Architecture</h2>
+            <p class="text-slate-300 mt-2">No placeholder forms. Every screen executes strict double-entry logic.</p>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr>
+                        <th class="table-header">Screen / Form Name</th>
+                        <th class="table-header">Role Access</th>
+                        <th class="table-header w-1/3">Field Layout (Schema)</th>
+                        <th class="table-header w-1/4">Posting Impact (On Post)</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200">
+                    
+                    <!-- Record Receiving -->
+                    <tr class="hover:bg-slate-50">
+                        <td class="table-cell font-bold text-slate-800">Record Receiving<br><span class="text-xs font-normal text-slate-500">Invoice-grade entry form</span></td>
+                        <td class="table-cell"><span class="bg-emerald-100 text-emerald-800 text-xs px-2 py-1 rounded">Operator</span></td>
+                        <td class="table-cell font-mono text-xs text-slate-600">
+                            <strong>Header:</strong> Date, Supplier (Select/Create), Vessel, Doc #<br>
+                            <strong>Body (Dynamic Rows):</strong><br>
+                            - Species (Dropdown)<br>
+                            - Grade (A/B/C/Reject)<br>
+                            - Size (S/M/L)<br>
+                            - Quantity (Kg)<br>
+                            - Unit Price<br>
+                            - Row Total (Auto)<br>
+                            <strong>Footer:</strong> Grand Total, Notes.
+                        </td>
+                        <td class="table-cell text-xs text-slate-700">
+                            <strong>Inventory:</strong> + Stock (Raw)<br>
+                            <strong>Ledger:</strong> Dr. Inventory, Cr. Supplier_AP
+                        </td>
+                    </tr>
+
+                    <!-- Processing Matrix -->
+                    <tr class="hover:bg-slate-50">
+                        <td class="table-cell font-bold text-slate-800">Processing & Yield<br><span class="text-xs font-normal text-slate-500">Transform Raw to Finished</span></td>
+                        <td class="table-cell"><span class="bg-emerald-100 text-emerald-800 text-xs px-2 py-1 rounded">Operator</span></td>
+                        <td class="table-cell font-mono text-xs text-slate-600">
+                            <strong>Input:</strong> Batch ID / Source Species, Input Qty (Locked constraint to unallocated raw stock).<br>
+                            <strong>Outputs (Multiple Rows):</strong><br>
+                            - Result SKU (e.g., Loin, Maw, Head)<br>
+                            - Result Qty (Kg)<br>
+                            - Yield % (Auto-calc)<br>
+                            <strong>Waste:</strong> Dedicated waste input field.
+                        </td>
+                        <td class="table-cell text-xs text-slate-700">
+                            <strong>Inventory:</strong><br> 
+                            - Stock (Raw)<br>
+                            + Stock (Finished SKU A)<br>
+                            + Stock (Finished SKU B)<br>
+                            <em>(Cost bases mathematically inherited by yield ratio)</em>
+                        </td>
+                    </tr>
+
+                    <!-- Expense Voucher -->
+                    <tr class="hover:bg-slate-50">
+                        <td class="table-cell font-bold text-slate-800">Expense Voucher<br><span class="text-xs font-normal text-slate-500">Multi-line OPEX recording</span></td>
+                        <td class="table-cell">
+                            <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">Finance</span>
+                            <span class="bg-slate-200 text-slate-800 text-xs px-2 py-1 rounded mt-1 inline-block">Location</span>
+                        </td>
+                        <td class="table-cell font-mono text-xs text-slate-600">
+                            <strong>Header:</strong> Date, Wallet Source, Payee<br>
+                            <strong>Lines:</strong><br>
+                            - Account Code (e.g., Fuel, Ice, Repair)<br>
+                            - Description<br>
+                            - Amount<br>
+                            <strong>Approvals:</strong> Location Manager Sign-off Block.
+                        </td>
+                        <td class="table-cell text-xs text-slate-700">
+                            <strong>Wallet:</strong> - Wallet Balance<br>
+                            <strong>Ledger:</strong> Dr. Expense Acct, Cr. Wallet/Cash
+                        </td>
+                    </tr>
+
+                    <!-- Global Ledger -->
+                    <tr class="hover:bg-slate-50">
+                        <td class="table-cell font-bold text-slate-800">Global Ledger View<br><span class="text-xs font-normal text-slate-500">Finance Data Table</span></td>
+                        <td class="table-cell">
+                            <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">Finance</span>
+                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mt-1 inline-block">CEO</span>
+                        </td>
+                        <td class="table-cell font-mono text-xs text-slate-600">
+                            <strong>Filters:</strong> Date Range, Account ID, Location, Unit.<br>
+                            <strong>Columns:</strong> Date, TxID, Debit, Credit, Balance, Meta/Ref Doc.<br>
+                            <strong>Actions:</strong> Export CSV, Export PDF, Void (Admin restricted).
+                        </td>
+                        <td class="table-cell text-xs text-slate-400">
+                            <em>Read-only projection of double-entry facts.</em>
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- 4. INVOICE-GRADE MOCKUPS -->
+    <section id="invoices" class="no-print">
+        <div class="mb-6 flex justify-between items-end">
+            <div>
+                <h2 class="text-2xl font-bold text-slate-900 tracking-widest uppercase">4. Invoice-Grade Document Layouts</h2>
+                <p class="text-slate-600">The actual printable, industrial A4 layouts generated by the UX.</p>
+            </div>
+            <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded shadow flex items-center font-bold text-sm">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                SIMULATE PRINT A4
+            </button>
+        </div>
+
+        <!-- A4 Mockup Container -->
+        <div class="a4-container print-only border border-slate-300 relative">
+            <!-- Document Header -->
+            <div class="flex justify-between items-start border-b-2 border-slate-800 pb-6 mb-8">
+                <div>
+                    <h1 class="text-4xl font-black text-slate-900 tracking-tighter">OCEAN PEARL</h1>
+                    <p class="text-sm font-semibold text-slate-500 tracking-widest mt-1">SEAFOOD EXPORTS DIV.</p>
+                    <p class="text-xs text-slate-500 mt-4 max-w-xs">Location: Kaimana Hub<br>Unit: Factory Processing<br>Jl. Pelabuhan Perikanan No 12</p>
+                </div>
+                <div class="text-right">
+                    <h2 class="text-3xl font-light text-slate-400 uppercase tracking-widest">GOODS RECEIPT</h2>
+                    <div class="mt-4 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                        <span class="text-slate-500 font-bold">DOC ID:</span> <span class="font-mono text-slate-900 font-bold">RECV-2026-0092</span>
+                        <span class="text-slate-500 font-bold">DATE:</span> <span class="font-mono text-slate-900">2026-02-28 14:30</span>
+                        <span class="text-slate-500 font-bold">SUPPLIER:</span> <span class="text-slate-900">CV. Makmur Jaya</span>
+                        <span class="text-slate-500 font-bold">VESSEL:</span> <span class="text-slate-900">KM. Bintang Laut</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Multi-line Table -->
+            <table class="w-full text-left mb-8">
+                <thead>
+                    <tr class="border-b border-slate-300">
+                        <th class="py-2 text-xs font-bold text-slate-600 uppercase">#</th>
+                        <th class="py-2 text-xs font-bold text-slate-600 uppercase">Species</th>
+                        <th class="py-2 text-xs font-bold text-slate-600 uppercase">Grade / Size</th>
+                        <th class="py-2 text-xs font-bold text-slate-600 uppercase text-right">Qty (KG)</th>
+                        <th class="py-2 text-xs font-bold text-slate-600 uppercase text-right">Unit Price</th>
+                        <th class="py-2 text-xs font-bold text-slate-900 uppercase text-right">Line Total</th>
+                    </tr>
+                </thead>
+                <tbody class="font-mono text-sm leading-8 border-b border-slate-800">
+                    <tr class="border-b border-slate-100">
+                        <td class="py-2 text-slate-400">1</td>
+                        <td class="py-2 font-bold text-slate-800">Grouper (Kerapu)</td>
+                        <td class="py-2 text-slate-600">A / Large</td>
+                        <td class="py-2 text-right">150.5</td>
+                        <td class="py-2 text-right">Rp 85,000</td>
+                        <td class="py-2 text-right font-bold text-slate-900">Rp 12,792,500</td>
+                    </tr>
+                    <tr class="border-b border-slate-100">
+                        <td class="py-2 text-slate-400">2</td>
+                        <td class="py-2 font-bold text-slate-800">Snapper (Kakap)</td>
+                        <td class="py-2 text-slate-600">A / Medium</td>
+                        <td class="py-2 text-right">240.0</td>
+                        <td class="py-2 text-right">Rp 65,000</td>
+                        <td class="py-2 text-right font-bold text-slate-900">Rp 15,600,000</td>
+                    </tr>
+                    <tr>
+                        <td class="py-2 text-slate-400">3</td>
+                        <td class="py-2 font-bold text-slate-800">Anchovy (Puri)</td>
+                        <td class="py-2 text-slate-600">Fresh / Mix</td>
+                        <td class="py-2 text-right">1,200.0</td>
+                        <td class="py-2 text-right">Rp 8,000</td>
+                        <td class="py-2 text-right font-bold text-slate-900">Rp 9,600,000</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Totals & Payment -->
+            <div class="flex justify-between items-start">
+                <div class="w-1/2 pr-8">
+                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Remarks</h4>
+                    <p class="text-sm font-mono text-slate-600 bg-slate-50 p-3 border border-slate-200 rounded min-h-[80px]">
+                        Quality check passed. Anchovy ice ratio ~10%. Deducted from gross weight.
+                    </p>
+                </div>
+                <div class="w-1/2">
+                    <div class="flex justify-between py-2 border-b border-slate-200">
+                        <span class="text-sm font-bold text-slate-600">Total Quantity:</span>
+                        <span class="text-sm font-mono font-bold text-slate-900">1,590.5 KG</span>
+                    </div>
+                    <div class="flex justify-between py-2 border-b border-slate-200">
+                        <span class="text-sm font-bold text-slate-600">Subtotal:</span>
+                        <span class="text-sm font-mono text-slate-700">Rp 37,992,500</span>
+                    </div>
+                    <div class="flex justify-between py-2 border-b-2 border-slate-800 bg-slate-50 px-2 mt-2 items-center">
+                        <span class="text-base font-black text-slate-900 uppercase tracking-wider">GRAND TOTAL</span>
+                        <span class="text-xl font-mono font-black text-slate-900">Rp 37,992,500</span>
+                    </div>
+                    <div class="flex justify-between py-2">
+                        <span class="text-xs font-bold text-slate-500 uppercase">Status:</span>
+                        <span class="text-xs font-bold text-blue-700 uppercase bg-blue-100 px-2 py-0.5 rounded">UNPAID (AP_SUPPLIER)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Signatures -->
+            <div class="mt-24 grid grid-cols-3 gap-8 text-center absolute bottom-12 w-[calc(100%-30mm)]">
+                <div>
+                    <div class="border-b border-slate-400 h-16 w-3/4 mx-auto mb-2 relative">
+                        <!-- Simulated Digital Stamp -->
+                        <div class="absolute inset-0 flex items-center justify-center opacity-20 transform -rotate-12">
+                            <span class="font-bold border-4 border-blue-900 text-blue-900 text-2xl uppercase p-2 tracking-widest rounded-lg">VERIFIED</span>
+                        </div>
+                    </div>
+                    <p class="text-xs font-bold text-slate-800 uppercase">Unit Operator</p>
+                    <p class="text-xs font-mono text-slate-500">operator.kai@oceanpearl.com</p>
+                </div>
+                <div>
+                    <div class="border-b border-slate-400 h-16 w-3/4 mx-auto mb-2"></div>
+                    <p class="text-xs font-bold text-slate-800 uppercase">Supplier / Driver</p>
+                    <p class="text-xs font-mono text-slate-500">CV. Makmur Jaya</p>
+                </div>
+                <div>
+                    <div class="flex items-center justify-center h-16 w-full mb-2">
+                        <!-- QR Code Placeholder -->
+                        <div class="w-16 h-16 border-2 border-slate-800 border-dashed flex items-center justify-center bg-slate-50">
+                            <span class="text-[0.5rem] text-slate-400 font-mono text-center">SYSTEM<br>QR</span>
+                        </div>
+                    </div>
+                    <p class="text-xs font-bold text-slate-800 uppercase">Audit Trace</p>
+                    <p class="text-[0.6rem] font-mono text-slate-400">hash: 9f8a8b...2c1</p>
+                </div>
+            </div>
+            
+        </div>
+    </section>
+
+    <!-- 5. SHARK AI ARCHITECTURE -->
+    <section id="shark" class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl shadow-xl overflow-hidden section-break text-slate-200">
+        <div class="px-8 py-6 border-b border-slate-700 flex items-center justify-between">
+            <h2 class="text-2xl font-bold text-white tracking-widest uppercase flex items-center">
+                <svg class="w-8 h-8 mr-3 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                5. Shark AI Architecture
+            </h2>
+            <span class="bg-blue-900 text-blue-200 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-widest border border-blue-700">Operational Intelligence</span>
+        </div>
+        
+        <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div class="space-y-6">
+                <h3 class="text-lg font-bold text-white border-b border-slate-600 pb-2">A. Context & Inheritance Model</h3>
+                <p class="text-sm text-slate-300 leading-relaxed">Shark is not a standard RAG chatbot. Shark executes within an exact replica of the logged-in User's IAM scope.</p>
+                <ul class="list-disc list-inside space-y-2 text-sm text-slate-400 font-mono">
+                    <li><span class="text-emerald-400 font-bold">Operator asks:</span> "What's my stock?" -> Shark retrieves ONLY Unit stock.</li>
+                    <li><span class="text-blue-400 font-bold">CEO asks:</span> "What's my stock?" -> Shark aggregates entire company.</li>
+                </ul>
+
+                <h3 class="text-lg font-bold text-white border-b border-slate-600 pb-2 mt-8">B. Proactive Risk Horizons</h3>
+                <p class="text-sm text-slate-300 leading-relaxed">Shark runs background CRON jobs evaluating Ledger and Inventory invariant rules:</p>
+                <div class="bg-slate-950 p-4 rounded border border-slate-700 font-mono text-xs text-slate-400 space-y-3">
+                    <div><span class="text-red-400 font-bold">Risk 1: Yield Anomaly</span><br>> Detects if MAW-DRY yield drops below 1.5% from GROUPER-RAW processing batch.</div>
+                    <div><span class="text-purple-400 font-bold">Risk 2: Wallet Irregularity</span><br>> Detects large expense disbursements (>Rp50M) not tied to a supplier PO.</div>
+                    <div><span class="text-amber-400 font-bold">Risk 3: Price Spikes</span><br>> Detects if receiving input price is +15% above 7-day trailing average for the same Location.</div>
+                </div>
+            </div>
+            
+            <div class="bg-slate-900 border border-slate-700 rounded-lg p-6 shadow-Inner">
+                <h3 class="text-sm font-bold text-purple-400 uppercase tracking-widest mb-4">Dedicated Shark Console UI</h3>
+                <div class="bg-slate-950 rounded-lg h-72 border border-slate-800 flex flex-col overflow-hidden relative">
+                    <div class="bg-slate-800 h-10 border-b border-slate-700 flex items-center px-4">
+                        <div class="flex space-x-2"><div class="w-3 h-3 rounded-full bg-red-500"></div><div class="w-3 h-3 rounded-full bg-amber-500"></div><div class="w-3 h-3 rounded-full bg-emerald-500"></div></div>
+                        <span class="mx-auto text-xs font-mono text-slate-400">Shark Operations</span>
+                    </div>
+                    <div class="p-4 flex-1 font-mono text-xs text-slate-400 space-y-4">
+                        <div class="text-slate-500">[System] User: CEO detected. Scope: Global.</div>
+                        <div><span class="text-purple-400">Shark></span> Running nightly yield analysis across all locations...</div>
+                        <div class="bg-red-900/20 border border-red-900/50 p-2 rounded text-red-200">
+                            <strong>ALERT:</strong> Yield deviation at FACTORY_KAI.<br>
+                            Input: 200kg Kaci. Output Loin: 40kg (20% expected 35%).<br>
+                            <em>Action required.</em>
+                        </div>
+                    </div>
+                    <div class="absolute bottom-0 w-full p-2 bg-slate-900 border-t border-slate-800">
+                        <div class="w-full bg-slate-950 border border-slate-700 rounded h-8 px-2 flex items-center text-slate-600 text-xs font-mono">Ask Shark to generate a report, audit a ledger, or execute a transfer...</div>
+                    </div>
+                </div>
+                <div class="mt-6 flex items-center justify-between">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Alerting Protocol:</span>
+                    <span class="bg-emerald-900/50 text-emerald-400 text-xs px-2 py-1 rounded border border-emerald-800 font-mono">WhatsApp Output Enabled</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. IMPLEMENTATION -->
+    <section id="phases" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden section-break">
+        <div class="bg-blue-600 px-8 py-6">
+            <h2 class="text-2xl font-bold text-white tracking-widest uppercase">6. Execution Roadmap</h2>
+            <p class="text-blue-100 mt-2">Implementation phases following strict blueprint approval.</p>
+        </div>
+        <div class="p-8">
+            <div class="relative border-l-2 border-slate-200 ml-3 space-y-8">
+                <div class="pl-6 relative">
+                    <div class="w-4 h-4 bg-blue-600 rounded-full absolute -left-2.5 top-1 ring-4 ring-white"></div>
+                    <h3 class="text-lg font-bold text-slate-900">Phase 1: Foundation & Roles</h3>
+                    <p class="text-sm text-slate-600 mt-1">Establish the `RoleBasedRouter`. Generate structural boundaries for Admin, CEO, Operations, Finance, and Investor so layouts cannot mix. Setup Tailwind styling and React component hierarchies.</p>
+                </div>
+                
+                <div class="pl-6 relative">
+                    <div class="w-4 h-4 bg-slate-300 rounded-full absolute -left-2.5 top-1 ring-4 ring-white"></div>
+                    <h3 class="text-lg font-bold text-slate-900">Phase 2: The Industrial Forms & Frontend Flow</h3>
+                    <p class="text-sm text-slate-600 mt-1">Building the multi-line React forms for Receiving, Processing, Transfer, and Expenses. Ensuring local state calculates Grand Totals correctly. Building the physical A4 print layouts.</p>
+                </div>
+
+                <div class="pl-6 relative">
+                    <div class="w-4 h-4 bg-slate-300 rounded-full absolute -left-2.5 top-1 ring-4 ring-white"></div>
+                    <h3 class="text-lg font-bold text-slate-900">Phase 3: Ledger Integration & Backend Execution</h3>
+                    <p class="text-sm text-slate-600 mt-1">Rebuilding `workflows.js` on the Cloud Functions to accept the structured multi-line payloads. Enforcing the double-entry accounting constraints (debts equal credits) and blocking negative inventory mutations.</p>
+                </div>
+
+                <div class="pl-6 relative">
+                    <div class="w-4 h-4 bg-slate-300 rounded-full absolute -left-2.5 top-1 ring-4 ring-white"></div>
+                    <h3 class="text-lg font-bold text-slate-900">Phase 4: Executive Pulse & Shark AI</h3>
+                    <p class="text-sm text-slate-600 mt-1">Developing the CEO and Finance read-only dashboards aggregating the new ledger data. Injecting the Shark AI interface and establishing CRON jobs for background anomaly monitoring.</p>
+                </div>
+            </div>
+            
+            <div class="mt-12 bg-red-50 border border-red-200 rounded-lg p-6">
+                <h4 class="text-red-800 font-bold uppercase tracking-widest mb-2 flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    Anti-Drift Commitment
+                </h4>
+                <p class="text-sm text-red-900 leading-relaxed">Coding will only proceed strictly following this approved blueprint. No undocumented logic will be deployed. Any new screen requests must be added to this document first.</p>
+            </div>
+        </div>
+    </section>
+
+</div>
+
+</body>
+</html>
