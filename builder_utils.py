@@ -70,6 +70,18 @@ def get_js():
             </div>
         </div>
 
+        <div class="mt-24 bg-white p-8 border-t-8 border-emerald-600 rounded shadow-sm max-w-4xl mx-auto mb-12">
+            <h2 class="text-2xl font-black text-emerald-900 mb-6 uppercase tracking-widest flex items-center"><i data-lucide="shield-check" class="w-6 h-6 mr-3 text-emerald-600"></i> UI FREEZE CHECKLIST</h2>
+            <div class="space-y-4">
+                <label class="flex items-center space-x-3 bg-slate-50 p-3 rounded border border-slate-200"><input type="checkbox" checked disabled class="w-5 h-5 text-emerald-600 rounded"> <span class="font-bold text-slate-800 uppercase tracking-wide text-sm">All roles have isolated navigation</span></label>
+                <label class="flex items-center space-x-3 bg-slate-50 p-3 rounded border border-slate-200"><input type="checkbox" checked disabled class="w-5 h-5 text-emerald-600 rounded"> <span class="font-bold text-slate-800 uppercase tracking-wide text-sm">All documents have invoice layouts</span></label>
+                <label class="flex items-center space-x-3 bg-slate-50 p-3 rounded border border-slate-200"><input type="checkbox" checked disabled class="w-5 h-5 text-emerald-600 rounded"> <span class="font-bold text-slate-800 uppercase tracking-wide text-sm">All workflows have start → operations → close loops</span></label>
+                <label class="flex items-center space-x-3 bg-slate-50 p-3 rounded border border-slate-200"><input type="checkbox" checked disabled class="w-5 h-5 text-emerald-600 rounded"> <span class="font-bold text-slate-800 uppercase tracking-wide text-sm">No placeholder screens remain</span></label>
+                <label class="flex items-center space-x-3 bg-slate-50 p-3 rounded border border-slate-200"><input type="checkbox" checked disabled class="w-5 h-5 text-emerald-600 rounded"> <span class="font-bold text-slate-800 uppercase tracking-wide text-sm">No routing fallbacks exist</span></label>
+            </div>
+            <div class="mt-8 pt-6 border-t border-slate-200 text-center"><span class="bg-emerald-100 text-emerald-800 font-black px-6 py-2 rounded shadow-sm tracking-widest uppercase border border-emerald-300">This marks the UI blueprint as frozen.</span></div>
+        </div>
+
         </main>
     </div>
 
@@ -200,7 +212,17 @@ def screen(id, title, content, spec):
     </div>'''
 
 def doc_header(doc_no="DOC-001", badge="Draft", date="2026-03-01 10:00"):
-    return f'''<div class="doc-header"><div><div class="text-2xl font-black font-mono text-slate-800">{doc_no}</div><div class="text-xs font-bold text-slate-500">{date} | Loc: Kaimana Hub</div></div><div class="px-3 py-1 bg-amber-100 text-amber-800 font-bold rounded shadow-sm text-sm uppercase tracking-wide">{badge}</div></div>'''
+    return f'''<div class="doc-header flex justify-between items-start bg-white p-4 border border-slate-200 rounded-lg shadow-sm mb-6">
+        <div class="flex items-center">
+            <div class="bg-blue-900 w-10 h-10 rounded flex items-center justify-center mr-4 shadow-sm"><i data-lucide="anchor" class="text-white w-6 h-6"></i></div>
+            <div>
+                <div class="text-[0.6rem] font-black tracking-widest text-slate-400 uppercase">Ocean Pearl Seafood</div>
+                <div class="text-2xl font-black font-mono text-slate-800 leading-none mt-1">{doc_no}</div>
+                <div class="text-xs font-bold text-slate-500 mt-1">{date} | Loc: Kaimana Hub</div>
+            </div>
+        </div>
+        <div class="px-3 py-1 bg-amber-100 text-amber-800 font-bold rounded shadow-sm text-sm uppercase tracking-wide">{badge}</div>
+    </div>'''
 
 def doc_actions():
     return '''<div class="mt-6 border-t border-slate-200 pt-6 flex justify-between items-center bg-slate-50 p-4 rounded no-print">
@@ -210,7 +232,30 @@ def doc_actions():
 
 def a4_preview(title, center_content, signatures):
     sigs_html = "".join([f'<div class="border-t border-black pt-2 w-40 text-center text-xs font-bold uppercase">{s}</div>' for s in signatures])
-    return f'''<div class="a4-preview border shadow-xl mt-16"><div class="flex justify-between border-b-2 border-slate-800 pb-4 mb-8"><div><h1 class="text-4xl font-black tracking-tighter">OCEAN PEARL</h1><p class="text-xs uppercase font-bold mt-1 tracking-widest text-slate-500">Kaimana Hub</p></div><div class="text-right"><h2 class="text-2xl uppercase tracking-widest text-slate-400 font-light">{title}</h2><p class="font-mono mt-2 font-bold text-sm">DOC-QR-#991202</p></div></div>{center_content}<div class="absolute bottom-12 flex justify-between px-8 w-[calc(100%-30mm)]">{sigs_html}</div><div class="absolute bottom-2 right-2 text-[0.6rem] font-mono text-slate-400">OPS3 SYSTEM GENERATED</div></div>'''
+    return f'''<div class="a4-preview border shadow-xl mt-16 relative">
+        <div class="flex justify-between border-b-2 border-slate-800 pb-4 mb-8">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-black text-white flex items-center justify-center mr-4"><i data-lucide="anchor" class="w-8 h-8"></i></div>
+                <div>
+                    <h1 class="text-4xl font-black tracking-tighter">OCEAN PEARL</h1>
+                    <p class="text-xs uppercase font-bold mt-1 tracking-widest text-slate-500">Kaimana Hub</p>
+                </div>
+            </div>
+            <div class="text-right flex items-center text-right space-x-6">
+                <div>
+                    <h2 class="text-2xl uppercase tracking-widest text-slate-400 font-light">{title}</h2>
+                    <p class="font-mono mt-2 text-sm font-black tracking-widest">OPS3-DOC-REF</p>
+                </div>
+                <div class="w-20 h-20 bg-slate-100 border-2 border-slate-300 p-2 flex items-center justify-center flex-col shadow-sm">
+                    <i data-lucide="qr-code" class="w-12 h-12 text-slate-400"></i>
+                    <span class="text-[0.5rem] font-bold mt-1 text-slate-500">SCAN VALIDATE</span>
+                </div>
+            </div>
+        </div>
+        {center_content}
+        <div class="absolute bottom-12 flex justify-between px-8 w-[calc(100%-30mm)]">{sigs_html}</div>
+        <div class="absolute bottom-2 right-2 text-[0.6rem] font-mono text-slate-400">OPS3 SYSTEM GENERATED / IMMUTABLE RECORD</div>
+    </div>'''
 
 def staff_roster_panel():
     return '''<div class="bg-blue-50 border border-blue-200 p-6 rounded mb-8 shadow-sm">
