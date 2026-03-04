@@ -40,10 +40,51 @@ def get_ceo_inv_screens():
         "Maps every physical asset (stock) and estimated value recursively."
     ))
 
-    screens.append(screen("ceo_yield", "Yield Anomalies", "<div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Flags processing batches that fall outside statistical norm expectations. Powered by Shark AI history.]</div>", ""))
-    screens.append(screen("ceo_health", "Financial Health", "<div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Charts derived from global Ledger view. Real-time P&L estimates.]</div>", ""))
-    screens.append(screen("ceo_risk", "Risk Dashboard", "<div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Displays unapproved expenses > 7 days, aging AR > 30 days, high cash float balances on disconnected boats.]</div>", ""))
-    screens.append(screen("ceo_appr", "Approvals (Overrides)", "<div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Unlocks specific documents blocked by Finance Policy logic.]</div>", ""))
+    screens.append(screen("ceo_yield", "Yield Anomalies", 
+        """
+        <div class="bg-white p-6 border rounded shadow max-w-5xl">
+            <h3 class="font-bold border-b pb-2 mb-4 text-slate-800"><i data-lucide="alert-triangle" class="inline w-4 h-4 mr-2 text-red-500"></i> Statistical Norm Deviations</h3>
+            <table class="w-full text-xs font-mono border text-left">
+                <thead><tr class="bg-slate-100"><th>Batch ID</th><th>Location</th><th>Expected Yield</th><th>Actual Yield</th><th>Action</th></tr></thead>
+                <tbody>
+                    <tr><td class="p-2 border-b">BATCH-099</td><td class="p-2 border-b">Kaimana Fac 2</td><td class="p-2 border-b">45%</td><td class="p-2 border-b text-red-600 font-bold">38%</td><td class="p-2 border-b"><button class="bg-slate-800 text-white px-2 py-1 rounded">Investigate</button></td></tr>
+                </tbody>
+            </table>
+        </div>
+        """, "Powered by Shark AI history."))
+    screens.append(screen("ceo_health", "Financial Health", 
+        """
+        <div class="bg-white p-6 border rounded shadow max-w-5xl">
+            <h3 class="font-bold border-b pb-2 mb-4 text-slate-800"><i data-lucide="dollar-sign" class="inline w-4 h-4 mr-2 text-emerald-500"></i> Real-time P&L Estimate</h3>
+            <div class="grid grid-cols-2 gap-4 text-sm font-mono">
+                <div class="p-4 bg-emerald-50 border border-emerald-200 rounded"><div class="text-xs font-bold text-emerald-800">Total Revenue YTD</div><div class="text-xl font-black text-emerald-900 mt-1">Rp 4,500,000,000</div></div>
+                <div class="p-4 bg-red-50 border border-red-200 rounded"><div class="text-xs font-bold text-red-800">Total Expenses YTD</div><div class="text-xl font-black text-red-900 mt-1">Rp 1,200,000,000</div></div>
+            </div>
+        </div>
+        """, "Charts derived from global Ledger view."))
+    screens.append(screen("ceo_risk", "Risk Dashboard", 
+        """
+        <div class="bg-white p-6 border rounded shadow max-w-5xl">
+            <h3 class="font-bold border-b pb-2 mb-4 text-slate-800"><i data-lucide="shield" class="inline w-4 h-4 mr-2 text-amber-500"></i> Active Risks</h3>
+            <div class="flex flex-col space-y-2 font-mono text-xs">
+                <div class="p-3 bg-red-50 border border-red-200 rounded text-red-800 font-bold">Unapproved Expenses > 7 days: 5 items</div>
+                <div class="p-3 bg-amber-50 border border-amber-200 rounded text-amber-800 font-bold">High Cash Float (>50M) on unconnected boats: Boat Faris</div>
+            </div>
+        </div>
+        """, "Displays aging risks and float balances."))
+    screens.append(screen("ceo_appr", "Approvals (Overrides)", 
+        """
+        <div class="bg-white p-6 border rounded shadow max-w-5xl">
+            <h3 class="font-bold border-b pb-2 mb-4 text-slate-800"><i data-lucide="key" class="inline w-4 h-4 mr-2"></i> Policy Overrides</h3>
+            <div class="font-mono text-xs mb-4 text-slate-600">The following documents have been blocked by Finance Policy but requested CEO override.</div>
+            <table class="w-full text-xs font-mono border text-left">
+                <thead><tr class="bg-slate-100"><th>Doc ID</th><th>Requested By</th><th>Amount</th><th>Policy Blocker</th><th>Action</th></tr></thead>
+                <tbody>
+                    <tr><td class="p-2 border-b">EXP-9921</td><td class="p-2 border-b">John (Loc Mgr)</td><td class="p-2 border-b">Rp 150M</td><td class="p-2 border-b">Exceeds limits</td><td class="p-2 border-b"><button class="bg-emerald-600 text-white px-2 py-1 rounded">Force Approve</button></td></tr>
+                </tbody>
+            </table>
+        </div>
+        """, "Unlocks specific documents blocked by Finance."))
     screens.append(screen("ceo_shark", "Ask Shark AI", "<div class='bg-slate-900 border-slate-700 p-6 rounded shadow max-w-4xl text-emerald-400 font-mono text-sm leading-relaxed border-t-8 border-t-purple-600 h-96'>OPS_SHARK_V4 ONLINE.<br>_ <span class='animate-pulse text-white'>_</span></div>", ""))
 
     screens.append(freeze_checklist_screen())
@@ -60,8 +101,34 @@ def get_ceo_inv_screens():
         "High-level sanitized read-only metrics aggregated directly from immutable underlying datasets."
     ))
 
-    screens.append(screen("inv_val", "Inventory Valuation", "<div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Grid displaying estimated mark-to-market value of all cold storage.]</div>", ""))
-    screens.append(screen("inv_rev", "Revenue/Margin", "<div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Chart of Commercial Sales invoices grouped by Hub.]</div>", ""))
-    screens.append(screen("inv_risk", "Risk Summary", "<div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Summary of waste deductions & uncollected AR ratios.]</div>", ""))
+    screens.append(screen("inv_val", "Inventory Valuation", 
+        """
+        <div class="bg-white p-6 border rounded shadow max-w-5xl">
+            <h3 class="font-bold border-b pb-2 mb-4 text-slate-800">Mark-to-Market Valuation</h3>
+            <table class="w-full text-xs font-mono border text-left">
+                <thead><tr class="bg-slate-100"><th>Facility</th><th>Total Stock (KG)</th><th>Est Current Value</th></tr></thead>
+                <tbody>
+                    <tr><td class="p-2 border-b border-r">Kaimana CS Main</td><td class="p-2 border-b border-r text-right">4,104.5</td><td class="p-2 border-b text-right font-bold text-emerald-700">Rp 241,000,000</td></tr>
+                </tbody>
+            </table>
+        </div>
+        """, "Grid displaying estimated MTM value of all cold storage."))
+    screens.append(screen("inv_rev", "Revenue/Margin", 
+        """
+        <div class="bg-white p-6 border rounded shadow max-w-5xl">
+            <h3 class="font-bold border-b pb-2 mb-4 text-slate-800">Commercial Sales Rollup</h3>
+            <div class="h-32 bg-slate-50 border border-slate-200 rounded flex items-center justify-center text-slate-400 font-mono text-xs italic">[Bar chart visualization mapping Sales Invoices grouped by Hub over time placeholder]</div>
+        </div>
+        """, "Chart of Commercial Sales invoices grouped by Hub."))
+    screens.append(screen("inv_risk", "Risk Summary", 
+        """
+        <div class="bg-white p-6 border rounded shadow max-w-5xl">
+            <h3 class="font-bold border-b pb-2 mb-4 text-slate-800">Operational Risk Rollup</h3>
+            <div class="grid grid-cols-2 gap-4 text-xs font-mono">
+                <div class="p-4 bg-red-50 rounded border border-red-200"><div class="font-bold text-red-900 mb-1">Global Waste Ratio</div><div class="text-xl">4.2%</div><div class="mt-2 text-[0.6rem] text-red-600">Target < 2.0%</div></div>
+                <div class="p-4 bg-amber-50 rounded border border-amber-200"><div class="font-bold text-amber-900 mb-1">Uncollected AR Ratio</div><div class="text-xl">12%</div><div class="mt-2 text-[0.6rem] text-amber-600">Target < 5%</div></div>
+            </div>
+        </div>
+        """, "Summary of waste deductions & uncollected AR ratios."))
 
     return screens

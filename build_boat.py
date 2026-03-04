@@ -199,12 +199,23 @@ def get_boat_screens():
 
             <button class="bg-slate-800 hover:bg-black text-white w-full py-5 text-xl tracking-widest mt-8 font-black rounded shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-700 relative z-10 transition-transform active:scale-[0.98] flex justify-center items-center"><i data-lucide="lock" class="w-6 h-6 mr-3"></i> ATTEST / LOCK TRIP DATA</button>
         </div>
-        """ + a4_preview("TRIP CLOSURE SETTLEMENT", "<div class='text-center uppercase font-bold tracking-widest h-64 text-slate-500 flex items-center justify-center border-dashed border-2 border-slate-300 bg-slate-50'>[A4 Summary of Catch, Wallet Zero-out, and Crew Signature Ledger Prints Here]</div>", ["Captain Signature", "Hub Finance Manager"]),
+        """ + a4_preview("TRIP CLOSURE SETTLEMENT", "<table class='w-full text-left text-xs font-mono border-collapse'><thead><tr class='bg-slate-100 border-b border-slate-300'><th>Description</th><th class='text-right'>Value</th></tr></thead><tbody><tr><td class='border-b py-2'>Total Trip Fuel Exp</td><td class='border-b py-2 text-right'>Rp 1,000,000</td></tr><tr><td class='border-b py-2'>Total Catch Est Val</td><td class='border-b py-2 text-right'>Rp 8,500,000</td></tr><tr><td class='border-b py-2 font-black'>Crew Net Settlement</td><td class='border-b py-2 text-right font-black'>Rp 1,000,000</td></tr><tr><td class='py-2 font-black'>Cash Handover to Hub</td><td class='py-2 text-right font-black text-emerald-700'>Rp 3,000,000</td></tr></tbody></table>", ["Captain Signature", "Hub Finance Manager"]),
         "Ultimate end state. Renders visually if trip cash is not zeroed. Compares all known staff advances against logged expenses to output net settlement paths. Generates paper trail."
     ))
 
     screens.append(screen("boat_docs", "My Documents", "<div class='bg-white p-6 border rounded shadow-sm text-center text-blue-900 border-blue-100 bg-blue-50 font-mono'>READ-ONLY SEARCH: All Docs matching active Boat constraint.</div>", ""))
-    screens.append(screen("boat_print", "Print Center", "<div class='bg-white p-6 border text-slate-500 text-center font-bold py-24 bg-slate-50 border-dashed border-4'>[Search Doc ID to inject A4 Print Template -> window.print()]</div>", ""))
+    screens.append(screen("boat_print", "Print Center", 
+        """
+        <div class="bg-slate-50 border-4 border-dashed border-slate-300 p-12 text-center rounded-xl max-w-4xl mx-auto mt-8">
+            <i data-lucide="printer" class="w-16 h-16 text-slate-400 mx-auto mb-4"></i>
+            <h3 class="text-xl font-black text-slate-700 mb-2">A4 Document Injection Engine</h3>
+            <p class="text-slate-500 font-mono text-sm mb-6 max-w-md mx-auto">Enter a specific Document ID to compile and render its immutable state into a printable format.</p>
+            <div class="flex max-w-sm mx-auto shadow-lg">
+                <input type="text" placeholder="DOC-..." class="flex-1 border-y border-l rounded-l px-4 py-2 font-mono outline-none focus:border-indigo-500">
+                <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-r font-bold uppercase tracking-widest text-xs transition">Preview</button>
+            </div>
+        </div>
+        """, "Search Doc ID to inject A4 Print Template -> window.print()"))
 
     return screens
 

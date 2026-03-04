@@ -21,8 +21,23 @@ def get_admin_shark_screens():
         "Maps Google Auth records to OPS3 internal roles and hard-binds them to explicit location node contexts. Affects Firestore Rules natively."
     ))
 
-    screens.append(screen("adm_loc", "Location Builder", "<div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Visual drag-n-drop or explicit tree editor placing Boats -> Hubs -> Global]</div>", ""))
-    
+    screens.append(screen("adm_loc", "Location Builder", 
+        """
+        <div class="bg-white p-6 border rounded shadow-md max-w-4xl text-sm font-mono border-t-8 border-slate-800">
+            <h3 class="font-black text-slate-800 border-b pb-2 mb-4 uppercase tracking-widest"><i data-lucide="git-merge" class="inline w-5 h-5 mr-2"></i> Operational Tree</h3>
+            <div class="space-y-2">
+                <div class="p-3 bg-slate-100 border rounded font-bold"><i data-lucide="globe" class="inline w-4 h-4 mr-2"></i> HQ Global</div>
+                <div class="pl-8 space-y-2">
+                    <div class="p-3 bg-blue-50 border border-blue-200 rounded text-blue-900 font-bold"><i data-lucide="map-pin" class="inline w-4 h-4 mr-2"></i> Kaimana Hub</div>
+                    <div class="pl-8 flex space-x-2">
+                        <div class="p-2 bg-white border rounded text-xs"><i data-lucide="anchor" class="inline w-3 h-3 text-slate-400"></i> Boat Faris</div>
+                        <div class="p-2 bg-white border rounded text-xs"><i data-lucide="factory" class="inline w-3 h-3 text-slate-400"></i> Fac Main</div>
+                    </div>
+                </div>
+            </div>
+            <button class="mt-4 bg-slate-800 text-white px-4 py-2 font-bold text-xs rounded uppercase shadow">+ Add Node</button>
+        </div>
+        """, "Tree builder for Location/Unit hierarchy."))
     screens.append(screen("adm_ppl", "Global People Registry Master",
         """
         <div class="bg-slate-50 border p-6 rounded shadow-sm max-w-5xl border-t-8 border-slate-700 text-sm">
@@ -56,11 +71,47 @@ def get_admin_shark_screens():
         "Binds UI operational expense dropdown items directly to Finance-layer Chart of Accounts strings."
     ))
 
-    screens.append(screen("adm_mdm", "Master Data Config", "<div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Manage SKU tables, standard conversion yields, and pricing minimums limit blocks.]</div>", ""))
-    screens.append(screen("adm_aud", "System Audit Tool", "<div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Raw immutable append-log viewer capturing every Firebase interaction bound by UID.]</div>", ""))
-    screens.append(screen("adm_perm", "Permissions Matrix", "<div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Overrides standard RoleConfig if exact granular blocks are required per user ID.]</div>", ""))
-    screens.append(screen("adm_set", "Global Constants", "<div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[System naming conventions, timezones, fiscal year start dates.]</div>", ""))
-
+    screens.append(screen("adm_mdm", "Master Data Config", 
+        """
+        <div class="bg-white p-6 border rounded max-w-5xl shadow border-t-8 border-slate-800">
+            <h3 class="font-black text-slate-800 border-b pb-2 mb-4 uppercase text-sm"><i data-lucide="database" class="inline w-4 h-4 mr-2"></i> SKU Data Dictionary</h3>
+            <table class="w-full text-xs inv-table font-mono border">
+                <thead><tr><th>SKU Code</th><th>Name</th><th>UOM</th><th>Expected Yield %</th></tr></thead>
+                <tbody>
+                    <tr><td>SKU-F-01</td><td>Snapper Fillet A</td><td>KG</td><td>45%</td></tr>
+                    <tr><td>SKU-W-01</td><td>Snapper Whole</td><td>KG</td><td>100%</td></tr>
+                </tbody>
+            </table>
+        </div>
+        """, "Manage SKUs and global metrics."))
+    screens.append(screen("adm_aud", "System Audit Tool", 
+        """
+        <div class="bg-slate-900 text-green-400 p-6 rounded shadow max-w-5xl font-mono text-xs h-64 overflow-y-auto">
+            <div>[2026-03-04T12:00:01Z] USER_ID: budi WRITE: wallet_transactions/tx_123</div>
+            <div>[2026-03-04T12:00:15Z] SHARK_AI FLAG: doc_8891 (OVERDRAW_RISK)</div>
+            <div>[2026-03-04T12:05:00Z] USER_ID: admin UPDATE: users/budi (LOCKED)</div>
+        </div>
+        """, "Raw immutable log."))
+    screens.append(screen("adm_perm", "Permissions Matrix", 
+        """
+        <div class="bg-white p-6 border rounded shadow max-w-4xl text-sm">
+            <h3 class="font-bold border-b pb-2 mb-4">Granular Override Matrix</h3>
+            <div class="grid grid-cols-3 gap-2 text-xs font-mono">
+                <label><input type="checkbox" checked> CAN_VOID_DOCS</label>
+                <label><input type="checkbox" checked> CAN_APPROVE_EXP</label>
+                <label><input type="checkbox"> BYPASS_SHARK_AI</label>
+            </div>
+        </div>
+        """, "Overrides standard RoleConfig."))
+    screens.append(screen("adm_set", "Global Constants", 
+        """
+        <div class="bg-white p-6 border rounded shadow max-w-4xl">
+            <div class="space-y-4 text-sm font-mono text-slate-700">
+                <div><label class="block font-bold">System Timezone</label><input type="text" class="border p-2 w-full" value="UTC+7 (Jakarta)"></div>
+                <div><label class="block font-bold">Fiscal Year Start</label><input type="date" class="border p-2 w-full" value="2026-01-01"></div>
+            </div>
+        </div>
+        """, "System global vars."))
     # SHARK AI OPS
     screens.append(screen("shk_chat", "Shark Consult & Override",
         """
@@ -123,10 +174,35 @@ def get_admin_shark_screens():
         "Presents the active, unfixed rules triggered via background asynchronous Cloud Functions monitoring the global ledger."
     ))
 
-    screens.append(screen("shk_hist", "Alert Decay History", "<div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Logs when a Risk was cleared, by whom, and what mitigation was supplied.]</div>", ""))
-    screens.append(screen("shk_wa", "C-Suite Broadcast", "<div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Configures WhatsApp / Telegram webhook texts triggered by specific system bounds (e.g. Daily EOD Recap).]</div>", ""))
-    screens.append(screen("shk_rule", "Rule Adjustments", "<div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Manages the percentage limits triggering 'Yield Divergence' or 'Float Violation'.]</div>", ""))
-
+    screens.append(screen("shk_hist", "Alert Decay History", 
+        """
+        <div class="bg-white p-6 border rounded shadow max-w-5xl text-sm">
+            <h3 class="font-black text-slate-800 uppercase tracking-widest border-b pb-2 mb-4"><i data-lucide="clock" class="inline w-4 h-4 mr-2"></i> Mitigation Timeline</h3>
+            <div class="border-l-2 border-purple-200 ml-4 pl-4 space-y-4 font-mono text-xs">
+                <div><span class="text-purple-600 font-bold">14:00Z</span> - Alert: Yield Divergence (Boat F-14)</div>
+                <div><span class="text-emerald-600 font-bold">14:15Z</span> - Cleared by Location Mgr (John Doe) - Note: Weather delay.</div>
+            </div>
+        </div>
+        """, "Mitigation log."))
+    screens.append(screen("shk_wa", "C-Suite Broadcast", 
+        """
+        <div class="bg-white p-6 border rounded shadow max-w-4xl text-sm font-mono">
+            <h3 class="font-black text-slate-800 border-b pb-2 mb-4"><i data-lucide="message-circle" class="inline w-4 h-4 mr-2"></i> Webhook Config</h3>
+            <label class="block font-bold mt-2">Daily EOD Recap Targets (Comma separated numbers)</label>
+            <input type="text" class="border p-2 w-full mb-4" value="+628123456789">
+            <button class="bg-purple-600 text-white px-4 py-2 font-bold rounded shadow uppercase text-xs">Test Ping</button>
+        </div>
+        """, "WhatsApp webhook endpoints."))
+    screens.append(screen("shk_rule", "Rule Adjustments", 
+        """
+        <div class="bg-white p-6 border rounded shadow max-w-4xl text-sm font-mono">
+            <h3 class="font-black text-slate-800 border-b pb-2 mb-4">Threshold Sliders</h3>
+            <div class="space-y-4">
+                <div><label class="block font-bold">Yield Divergence Limit (%)</label><input type="range" class="w-full" min="1" max="20" value="5"></div>
+                <div><label class="block font-bold">Float Violation Buffer (Rp)</label><input type="number" class="w-full border p-2 text-right" value="50000000"></div>
+            </div>
+        </div>
+        """, "Percentage limits for triggers."))
     screens.append(freeze_checklist_screen())
 
     return screens

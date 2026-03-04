@@ -151,6 +151,17 @@ def get_office_screens():
     ))
 
     screens.append(screen("off_docs", "My Documents", "<div class='bg-white p-6 border rounded shadow-sm text-center text-teal-900 border-teal-100 bg-teal-50 font-mono'>OFFICE DOC BROWSER (EXP, REQ)</div>", ""))
-    screens.append(screen("off_print", "Print Center", "<div class='bg-white p-6 border text-slate-500 text-center font-bold py-24 bg-slate-50 border-dashed border-4'>[Search Doc ID to inject A4 Print Template -> window.print()]</div>", ""))
+    screens.append(screen("off_print", "Print Center", 
+        """
+        <div class="bg-slate-50 border-4 border-dashed border-slate-300 p-12 text-center rounded-xl max-w-4xl mx-auto mt-8">
+            <i data-lucide="printer" class="w-16 h-16 text-slate-400 mx-auto mb-4"></i>
+            <h3 class="text-xl font-black text-slate-700 mb-2">A4 Document Injection Engine</h3>
+            <p class="text-slate-500 font-mono text-sm mb-6 max-w-md mx-auto">Enter a specific Document ID to compile and render its immutable state into a printable format.</p>
+            <div class="flex max-w-sm mx-auto shadow-lg">
+                <input type="text" placeholder="DOC-..." class="flex-1 border-y border-l rounded-l px-4 py-2 font-mono outline-none focus:border-indigo-500">
+                <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-r font-bold uppercase tracking-widest text-xs transition">Preview</button>
+            </div>
+        </div>
+        """, "Search Doc ID to inject A4 Print Template -> window.print()"))
 
     return screens

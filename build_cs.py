@@ -173,7 +173,23 @@ def get_cs_screens():
         "Bypasses dispatch mechanisms and destroys local stock value silently alerting Location Manager."
     ))
 
-    screens.append(screen("cs_wallet", "9. Wallet Sub-View", "<div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Mirror of Factory Wallet logic bound strictly to CS_PettyCash tag.]</div>", ""))
+    screens.append(screen("cs_wallet", "9. Wallet Sub-View", 
+        """
+        <div class="bg-white p-6 border rounded shadow max-w-5xl">
+            <h3 class="font-bold border-b pb-2 mb-4 text-slate-800"><i data-lucide="wallet" class="inline w-4 h-4 mr-2 text-cyan-600"></i> Cold Storage Petty Cash</h3>
+            <div class="grid grid-cols-2 gap-4 text-sm font-mono mb-6">
+                <div class="p-4 bg-cyan-50 border border-cyan-200 rounded"><div class="text-xs font-bold text-cyan-800">Available Float</div><div class="text-xl font-black text-cyan-900 mt-1">Rp 15,000,000</div></div>
+                <div class="p-4 bg-red-50 border border-red-200 rounded"><div class="text-xs font-bold text-red-800">Total Shift Expenses</div><div class="text-xl font-black text-red-900 mt-1">Rp 1,000,000</div></div>
+            </div>
+            <table class="w-full text-xs font-mono border text-left">
+                <thead><tr class="bg-slate-100"><th>Time</th><th>Txn ID</th><th>Type</th><th>Amount</th><th>Running Balance</th></tr></thead>
+                <tbody>
+                    <tr><td class="p-2 border-b text-slate-500">08:00</td><td class="p-2 border-b">TX-1</td><td class="p-2 border-b">Float Receipt</td><td class="p-2 border-b text-emerald-600">+ Rp 16,000,000</td><td class="p-2 border-b font-bold">16,000,000</td></tr>
+                    <tr><td class="p-2 border-b text-slate-500">11:00</td><td class="p-2 border-b">TX-2</td><td class="p-2 border-b">Fuel Expense</td><td class="p-2 border-b text-red-600">- Rp 1,000,000</td><td class="p-2 border-b font-bold">15,000,000</td></tr>
+                </tbody>
+            </table>
+        </div>
+        """, "Mirror of Factory Wallet logic bound strictly to CS_PettyCash tag."))
     
     screens.append(screen("cs_close", "10. Settle Session Operations",
         """
@@ -200,7 +216,18 @@ def get_cs_screens():
     ))
 
     screens.append(screen("cs_docs", "My Documents", "<div class='bg-white p-6 border rounded shadow-sm text-center text-cyan-900 border-cyan-100 bg-cyan-50 font-mono'>READ-ONLY SEARCH: All Docs matching active CS Unit.</div>", ""))
-    screens.append(screen("cs_print", "Print Center", "<div class='bg-white p-6 border text-slate-500 text-center font-bold py-24 bg-slate-50 border-dashed border-4'>[Search Doc ID to inject A4 Print Template -> window.print()]</div>", ""))
+    screens.append(screen("cs_print", "Print Center", 
+        """
+        <div class="bg-slate-50 border-4 border-dashed border-slate-300 p-12 text-center rounded-xl max-w-4xl mx-auto mt-8">
+            <i data-lucide="printer" class="w-16 h-16 text-slate-400 mx-auto mb-4"></i>
+            <h3 class="text-xl font-black text-slate-700 mb-2">A4 Document Injection Engine</h3>
+            <p class="text-slate-500 font-mono text-sm mb-6 max-w-md mx-auto">Enter a specific Document ID to compile and render its immutable state into a printable format.</p>
+            <div class="flex max-w-sm mx-auto shadow-lg">
+                <input type="text" placeholder="DOC-..." class="flex-1 border-y border-l rounded-l px-4 py-2 font-mono outline-none focus:border-indigo-500">
+                <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-r font-bold uppercase tracking-widest text-xs transition">Preview</button>
+            </div>
+        </div>
+        """, "Search Doc ID to inject A4 Print Template -> window.print()"))
 
     return screens
 

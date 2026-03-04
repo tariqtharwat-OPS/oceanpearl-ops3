@@ -361,7 +361,7 @@
                 </div>
             </div>
         </div>
-        <div class='text-center uppercase font-bold tracking-widest h-64 text-slate-500 flex items-center justify-center border-dashed border-2 border-slate-300 bg-slate-50'>[A4 Summary of Catch, Wallet Zero-out, and Crew Signature Ledger Prints Here]</div>
+        <table class='w-full text-left text-xs font-mono border-collapse'><thead><tr class='bg-slate-100 border-b border-slate-300'><th>Description</th><th class='text-right'>Value</th></tr></thead><tbody><tr><td class='border-b py-2'>Total Trip Fuel Exp</td><td class='border-b py-2 text-right'>Rp 1,000,000</td></tr><tr><td class='border-b py-2'>Total Catch Est Val</td><td class='border-b py-2 text-right'>Rp 8,500,000</td></tr><tr><td class='border-b py-2 font-black'>Crew Net Settlement</td><td class='border-b py-2 text-right font-black'>Rp 1,000,000</td></tr><tr><td class='py-2 font-black'>Cash Handover to Hub</td><td class='py-2 text-right font-black text-emerald-700'>Rp 3,000,000</td></tr></tbody></table>
         <div class="absolute bottom-12 flex justify-between px-8 w-[calc(100%-30mm)]"><div class="border-t border-black pt-2 w-40 text-center text-xs font-bold uppercase">Captain Signature</div><div class="border-t border-black pt-2 w-40 text-center text-xs font-bold uppercase">Hub Finance Manager</div></div>
         <div class="absolute bottom-2 right-2 text-[0.6rem] font-mono text-slate-400">OPS3 SYSTEM GENERATED / IMMUTABLE RECORD</div>
     </div>
@@ -372,8 +372,18 @@
         <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
     </div><div id="boat_print" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Print Center</h2>
-        <div class='bg-white p-6 border text-slate-500 text-center font-bold py-24 bg-slate-50 border-dashed border-4'>[Search Doc ID to inject A4 Print Template -> window.print()]</div>
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+        
+        <div class="bg-slate-50 border-4 border-dashed border-slate-300 p-12 text-center rounded-xl max-w-4xl mx-auto mt-8">
+            <i data-lucide="printer" class="w-16 h-16 text-slate-400 mx-auto mb-4"></i>
+            <h3 class="text-xl font-black text-slate-700 mb-2">A4 Document Injection Engine</h3>
+            <p class="text-slate-500 font-mono text-sm mb-6 max-w-md mx-auto">Enter a specific Document ID to compile and render its immutable state into a printable format.</p>
+            <div class="flex max-w-sm mx-auto shadow-lg">
+                <input type="text" placeholder="DOC-..." class="flex-1 border-y border-l rounded-l px-4 py-2 font-mono outline-none focus:border-indigo-500">
+                <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-r font-bold uppercase tracking-widest text-xs transition">Preview</button>
+            </div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Search Doc ID to inject A4 Print Template -> window.print()</div>
     </div><div id="fac_start" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">1. Start Shift / Batch</h2>
         
@@ -596,8 +606,23 @@
         <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Subtracts Factory inventory immediately upon 'Post'. The target Cold Storage unit receives a pending Reception notice.</div>
     </div><div id="fac_wallet" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">7. Wallet Sub-View</h2>
-        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Mirror of Boat Wallet sweeps but context bound to FACTORY_CASH.]</div>
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+        
+        <div class="bg-white p-6 border rounded shadow max-w-5xl border-t-8 border-indigo-900">
+            <h3 class="font-bold border-b pb-2 mb-4 text-slate-800"><i data-lucide="wallet" class="inline w-4 h-4 mr-2 text-indigo-600"></i> Factory Petty Cash</h3>
+            <div class="grid grid-cols-2 gap-4 text-sm font-mono mb-6">
+                <div class="p-4 bg-indigo-50 border border-indigo-200 rounded"><div class="text-xs font-bold text-indigo-800">Available Float</div><div class="text-xl font-black text-indigo-900 mt-1">Rp 12,500,000</div></div>
+                <div class="p-4 bg-red-50 border border-red-200 rounded"><div class="text-xs font-bold text-red-800">Total Shift Expenses</div><div class="text-xl font-black text-red-900 mt-1">Rp 500,000</div></div>
+            </div>
+            <table class="w-full text-xs font-mono border text-left">
+                <thead><tr class="bg-slate-100"><th>Time</th><th>Txn ID</th><th>Type</th><th>Amount</th><th>Running Balance</th></tr></thead>
+                <tbody>
+                    <tr><td class="p-2 border-b text-slate-500">08:00</td><td class="p-2 border-b">TX-4</td><td class="p-2 border-b">Float Receipt</td><td class="p-2 border-b text-emerald-600">+ Rp 13,000,000</td><td class="p-2 border-b font-bold">13,000,000</td></tr>
+                    <tr><td class="p-2 border-b text-slate-500">14:00</td><td class="p-2 border-b">TX-5</td><td class="p-2 border-b">Op Expense</td><td class="p-2 border-b text-red-600">- Rp 500,000</td><td class="p-2 border-b font-bold">12,500,000</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Mirror of Boat Wallet sweeps but context bound to FACTORY_CASH.</div>
     </div><div id="fac_close" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">8. Close Shift</h2>
         
@@ -651,7 +676,7 @@
                 </div>
             </div>
         </div>
-        <div class='text-center uppercase font-bold tracking-widest h-64 text-slate-500 flex items-center justify-center border-dashed border-2 border-slate-300 bg-slate-50'>[Includes yields, shift staff settlement nets, physical cash handover declarations]</div>
+        <table class='w-full text-left text-xs font-mono border-collapse'><thead><tr class='bg-slate-100 border-b border-slate-300'><th>Metrics & End of Shift Handover</th><th class='text-right'>Value</th></tr></thead><tbody><tr><td class='border-b py-2'>Processed Yield Est.</td><td class='border-b py-2 text-right'>45% (Nominal)</td></tr><tr><td class='border-b py-2'>Total Op Expenditure</td><td class='border-b py-2 text-right'>Rp 500,000</td></tr><tr><td class='py-2 font-black text-indigo-800'>Physical Vault Handover</td><td class='py-2 text-right font-black text-emerald-700'>Rp 12,500,000</td></tr></tbody></table>
         <div class="absolute bottom-12 flex justify-between px-8 w-[calc(100%-30mm)]"><div class="border-t border-black pt-2 w-40 text-center text-xs font-bold uppercase">Shift Mandor</div><div class="border-t border-black pt-2 w-40 text-center text-xs font-bold uppercase">Location Cashier</div></div>
         <div class="absolute bottom-2 right-2 text-[0.6rem] font-mono text-slate-400">OPS3 SYSTEM GENERATED / IMMUTABLE RECORD</div>
     </div>
@@ -662,8 +687,18 @@
         <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
     </div><div id="fac_print" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Print Center</h2>
-        <div class='bg-white p-6 border text-slate-500 text-center font-bold py-24 bg-slate-50 border-dashed border-4'>[Search Doc ID to inject A4 Print Template -> window.print()]</div>
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+        
+        <div class="bg-slate-50 border-4 border-dashed border-slate-300 p-12 text-center rounded-xl max-w-4xl mx-auto mt-8">
+            <i data-lucide="printer" class="w-16 h-16 text-slate-400 mx-auto mb-4"></i>
+            <h3 class="text-xl font-black text-slate-700 mb-2">A4 Document Injection Engine</h3>
+            <p class="text-slate-500 font-mono text-sm mb-6 max-w-md mx-auto">Enter a specific Document ID to compile and render its immutable state into a printable format.</p>
+            <div class="flex max-w-sm mx-auto shadow-lg">
+                <input type="text" placeholder="DOC-..." class="flex-1 border-y border-l rounded-l px-4 py-2 font-mono outline-none focus:border-indigo-500">
+                <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-r font-bold uppercase tracking-widest text-xs transition">Preview</button>
+            </div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Search Doc ID to inject A4 Print Template -> window.print()</div>
     </div><div id="cs_start" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">1. Start Loading/Shipping Shift</h2>
         
@@ -958,8 +993,23 @@
         <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Bypasses dispatch mechanisms and destroys local stock value silently alerting Location Manager.</div>
     </div><div id="cs_wallet" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">9. Wallet Sub-View</h2>
-        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Mirror of Factory Wallet logic bound strictly to CS_PettyCash tag.]</div>
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+        
+        <div class="bg-white p-6 border rounded shadow max-w-5xl">
+            <h3 class="font-bold border-b pb-2 mb-4 text-slate-800"><i data-lucide="wallet" class="inline w-4 h-4 mr-2 text-cyan-600"></i> Cold Storage Petty Cash</h3>
+            <div class="grid grid-cols-2 gap-4 text-sm font-mono mb-6">
+                <div class="p-4 bg-cyan-50 border border-cyan-200 rounded"><div class="text-xs font-bold text-cyan-800">Available Float</div><div class="text-xl font-black text-cyan-900 mt-1">Rp 15,000,000</div></div>
+                <div class="p-4 bg-red-50 border border-red-200 rounded"><div class="text-xs font-bold text-red-800">Total Shift Expenses</div><div class="text-xl font-black text-red-900 mt-1">Rp 1,000,000</div></div>
+            </div>
+            <table class="w-full text-xs font-mono border text-left">
+                <thead><tr class="bg-slate-100"><th>Time</th><th>Txn ID</th><th>Type</th><th>Amount</th><th>Running Balance</th></tr></thead>
+                <tbody>
+                    <tr><td class="p-2 border-b text-slate-500">08:00</td><td class="p-2 border-b">TX-1</td><td class="p-2 border-b">Float Receipt</td><td class="p-2 border-b text-emerald-600">+ Rp 16,000,000</td><td class="p-2 border-b font-bold">16,000,000</td></tr>
+                    <tr><td class="p-2 border-b text-slate-500">11:00</td><td class="p-2 border-b">TX-2</td><td class="p-2 border-b">Fuel Expense</td><td class="p-2 border-b text-red-600">- Rp 1,000,000</td><td class="p-2 border-b font-bold">15,000,000</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Mirror of Factory Wallet logic bound strictly to CS_PettyCash tag.</div>
     </div><div id="cs_close" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">10. Settle Session Operations</h2>
         
@@ -989,8 +1039,18 @@
         <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
     </div><div id="cs_print" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Print Center</h2>
-        <div class='bg-white p-6 border text-slate-500 text-center font-bold py-24 bg-slate-50 border-dashed border-4'>[Search Doc ID to inject A4 Print Template -> window.print()]</div>
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+        
+        <div class="bg-slate-50 border-4 border-dashed border-slate-300 p-12 text-center rounded-xl max-w-4xl mx-auto mt-8">
+            <i data-lucide="printer" class="w-16 h-16 text-slate-400 mx-auto mb-4"></i>
+            <h3 class="text-xl font-black text-slate-700 mb-2">A4 Document Injection Engine</h3>
+            <p class="text-slate-500 font-mono text-sm mb-6 max-w-md mx-auto">Enter a specific Document ID to compile and render its immutable state into a printable format.</p>
+            <div class="flex max-w-sm mx-auto shadow-lg">
+                <input type="text" placeholder="DOC-..." class="flex-1 border-y border-l rounded-l px-4 py-2 font-mono outline-none focus:border-indigo-500">
+                <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-r font-bold uppercase tracking-widest text-xs transition">Preview</button>
+            </div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Search Doc ID to inject A4 Print Template -> window.print()</div>
     </div><div id="off_start" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">1. Start Office Day</h2>
         
@@ -1188,8 +1248,18 @@
         <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
     </div><div id="off_print" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Print Center</h2>
-        <div class='bg-white p-6 border text-slate-500 text-center font-bold py-24 bg-slate-50 border-dashed border-4'>[Search Doc ID to inject A4 Print Template -> window.print()]</div>
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+        
+        <div class="bg-slate-50 border-4 border-dashed border-slate-300 p-12 text-center rounded-xl max-w-4xl mx-auto mt-8">
+            <i data-lucide="printer" class="w-16 h-16 text-slate-400 mx-auto mb-4"></i>
+            <h3 class="text-xl font-black text-slate-700 mb-2">A4 Document Injection Engine</h3>
+            <p class="text-slate-500 font-mono text-sm mb-6 max-w-md mx-auto">Enter a specific Document ID to compile and render its immutable state into a printable format.</p>
+            <div class="flex max-w-sm mx-auto shadow-lg">
+                <input type="text" placeholder="DOC-..." class="flex-1 border-y border-l rounded-l px-4 py-2 font-mono outline-none focus:border-indigo-500">
+                <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-r font-bold uppercase tracking-widest text-xs transition">Preview</button>
+            </div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Search Doc ID to inject A4 Print Template -> window.print()</div>
     </div><div id="loc_dash" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Location Dashboard</h2>
         
@@ -1231,12 +1301,30 @@
         <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Authorizes physical cash returning from field wallets. Inflates Kaimana Hub central treasury directly.</div>
     </div><div id="loc_app_recv" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Review: Receivings</h2>
-        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Grid showing DO mismatches flagged at CS or Factory]</div>
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+        
+        <div class="bg-white p-6 border rounded shadow max-w-5xl">
+            <h3 class="font-bold border-b pb-2 mb-4 text-slate-800"><i data-lucide="eye" class="inline w-4 h-4 mr-2 text-emerald-600"></i> Discrepancy Flag Rollup</h3>
+            <table class="w-full text-xs font-mono border text-left">
+                <thead><tr class="bg-slate-100"><th>Doc Ref</th><th>Type</th><th>Origin</th><th>Destination</th><th>Discrepancy</th><th>Action</th></tr></thead>
+                <tbody>
+                    <tr><td class="p-2 border-b">DO-991</td><td class="p-2 border-b">Transfer</td><td class="p-2 border-b">Boat Faris</td><td class="p-2 border-b">Fac Main</td><td class="p-2 border-b text-red-600 font-bold">5 KG Short</td><td class="p-2 border-b"><button class="bg-slate-800 text-white px-2 py-1 rounded">Review</button></td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Grid showing DO mismatches flagged at CS or Factory</div>
     </div><div id="loc_perf" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Unit Performance Grid</h2>
-        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Read-only analytic rollups of yield % and fuel consumption metrics per Boat/Factory.]</div>
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+        
+        <div class="bg-white p-6 border rounded shadow max-w-5xl">
+            <h3 class="font-bold border-b pb-2 mb-4 text-slate-800"><i data-lucide="activity" class="inline w-4 h-4 mr-2 text-blue-600"></i> Unit KPIs</h3>
+            <div class="grid grid-cols-2 gap-4 text-xs font-mono">
+                <div class="p-4 border rounded"><div class="font-bold mb-2">Boat Efficiency</div><div class="text-xl">Fuel Ratio: 12 L/KG</div></div>
+                <div class="p-4 border rounded"><div class="font-bold mb-2">Factory Yield</div><div class="text-xl">Avg Yield: 42%</div></div>
+            </div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Read-only analytic rollups of yield % and fuel consumption metrics per Boat/Factory.</div>
     </div><div id="loc_inv" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Location Inventory Master</h2>
         
@@ -1253,20 +1341,55 @@
         <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Sub-tree visual query of inventory aggregated across location boundaries.</div>
     </div><div id="loc_wallet" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Location Wallets Master</h2>
-        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Tree view: Kaimana Hub Central -> Petty Cash + Factory Cash + Trip Cash B1 + Trip Cash B2]</div>
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+        
+        <div class="bg-white p-6 border rounded shadow max-w-5xl">
+            <h3 class="font-bold border-b pb-2 mb-4 text-slate-800"><i data-lucide="wallet" class="inline w-4 h-4 mr-2 text-emerald-600"></i> Wallets Tree</h3>
+            <div class="font-mono text-xs space-y-2">
+                <div class="p-2 bg-emerald-50 border border-emerald-200 font-bold text-emerald-900 rounded">Kaimana Hub Central - Rp 500,000,000</div>
+                <div class="pl-8 space-y-2">
+                    <div class="p-2 bg-slate-50 border rounded">Petty Cash - Rp 15,000,000</div>
+                    <div class="p-2 bg-indigo-50 border border-indigo-200 rounded text-indigo-900">Factory Cash - Rp 12,500,000</div>
+                    <div class="pl-8 p-2 bg-blue-50 border rounded text-blue-900">Trip Cash B1 (Boat Faris) - Rp 4,000,000</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Tree view: Kaimana Hub Central -> Petty Cash + Factory Cash + Trip Cash B1 + Trip Cash B2</div>
     </div><div id="loc_staff" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Unit Staff Assignment</h2>
-        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Moves People from Loc pool into Boat/Factory default roster templates.]</div>
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+        
+        <div class="bg-white p-6 border rounded shadow max-w-5xl">
+            <h3 class="font-bold border-b pb-2 mb-4 text-slate-800"><i data-lucide="users" class="inline w-4 h-4 mr-2 text-emerald-600"></i> Unit Staff Assignment</h3>
+            <div class="flex space-x-4 font-mono text-xs">
+                <div class="w-1/2 border p-4 rounded"><h4 class="font-bold mb-2">Location Pool</h4><div class="p-2 bg-slate-100 mb-1 border rounded">Maman (ID-042)</div><div class="p-2 bg-slate-100 border rounded">Rian (ID-043)</div></div>
+                <div class="w-1/2 border p-4 rounded"><h4 class="font-bold mb-2">Boat Faris Roster</h4><div class="p-2 bg-blue-50 border border-blue-200 text-blue-800 mb-1 rounded">Budi (Capt)</div></div>
+            </div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Moves People from Loc pool into Boat/Factory default roster templates.</div>
     </div><div id="loc_ppl" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">People Registry View</h2>
-        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Location filter applied to Global People Registry. Read-only]</div>
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+        
+        <div class="bg-white p-6 border rounded shadow max-w-5xl">
+            <h3 class="font-bold border-b pb-2 mb-4 text-slate-800"><i data-lucide="contact" class="inline w-4 h-4 mr-2 text-emerald-600"></i> People Mapping</h3>
+            <table class="w-full text-xs font-mono border text-left">
+                <thead><tr class="bg-slate-100"><th>ID</th><th>Name</th><th>Role Category</th><th>Status</th></tr></thead>
+                <tbody>
+                    <tr><td class="p-2 border-b">ID-011</td><td class="p-2 border-b">Budi</td><td class="p-2 border-b">Captain</td><td class="p-2 border-b text-emerald-600 font-bold">Active</td></tr>
+                    <tr><td class="p-2 border-b">ID-042</td><td class="p-2 border-b">Maman</td><td class="p-2 border-b">Crew</td><td class="p-2 border-b text-emerald-600 font-bold">Active</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Location filter applied to Global People Registry. Read-only</div>
     </div><div id="loc_print" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Doc Center (Location)</h2>
-        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Search all Docs where Loc=Kaimana]</div>
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+        
+        <div class="bg-white p-6 border rounded shadow max-w-4xl">
+            <div class="flex items-center space-x-2"><input type="text" placeholder="Search Docs..." class="border p-2 w-full font-mono text-sm"><button class="bg-slate-800 text-white px-4 py-2 font-bold rounded">Search</button></div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Search all Docs where Loc=Kaimana</div>
     </div><div id="fin_dash" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Finance Dashboard</h2>
         
@@ -1375,20 +1498,62 @@
         <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Double-entry raw immutable log representation visually. Dr Cash, Cr Revenue mappings display here mapped by Timestamp and source Doc ID.</div>
     </div><div id="fin_recon" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Bank Recon</h2>
-        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Reconciliation logic vs uploaded CSV.]</div>
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+        
+        <div class="bg-white p-6 border rounded shadow max-w-5xl text-sm font-mono">
+            <h3 class="font-black border-b pb-2 mb-4 text-slate-800"><i data-lucide="refresh-cw" class="inline w-4 h-4 mr-2 text-amber-600"></i> Reconciliation Grid</h3>
+            <div class="bg-amber-50 border p-4 flex justify-between items-center rounded text-amber-900 font-bold border-amber-200 mb-4">
+                Upload Bank CSV <button class="bg-amber-600 text-white px-4 py-1 rounded">Select File</button>
+            </div>
+            <table class="w-full text-xs font-mono border text-left">
+                <thead><tr class="bg-slate-100"><th>Bank Txn</th><th>System Ledger</th><th>Variance</th><th>Action</th></tr></thead>
+                <tbody>
+                    <tr><td class="p-2 border-b">Rp 150M IN</td><td class="p-2 border-b text-emerald-600 font-bold">MATCHED (INV-22)</td><td class="p-2 border-b">0</td><td class="p-2 border-b"><button class="bg-slate-200 px-2 rounded opacity-50 cursor-not-allowed">Locked</button></td></tr>
+                    <tr><td class="p-2 border-b">Rp 5.5M OUT</td><td class="p-2 border-b text-red-600 font-bold">UNMATCHED</td><td class="p-2 border-b">-</td><td class="p-2 border-b"><button class="bg-amber-100 text-amber-800 border-amber-300 border px-2 py-1 rounded text-[0.6rem] uppercase tracking-wide">Bind to AP</button></td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Reconciliation logic vs uploaded CSV.</div>
     </div><div id="fin_pol" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Policy Monitor</h2>
-        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Rules engine output: e.g. Flag expenses > 5M]</div>
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+        
+        <div class="bg-white p-6 border rounded shadow max-w-5xl">
+            <h3 class="font-bold border-b pb-2 mb-4 text-slate-800"><i data-lucide="shield-alert" class="inline w-4 h-4 mr-2 text-amber-600"></i> Policy Violations Tracker</h3>
+            <div class="p-4 bg-red-50 border border-red-200 rounded text-xs font-mono text-red-800">
+                <span class="font-bold block mb-1">High Value Alert:</span>
+                Boat Trip B1-99 expense logged at Rp 15M (Policy Limit: 10M). Blocking approval chain automatically.
+            </div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Rules engine output: e.g. Flag expenses > 5M</div>
     </div><div id="fin_rep" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Reports Export</h2>
-        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Excel/PDF generator for Balance Sheet / P&L based on Ledger.]</div>
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+        
+        <div class="bg-white p-6 border rounded shadow max-w-3xl">
+            <h3 class="font-bold border-b pb-2 mb-4 text-slate-800">Financial Reporting</h3>
+            <div class="flex space-x-4 mb-4 font-mono text-sm">
+                <label><input type="radio" checked> Balance Sheet</label>
+                <label><input type="radio"> P&L</label>
+                <label><input type="radio"> Cash Flow</label>
+            </div>
+            <button class="bg-amber-800 text-white px-4 py-2 font-bold rounded shadow uppercase tracking-widest text-xs flex items-center"><i data-lucide="download" class="w-4 h-4 inline mr-2"></i> Export PDF/XLSX</button>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Excel/PDF generator for Balance Sheet / P&L based on Ledger.</div>
     </div><div id="fin_print" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Print Center (Docs)</h2>
-        <div class='bg-white p-6 border text-slate-500 text-center font-bold py-24 bg-slate-50 border-dashed border-4'>[Search Doc ID to inject A4 Print Template -> window.print()]</div>
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+        
+        <div class="bg-slate-50 border-4 border-dashed border-slate-300 p-12 text-center rounded-xl max-w-4xl mx-auto mt-8">
+            <i data-lucide="printer" class="w-16 h-16 text-slate-400 mx-auto mb-4"></i>
+            <h3 class="text-xl font-black text-slate-700 mb-2">A4 Document Injection Engine</h3>
+            <p class="text-slate-500 font-mono text-sm mb-6 max-w-md mx-auto">Enter a specific Document ID (e.g. REC-9921) to compile and render its immutable state into a printable format.</p>
+            <div class="flex max-w-sm mx-auto shadow-lg">
+                <input type="text" placeholder="RX-..." class="flex-1 border-y border-l rounded-l px-4 py-2 font-mono outline-none focus:border-indigo-500">
+                <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-r font-bold uppercase tracking-widest text-xs transition">Preview</button>
+            </div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Search Doc ID to inject A4 Print Template -> window.print()</div>
     </div><div id="ceo_dash" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Executive Pulse</h2>
         
@@ -1425,20 +1590,57 @@
         <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Maps every physical asset (stock) and estimated value recursively.</div>
     </div><div id="ceo_yield" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Yield Anomalies</h2>
-        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Flags processing batches that fall outside statistical norm expectations. Powered by Shark AI history.]</div>
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+        
+        <div class="bg-white p-6 border rounded shadow max-w-5xl">
+            <h3 class="font-bold border-b pb-2 mb-4 text-slate-800"><i data-lucide="alert-triangle" class="inline w-4 h-4 mr-2 text-red-500"></i> Statistical Norm Deviations</h3>
+            <table class="w-full text-xs font-mono border text-left">
+                <thead><tr class="bg-slate-100"><th>Batch ID</th><th>Location</th><th>Expected Yield</th><th>Actual Yield</th><th>Action</th></tr></thead>
+                <tbody>
+                    <tr><td class="p-2 border-b">BATCH-099</td><td class="p-2 border-b">Kaimana Fac 2</td><td class="p-2 border-b">45%</td><td class="p-2 border-b text-red-600 font-bold">38%</td><td class="p-2 border-b"><button class="bg-slate-800 text-white px-2 py-1 rounded">Investigate</button></td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Powered by Shark AI history.</div>
     </div><div id="ceo_health" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Financial Health</h2>
-        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Charts derived from global Ledger view. Real-time P&L estimates.]</div>
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+        
+        <div class="bg-white p-6 border rounded shadow max-w-5xl">
+            <h3 class="font-bold border-b pb-2 mb-4 text-slate-800"><i data-lucide="dollar-sign" class="inline w-4 h-4 mr-2 text-emerald-500"></i> Real-time P&L Estimate</h3>
+            <div class="grid grid-cols-2 gap-4 text-sm font-mono">
+                <div class="p-4 bg-emerald-50 border border-emerald-200 rounded"><div class="text-xs font-bold text-emerald-800">Total Revenue YTD</div><div class="text-xl font-black text-emerald-900 mt-1">Rp 4,500,000,000</div></div>
+                <div class="p-4 bg-red-50 border border-red-200 rounded"><div class="text-xs font-bold text-red-800">Total Expenses YTD</div><div class="text-xl font-black text-red-900 mt-1">Rp 1,200,000,000</div></div>
+            </div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Charts derived from global Ledger view.</div>
     </div><div id="ceo_risk" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Risk Dashboard</h2>
-        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Displays unapproved expenses > 7 days, aging AR > 30 days, high cash float balances on disconnected boats.]</div>
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+        
+        <div class="bg-white p-6 border rounded shadow max-w-5xl">
+            <h3 class="font-bold border-b pb-2 mb-4 text-slate-800"><i data-lucide="shield" class="inline w-4 h-4 mr-2 text-amber-500"></i> Active Risks</h3>
+            <div class="flex flex-col space-y-2 font-mono text-xs">
+                <div class="p-3 bg-red-50 border border-red-200 rounded text-red-800 font-bold">Unapproved Expenses > 7 days: 5 items</div>
+                <div class="p-3 bg-amber-50 border border-amber-200 rounded text-amber-800 font-bold">High Cash Float (>50M) on unconnected boats: Boat Faris</div>
+            </div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Displays aging risks and float balances.</div>
     </div><div id="ceo_appr" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Approvals (Overrides)</h2>
-        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Unlocks specific documents blocked by Finance Policy logic.]</div>
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+        
+        <div class="bg-white p-6 border rounded shadow max-w-5xl">
+            <h3 class="font-bold border-b pb-2 mb-4 text-slate-800"><i data-lucide="key" class="inline w-4 h-4 mr-2"></i> Policy Overrides</h3>
+            <div class="font-mono text-xs mb-4 text-slate-600">The following documents have been blocked by Finance Policy but requested CEO override.</div>
+            <table class="w-full text-xs font-mono border text-left">
+                <thead><tr class="bg-slate-100"><th>Doc ID</th><th>Requested By</th><th>Amount</th><th>Policy Blocker</th><th>Action</th></tr></thead>
+                <tbody>
+                    <tr><td class="p-2 border-b">EXP-9921</td><td class="p-2 border-b">John (Loc Mgr)</td><td class="p-2 border-b">Rp 150M</td><td class="p-2 border-b">Exceeds limits</td><td class="p-2 border-b"><button class="bg-emerald-600 text-white px-2 py-1 rounded">Force Approve</button></td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Unlocks specific documents blocked by Finance.</div>
     </div><div id="ceo_shark" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Ask Shark AI</h2>
         <div class='bg-slate-900 border-slate-700 p-6 rounded shadow max-w-4xl text-emerald-400 font-mono text-sm leading-relaxed border-t-8 border-t-purple-600 h-96'>OPS_SHARK_V4 ONLINE.<br>_ <span class='animate-pulse text-white'>_</span></div>
@@ -1505,16 +1707,39 @@
         <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> High-level sanitized read-only metrics aggregated directly from immutable underlying datasets.</div>
     </div><div id="inv_val" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Inventory Valuation</h2>
-        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Grid displaying estimated mark-to-market value of all cold storage.]</div>
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+        
+        <div class="bg-white p-6 border rounded shadow max-w-5xl">
+            <h3 class="font-bold border-b pb-2 mb-4 text-slate-800">Mark-to-Market Valuation</h3>
+            <table class="w-full text-xs font-mono border text-left">
+                <thead><tr class="bg-slate-100"><th>Facility</th><th>Total Stock (KG)</th><th>Est Current Value</th></tr></thead>
+                <tbody>
+                    <tr><td class="p-2 border-b border-r">Kaimana CS Main</td><td class="p-2 border-b border-r text-right">4,104.5</td><td class="p-2 border-b text-right font-bold text-emerald-700">Rp 241,000,000</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Grid displaying estimated MTM value of all cold storage.</div>
     </div><div id="inv_rev" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Revenue/Margin</h2>
-        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Chart of Commercial Sales invoices grouped by Hub.]</div>
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+        
+        <div class="bg-white p-6 border rounded shadow max-w-5xl">
+            <h3 class="font-bold border-b pb-2 mb-4 text-slate-800">Commercial Sales Rollup</h3>
+            <div class="h-32 bg-slate-50 border border-slate-200 rounded flex items-center justify-center text-slate-400 font-mono text-xs italic">[Bar chart visualization mapping Sales Invoices grouped by Hub over time placeholder]</div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Chart of Commercial Sales invoices grouped by Hub.</div>
     </div><div id="inv_risk" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Risk Summary</h2>
-        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Summary of waste deductions & uncollected AR ratios.]</div>
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+        
+        <div class="bg-white p-6 border rounded shadow max-w-5xl">
+            <h3 class="font-bold border-b pb-2 mb-4 text-slate-800">Operational Risk Rollup</h3>
+            <div class="grid grid-cols-2 gap-4 text-xs font-mono">
+                <div class="p-4 bg-red-50 rounded border border-red-200"><div class="font-bold text-red-900 mb-1">Global Waste Ratio</div><div class="text-xl">4.2%</div><div class="mt-2 text-[0.6rem] text-red-600">Target < 2.0%</div></div>
+                <div class="p-4 bg-amber-50 rounded border border-amber-200"><div class="font-bold text-amber-900 mb-1">Uncollected AR Ratio</div><div class="text-xl">12%</div><div class="mt-2 text-[0.6rem] text-amber-600">Target < 5%</div></div>
+            </div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Summary of waste deductions & uncollected AR ratios.</div>
     </div><div id="adm_usr" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">User Management</h2>
         
@@ -1533,8 +1758,23 @@
         <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Maps Google Auth records to OPS3 internal roles and hard-binds them to explicit location node contexts. Affects Firestore Rules natively.</div>
     </div><div id="adm_loc" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Location Builder</h2>
-        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Visual drag-n-drop or explicit tree editor placing Boats -> Hubs -> Global]</div>
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+        
+        <div class="bg-white p-6 border rounded shadow-md max-w-4xl text-sm font-mono border-t-8 border-slate-800">
+            <h3 class="font-black text-slate-800 border-b pb-2 mb-4 uppercase tracking-widest"><i data-lucide="git-merge" class="inline w-5 h-5 mr-2"></i> Operational Tree</h3>
+            <div class="space-y-2">
+                <div class="p-3 bg-slate-100 border rounded font-bold"><i data-lucide="globe" class="inline w-4 h-4 mr-2"></i> HQ Global</div>
+                <div class="pl-8 space-y-2">
+                    <div class="p-3 bg-blue-50 border border-blue-200 rounded text-blue-900 font-bold"><i data-lucide="map-pin" class="inline w-4 h-4 mr-2"></i> Kaimana Hub</div>
+                    <div class="pl-8 flex space-x-2">
+                        <div class="p-2 bg-white border rounded text-xs"><i data-lucide="anchor" class="inline w-3 h-3 text-slate-400"></i> Boat Faris</div>
+                        <div class="p-2 bg-white border rounded text-xs"><i data-lucide="factory" class="inline w-3 h-3 text-slate-400"></i> Fac Main</div>
+                    </div>
+                </div>
+            </div>
+            <button class="mt-4 bg-slate-800 text-white px-4 py-2 font-bold text-xs rounded uppercase shadow">+ Add Node</button>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Tree builder for Location/Unit hierarchy.</div>
     </div><div id="adm_ppl" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Global People Registry Master</h2>
         
@@ -1568,20 +1808,53 @@
         <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Binds UI operational expense dropdown items directly to Finance-layer Chart of Accounts strings.</div>
     </div><div id="adm_mdm" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Master Data Config</h2>
-        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Manage SKU tables, standard conversion yields, and pricing minimums limit blocks.]</div>
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+        
+        <div class="bg-white p-6 border rounded max-w-5xl shadow border-t-8 border-slate-800">
+            <h3 class="font-black text-slate-800 border-b pb-2 mb-4 uppercase text-sm"><i data-lucide="database" class="inline w-4 h-4 mr-2"></i> SKU Data Dictionary</h3>
+            <table class="w-full text-xs inv-table font-mono border">
+                <thead><tr><th>SKU Code</th><th>Name</th><th>UOM</th><th>Expected Yield %</th></tr></thead>
+                <tbody>
+                    <tr><td>SKU-F-01</td><td>Snapper Fillet A</td><td>KG</td><td>45%</td></tr>
+                    <tr><td>SKU-W-01</td><td>Snapper Whole</td><td>KG</td><td>100%</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Manage SKUs and global metrics.</div>
     </div><div id="adm_aud" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">System Audit Tool</h2>
-        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Raw immutable append-log viewer capturing every Firebase interaction bound by UID.]</div>
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+        
+        <div class="bg-slate-900 text-green-400 p-6 rounded shadow max-w-5xl font-mono text-xs h-64 overflow-y-auto">
+            <div>[2026-03-04T12:00:01Z] USER_ID: budi WRITE: wallet_transactions/tx_123</div>
+            <div>[2026-03-04T12:00:15Z] SHARK_AI FLAG: doc_8891 (OVERDRAW_RISK)</div>
+            <div>[2026-03-04T12:05:00Z] USER_ID: admin UPDATE: users/budi (LOCKED)</div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Raw immutable log.</div>
     </div><div id="adm_perm" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Permissions Matrix</h2>
-        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Overrides standard RoleConfig if exact granular blocks are required per user ID.]</div>
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+        
+        <div class="bg-white p-6 border rounded shadow max-w-4xl text-sm">
+            <h3 class="font-bold border-b pb-2 mb-4">Granular Override Matrix</h3>
+            <div class="grid grid-cols-3 gap-2 text-xs font-mono">
+                <label><input type="checkbox" checked> CAN_VOID_DOCS</label>
+                <label><input type="checkbox" checked> CAN_APPROVE_EXP</label>
+                <label><input type="checkbox"> BYPASS_SHARK_AI</label>
+            </div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Overrides standard RoleConfig.</div>
     </div><div id="adm_set" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Global Constants</h2>
-        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[System naming conventions, timezones, fiscal year start dates.]</div>
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+        
+        <div class="bg-white p-6 border rounded shadow max-w-4xl">
+            <div class="space-y-4 text-sm font-mono text-slate-700">
+                <div><label class="block font-bold">System Timezone</label><input type="text" class="border p-2 w-full" value="UTC+7 (Jakarta)"></div>
+                <div><label class="block font-bold">Fiscal Year Start</label><input type="date" class="border p-2 w-full" value="2026-01-01"></div>
+            </div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> System global vars.</div>
     </div><div id="shk_chat" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Shark Consult & Override</h2>
         
@@ -1643,16 +1916,39 @@
         <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Presents the active, unfixed rules triggered via background asynchronous Cloud Functions monitoring the global ledger.</div>
     </div><div id="shk_hist" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Alert Decay History</h2>
-        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Logs when a Risk was cleared, by whom, and what mitigation was supplied.]</div>
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+        
+        <div class="bg-white p-6 border rounded shadow max-w-5xl text-sm">
+            <h3 class="font-black text-slate-800 uppercase tracking-widest border-b pb-2 mb-4"><i data-lucide="clock" class="inline w-4 h-4 mr-2"></i> Mitigation Timeline</h3>
+            <div class="border-l-2 border-purple-200 ml-4 pl-4 space-y-4 font-mono text-xs">
+                <div><span class="text-purple-600 font-bold">14:00Z</span> - Alert: Yield Divergence (Boat F-14)</div>
+                <div><span class="text-emerald-600 font-bold">14:15Z</span> - Cleared by Location Mgr (John Doe) - Note: Weather delay.</div>
+            </div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Mitigation log.</div>
     </div><div id="shk_wa" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">C-Suite Broadcast</h2>
-        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Configures WhatsApp / Telegram webhook texts triggered by specific system bounds (e.g. Daily EOD Recap).]</div>
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+        
+        <div class="bg-white p-6 border rounded shadow max-w-4xl text-sm font-mono">
+            <h3 class="font-black text-slate-800 border-b pb-2 mb-4"><i data-lucide="message-circle" class="inline w-4 h-4 mr-2"></i> Webhook Config</h3>
+            <label class="block font-bold mt-2">Daily EOD Recap Targets (Comma separated numbers)</label>
+            <input type="text" class="border p-2 w-full mb-4" value="+628123456789">
+            <button class="bg-purple-600 text-white px-4 py-2 font-bold rounded shadow uppercase text-xs">Test Ping</button>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> WhatsApp webhook endpoints.</div>
     </div><div id="shk_rule" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Rule Adjustments</h2>
-        <div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Manages the percentage limits triggering 'Yield Divergence' or 'Float Violation'.]</div>
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
+        
+        <div class="bg-white p-6 border rounded shadow max-w-4xl text-sm font-mono">
+            <h3 class="font-black text-slate-800 border-b pb-2 mb-4">Threshold Sliders</h3>
+            <div class="space-y-4">
+                <div><label class="block font-bold">Yield Divergence Limit (%)</label><input type="range" class="w-full" min="1" max="20" value="5"></div>
+                <div><label class="block font-bold">Float Violation Buffer (Rp)</label><input type="number" class="w-full border p-2 text-right" value="50000000"></div>
+            </div>
+        </div>
+        
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Percentage limits for triggers.</div>
     </div><div id="freeze_chk" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">UI FREEZE CONTRACT LOCK v1</h2>
         

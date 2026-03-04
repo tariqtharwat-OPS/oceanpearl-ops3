@@ -46,8 +46,28 @@ def get_loc_fin_screens():
         "Authorizes physical cash returning from field wallets. Inflates Kaimana Hub central treasury directly."
     ))
 
-    screens.append(screen("loc_app_recv", "Review: Receivings", "<div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Grid showing DO mismatches flagged at CS or Factory]</div>", ""))
-    screens.append(screen("loc_perf", "Unit Performance Grid", "<div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Read-only analytic rollups of yield % and fuel consumption metrics per Boat/Factory.]</div>", ""))
+    screens.append(screen("loc_app_recv", "Review: Receivings", 
+        """
+        <div class="bg-white p-6 border rounded shadow max-w-5xl">
+            <h3 class="font-bold border-b pb-2 mb-4 text-slate-800"><i data-lucide="eye" class="inline w-4 h-4 mr-2 text-emerald-600"></i> Discrepancy Flag Rollup</h3>
+            <table class="w-full text-xs font-mono border text-left">
+                <thead><tr class="bg-slate-100"><th>Doc Ref</th><th>Type</th><th>Origin</th><th>Destination</th><th>Discrepancy</th><th>Action</th></tr></thead>
+                <tbody>
+                    <tr><td class="p-2 border-b">DO-991</td><td class="p-2 border-b">Transfer</td><td class="p-2 border-b">Boat Faris</td><td class="p-2 border-b">Fac Main</td><td class="p-2 border-b text-red-600 font-bold">5 KG Short</td><td class="p-2 border-b"><button class="bg-slate-800 text-white px-2 py-1 rounded">Review</button></td></tr>
+                </tbody>
+            </table>
+        </div>
+        """, "Grid showing DO mismatches flagged at CS or Factory"))
+    screens.append(screen("loc_perf", "Unit Performance Grid", 
+        """
+        <div class="bg-white p-6 border rounded shadow max-w-5xl">
+            <h3 class="font-bold border-b pb-2 mb-4 text-slate-800"><i data-lucide="activity" class="inline w-4 h-4 mr-2 text-blue-600"></i> Unit KPIs</h3>
+            <div class="grid grid-cols-2 gap-4 text-xs font-mono">
+                <div class="p-4 border rounded"><div class="font-bold mb-2">Boat Efficiency</div><div class="text-xl">Fuel Ratio: 12 L/KG</div></div>
+                <div class="p-4 border rounded"><div class="font-bold mb-2">Factory Yield</div><div class="text-xl">Avg Yield: 42%</div></div>
+            </div>
+        </div>
+        """, "Read-only analytic rollups of yield % and fuel consumption metrics per Boat/Factory."))
     
     screens.append(screen("loc_inv", "Location Inventory Master",
         """
@@ -64,10 +84,49 @@ def get_loc_fin_screens():
         "Sub-tree visual query of inventory aggregated across location boundaries."
     ))
 
-    screens.append(screen("loc_wallet", "Location Wallets Master", "<div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Tree view: Kaimana Hub Central -> Petty Cash + Factory Cash + Trip Cash B1 + Trip Cash B2]</div>", ""))
-    screens.append(screen("loc_staff", "Unit Staff Assignment", "<div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Moves People from Loc pool into Boat/Factory default roster templates.]</div>", ""))
-    screens.append(screen("loc_ppl", "People Registry View", "<div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Location filter applied to Global People Registry. Read-only]</div>", ""))
-    screens.append(screen("loc_print", "Doc Center (Location)", "<div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Search all Docs where Loc=Kaimana]</div>", ""))
+    screens.append(screen("loc_wallet", "Location Wallets Master", 
+        """
+        <div class="bg-white p-6 border rounded shadow max-w-5xl">
+            <h3 class="font-bold border-b pb-2 mb-4 text-slate-800"><i data-lucide="wallet" class="inline w-4 h-4 mr-2 text-emerald-600"></i> Wallets Tree</h3>
+            <div class="font-mono text-xs space-y-2">
+                <div class="p-2 bg-emerald-50 border border-emerald-200 font-bold text-emerald-900 rounded">Kaimana Hub Central - Rp 500,000,000</div>
+                <div class="pl-8 space-y-2">
+                    <div class="p-2 bg-slate-50 border rounded">Petty Cash - Rp 15,000,000</div>
+                    <div class="p-2 bg-indigo-50 border border-indigo-200 rounded text-indigo-900">Factory Cash - Rp 12,500,000</div>
+                    <div class="pl-8 p-2 bg-blue-50 border rounded text-blue-900">Trip Cash B1 (Boat Faris) - Rp 4,000,000</div>
+                </div>
+            </div>
+        </div>
+        """, "Tree view: Kaimana Hub Central -> Petty Cash + Factory Cash + Trip Cash B1 + Trip Cash B2"))
+    screens.append(screen("loc_staff", "Unit Staff Assignment", 
+        """
+        <div class="bg-white p-6 border rounded shadow max-w-5xl">
+            <h3 class="font-bold border-b pb-2 mb-4 text-slate-800"><i data-lucide="users" class="inline w-4 h-4 mr-2 text-emerald-600"></i> Unit Staff Assignment</h3>
+            <div class="flex space-x-4 font-mono text-xs">
+                <div class="w-1/2 border p-4 rounded"><h4 class="font-bold mb-2">Location Pool</h4><div class="p-2 bg-slate-100 mb-1 border rounded">Maman (ID-042)</div><div class="p-2 bg-slate-100 border rounded">Rian (ID-043)</div></div>
+                <div class="w-1/2 border p-4 rounded"><h4 class="font-bold mb-2">Boat Faris Roster</h4><div class="p-2 bg-blue-50 border border-blue-200 text-blue-800 mb-1 rounded">Budi (Capt)</div></div>
+            </div>
+        </div>
+        """, "Moves People from Loc pool into Boat/Factory default roster templates."))
+    screens.append(screen("loc_ppl", "People Registry View", 
+        """
+        <div class="bg-white p-6 border rounded shadow max-w-5xl">
+            <h3 class="font-bold border-b pb-2 mb-4 text-slate-800"><i data-lucide="contact" class="inline w-4 h-4 mr-2 text-emerald-600"></i> People Mapping</h3>
+            <table class="w-full text-xs font-mono border text-left">
+                <thead><tr class="bg-slate-100"><th>ID</th><th>Name</th><th>Role Category</th><th>Status</th></tr></thead>
+                <tbody>
+                    <tr><td class="p-2 border-b">ID-011</td><td class="p-2 border-b">Budi</td><td class="p-2 border-b">Captain</td><td class="p-2 border-b text-emerald-600 font-bold">Active</td></tr>
+                    <tr><td class="p-2 border-b">ID-042</td><td class="p-2 border-b">Maman</td><td class="p-2 border-b">Crew</td><td class="p-2 border-b text-emerald-600 font-bold">Active</td></tr>
+                </tbody>
+            </table>
+        </div>
+        """, "Location filter applied to Global People Registry. Read-only"))
+    screens.append(screen("loc_print", "Doc Center (Location)", 
+        """
+        <div class="bg-white p-6 border rounded shadow max-w-4xl">
+            <div class="flex items-center space-x-2"><input type="text" placeholder="Search Docs..." class="border p-2 w-full font-mono text-sm"><button class="bg-slate-800 text-white px-4 py-2 font-bold rounded">Search</button></div>
+        </div>
+        """, "Search all Docs where Loc=Kaimana"))
 
     # FINANCE OFFICER
     screens.append(screen("fin_dash", "Finance Dashboard",
@@ -182,10 +241,56 @@ def get_loc_fin_screens():
         "Double-entry raw immutable log representation visually. Dr Cash, Cr Revenue mappings display here mapped by Timestamp and source Doc ID."
     ))
 
-    screens.append(screen("fin_recon", "Bank Recon", "<div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Reconciliation logic vs uploaded CSV.]</div>", ""))
-    screens.append(screen("fin_pol", "Policy Monitor", "<div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Rules engine output: e.g. Flag expenses > 5M]</div>", ""))
-    screens.append(screen("fin_rep", "Reports Export", "<div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Excel/PDF generator for Balance Sheet / P&L based on Ledger.]</div>", ""))
-    screens.append(screen("fin_print", "Print Center (Docs)", "<div class='bg-white p-6 border text-slate-500 text-center font-bold py-24 bg-slate-50 border-dashed border-4'>[Search Doc ID to inject A4 Print Template -> window.print()]</div>", ""))
+    screens.append(screen("fin_recon", "Bank Recon", 
+        """
+        <div class="bg-white p-6 border rounded shadow max-w-5xl text-sm font-mono">
+            <h3 class="font-black border-b pb-2 mb-4 text-slate-800"><i data-lucide="refresh-cw" class="inline w-4 h-4 mr-2 text-amber-600"></i> Reconciliation Grid</h3>
+            <div class="bg-amber-50 border p-4 flex justify-between items-center rounded text-amber-900 font-bold border-amber-200 mb-4">
+                Upload Bank CSV <button class="bg-amber-600 text-white px-4 py-1 rounded">Select File</button>
+            </div>
+            <table class="w-full text-xs font-mono border text-left">
+                <thead><tr class="bg-slate-100"><th>Bank Txn</th><th>System Ledger</th><th>Variance</th><th>Action</th></tr></thead>
+                <tbody>
+                    <tr><td class="p-2 border-b">Rp 150M IN</td><td class="p-2 border-b text-emerald-600 font-bold">MATCHED (INV-22)</td><td class="p-2 border-b">0</td><td class="p-2 border-b"><button class="bg-slate-200 px-2 rounded opacity-50 cursor-not-allowed">Locked</button></td></tr>
+                    <tr><td class="p-2 border-b">Rp 5.5M OUT</td><td class="p-2 border-b text-red-600 font-bold">UNMATCHED</td><td class="p-2 border-b">-</td><td class="p-2 border-b"><button class="bg-amber-100 text-amber-800 border-amber-300 border px-2 py-1 rounded text-[0.6rem] uppercase tracking-wide">Bind to AP</button></td></tr>
+                </tbody>
+            </table>
+        </div>
+        """, "Reconciliation logic vs uploaded CSV."))
+    screens.append(screen("fin_pol", "Policy Monitor", 
+        """
+        <div class="bg-white p-6 border rounded shadow max-w-5xl">
+            <h3 class="font-bold border-b pb-2 mb-4 text-slate-800"><i data-lucide="shield-alert" class="inline w-4 h-4 mr-2 text-amber-600"></i> Policy Violations Tracker</h3>
+            <div class="p-4 bg-red-50 border border-red-200 rounded text-xs font-mono text-red-800">
+                <span class="font-bold block mb-1">High Value Alert:</span>
+                Boat Trip B1-99 expense logged at Rp 15M (Policy Limit: 10M). Blocking approval chain automatically.
+            </div>
+        </div>
+        """, "Rules engine output: e.g. Flag expenses > 5M"))
+    screens.append(screen("fin_rep", "Reports Export", 
+        """
+        <div class="bg-white p-6 border rounded shadow max-w-3xl">
+            <h3 class="font-bold border-b pb-2 mb-4 text-slate-800">Financial Reporting</h3>
+            <div class="flex space-x-4 mb-4 font-mono text-sm">
+                <label><input type="radio" checked> Balance Sheet</label>
+                <label><input type="radio"> P&L</label>
+                <label><input type="radio"> Cash Flow</label>
+            </div>
+            <button class="bg-amber-800 text-white px-4 py-2 font-bold rounded shadow uppercase tracking-widest text-xs flex items-center"><i data-lucide="download" class="w-4 h-4 inline mr-2"></i> Export PDF/XLSX</button>
+        </div>
+        """, "Excel/PDF generator for Balance Sheet / P&L based on Ledger."))
+    screens.append(screen("fin_print", "Print Center (Docs)", 
+        """
+        <div class="bg-slate-50 border-4 border-dashed border-slate-300 p-12 text-center rounded-xl max-w-4xl mx-auto mt-8">
+            <i data-lucide="printer" class="w-16 h-16 text-slate-400 mx-auto mb-4"></i>
+            <h3 class="text-xl font-black text-slate-700 mb-2">A4 Document Injection Engine</h3>
+            <p class="text-slate-500 font-mono text-sm mb-6 max-w-md mx-auto">Enter a specific Document ID (e.g. REC-9921) to compile and render its immutable state into a printable format.</p>
+            <div class="flex max-w-sm mx-auto shadow-lg">
+                <input type="text" placeholder="RX-..." class="flex-1 border-y border-l rounded-l px-4 py-2 font-mono outline-none focus:border-indigo-500">
+                <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-r font-bold uppercase tracking-widest text-xs transition">Preview</button>
+            </div>
+        </div>
+        """, "Search Doc ID to inject A4 Print Template -> window.print()"))
 
     return screens
 

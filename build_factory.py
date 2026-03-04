@@ -154,7 +154,23 @@ def get_factory_screens():
         "Subtracts Factory inventory immediately upon 'Post'. The target Cold Storage unit receives a pending Reception notice."
     ))
 
-    screens.append(screen("fac_wallet", "7. Wallet Sub-View", "<div class='bg-white p-6 border rounded shadow max-w-4xl text-slate-400 font-bold'>[Mirror of Boat Wallet sweeps but context bound to FACTORY_CASH.]</div>", ""))
+    screens.append(screen("fac_wallet", "7. Wallet Sub-View", 
+        """
+        <div class="bg-white p-6 border rounded shadow max-w-5xl border-t-8 border-indigo-900">
+            <h3 class="font-bold border-b pb-2 mb-4 text-slate-800"><i data-lucide="wallet" class="inline w-4 h-4 mr-2 text-indigo-600"></i> Factory Petty Cash</h3>
+            <div class="grid grid-cols-2 gap-4 text-sm font-mono mb-6">
+                <div class="p-4 bg-indigo-50 border border-indigo-200 rounded"><div class="text-xs font-bold text-indigo-800">Available Float</div><div class="text-xl font-black text-indigo-900 mt-1">Rp 12,500,000</div></div>
+                <div class="p-4 bg-red-50 border border-red-200 rounded"><div class="text-xs font-bold text-red-800">Total Shift Expenses</div><div class="text-xl font-black text-red-900 mt-1">Rp 500,000</div></div>
+            </div>
+            <table class="w-full text-xs font-mono border text-left">
+                <thead><tr class="bg-slate-100"><th>Time</th><th>Txn ID</th><th>Type</th><th>Amount</th><th>Running Balance</th></tr></thead>
+                <tbody>
+                    <tr><td class="p-2 border-b text-slate-500">08:00</td><td class="p-2 border-b">TX-4</td><td class="p-2 border-b">Float Receipt</td><td class="p-2 border-b text-emerald-600">+ Rp 13,000,000</td><td class="p-2 border-b font-bold">13,000,000</td></tr>
+                    <tr><td class="p-2 border-b text-slate-500">14:00</td><td class="p-2 border-b">TX-5</td><td class="p-2 border-b">Op Expense</td><td class="p-2 border-b text-red-600">- Rp 500,000</td><td class="p-2 border-b font-bold">12,500,000</td></tr>
+                </tbody>
+            </table>
+        </div>
+        """, "Mirror of Boat Wallet sweeps but context bound to FACTORY_CASH."))
     
     screens.append(screen("fac_close", "8. Close Shift",
          """
@@ -188,12 +204,23 @@ def get_factory_screens():
 
             <button class="bg-indigo-900 hover:bg-black text-white w-full py-5 text-xl tracking-widest mt-8 font-black rounded shadow-lg flex justify-center items-center relative z-10 transition-transform active:scale-[0.98]"><i data-lucide="lock" class="w-6 h-6 mr-3 text-indigo-300"></i> HANDOVER SHIFT KEYS</button>
         </div>
-        """ + a4_preview("FACTORY SESSION AUDIT", "<div class='text-center uppercase font-bold tracking-widest h-64 text-slate-500 flex items-center justify-center border-dashed border-2 border-slate-300 bg-slate-50'>[Includes yields, shift staff settlement nets, physical cash handover declarations]</div>", ["Shift Mandor", "Location Cashier"]),
+        """ + a4_preview("FACTORY SESSION AUDIT", "<table class='w-full text-left text-xs font-mono border-collapse'><thead><tr class='bg-slate-100 border-b border-slate-300'><th>Metrics & End of Shift Handover</th><th class='text-right'>Value</th></tr></thead><tbody><tr><td class='border-b py-2'>Processed Yield Est.</td><td class='border-b py-2 text-right'>45% (Nominal)</td></tr><tr><td class='border-b py-2'>Total Op Expenditure</td><td class='border-b py-2 text-right'>Rp 500,000</td></tr><tr><td class='py-2 font-black text-indigo-800'>Physical Vault Handover</td><td class='py-2 text-right font-black text-emerald-700'>Rp 12,500,000</td></tr></tbody></table>", ["Shift Mandor", "Location Cashier"]),
         "Validates cash box balances. Enforces piece-rate or advance settlements for factory workers. Previews printed handover sheet."
     ))
 
     screens.append(screen("fac_docs", "My Documents", "<div class='bg-white p-6 border rounded shadow-sm text-center text-indigo-900 border-indigo-100 bg-indigo-50 font-mono'>READ-ONLY SEARCH: All Docs matching active Factory.</div>", ""))
-    screens.append(screen("fac_print", "Print Center", "<div class='bg-white p-6 border text-slate-500 text-center font-bold py-24 bg-slate-50 border-dashed border-4'>[Search Doc ID to inject A4 Print Template -> window.print()]</div>", ""))
+    screens.append(screen("fac_print", "Print Center", 
+        """
+        <div class="bg-slate-50 border-4 border-dashed border-slate-300 p-12 text-center rounded-xl max-w-4xl mx-auto mt-8">
+            <i data-lucide="printer" class="w-16 h-16 text-slate-400 mx-auto mb-4"></i>
+            <h3 class="text-xl font-black text-slate-700 mb-2">A4 Document Injection Engine</h3>
+            <p class="text-slate-500 font-mono text-sm mb-6 max-w-md mx-auto">Enter a specific Document ID to compile and render its immutable state into a printable format.</p>
+            <div class="flex max-w-sm mx-auto shadow-lg">
+                <input type="text" placeholder="DOC-..." class="flex-1 border-y border-l rounded-l px-4 py-2 font-mono outline-none focus:border-indigo-500">
+                <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-r font-bold uppercase tracking-widest text-xs transition">Preview</button>
+            </div>
+        </div>
+        """, "Search Doc ID to inject A4 Print Template -> window.print()"))
 
     return screens
 
