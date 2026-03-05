@@ -142,7 +142,7 @@ Data mockups legitimately use brackets for explicit inline value displays. Durin
 
 ## UI FREEZE CERTIFICATION
 
-- **Commit hash:** 2d07e1241deeca7d5ede2ef277f2f2401eb5c73c
+- **Commit hash:** 958fcf6310e7a88651cf1adf032f494b61ed98a7
 - **Tag:** ui-freeze-v1.1.2
 - **Screen count:** 83
 - **Route completeness result:** 100% (Missing screens: 0)

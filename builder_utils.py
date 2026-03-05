@@ -292,7 +292,7 @@ def freeze_checklist_screen():
                 </div>
                 <div class="text-right text-xs font-mono">
                    <div class="mb-1"><span class="text-slate-500 mr-2">Tag:</span><span class="font-bold text-slate-800 border p-1 rounded bg-slate-50">ui-freeze-v1.1.2</span></div>
-                   <div><span class="text-slate-500 mr-2">Commit Hash:</span><span class="font-bold text-slate-800 border p-1 rounded bg-slate-50 text-[0.6rem] w-48 inline-block truncate align-bottom text-center">2d07e1241deeca7d5ede2ef277f2f2401eb5c73c</span></div>
+                   <div><span class="text-slate-500 mr-2">Commit Hash:</span><span class="font-bold text-slate-800 border p-1 rounded bg-slate-50 text-[0.6rem] w-48 inline-block truncate align-bottom text-center">958fcf6310e7a88651cf1adf032f494b61ed98a7</span></div>
                 </div>
             </div>
             
