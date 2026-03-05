@@ -282,19 +282,20 @@ def advance_paid_grid():
     </div>'''
 
 def freeze_checklist_screen():
-    return screen("freeze_chk", "UI FREEZE CONTRACT LOCK v1.1",
+    return screen("freeze_chk", "UI FREEZE CONTRACT LOCK v1.1.1",
         """
         <div class="bg-white p-8 rounded shadow border-t-8 border-emerald-600 max-w-5xl mb-8">
             <div class="flex justify-between items-start border-b pb-4 mb-6">
                 <div>
                    <h3 class="text-xl font-black text-slate-800 uppercase tracking-widest mb-1">Rule: Strict UI Versioning</h3>
-                   <span class="bg-emerald-100 text-emerald-800 px-2 py-1 text-xs font-bold rounded">Version v1.1</span>
+                   <span class="bg-emerald-100 text-emerald-800 px-2 py-1 text-xs font-bold rounded">Version v1.1.1</span>
                 </div>
                 <div class="text-right text-xs font-mono">
-                   <div class="mb-1"><span class="text-slate-500 mr-2">Tag:</span><span class="font-bold text-slate-800 border p-1 rounded bg-slate-50">ui-freeze-v1.1</span></div>
-                   <div><span class="text-slate-500 mr-2">Commit Hash:</span><span class="font-bold text-slate-800 border p-1 rounded bg-slate-50 text-[0.6rem]">Pending</span></div>
+                   <div class="mb-1"><span class="text-slate-500 mr-2">Tag:</span><span class="font-bold text-slate-800 border p-1 rounded bg-slate-50">ui-freeze-v1.1.1</span></div>
+                   <div><span class="text-slate-500 mr-2">Commit Hash:</span><span id="freezeHash" class="font-bold text-slate-800 border p-1 rounded bg-slate-50 text-[0.6rem] w-48 inline-block truncate align-bottom text-center">ui-freeze-v1.1.1</span></div>
                 </div>
             </div>
+            <script>fetch("https://api.github.com/repos/tariqtharwat-OPS/oceanpearl-ops3/git/refs/tags/ui-freeze-v1.1.1").then(r=>r.json()).then(d=>{if(d.object)document.getElementById('freezeHash').innerText=d.object.sha;})</script>
             
             <p class="text-slate-600 font-mono text-sm mb-4 bg-slate-50 p-4 border rounded">Any future UI change requires a new version tag and an entry in the changelog. The UI blueprint is now the immutable source of truth for the system's interactive constraints.</p>
             <p class="text-emerald-800 font-mono text-sm mb-8 bg-emerald-50 p-4 border border-emerald-200 rounded font-bold"><i data-lucide="shield-check" class="w-4 h-4 inline mr-2 text-emerald-600"></i> Explicit Statement: No placeholders remain (validated by audit report).</p>

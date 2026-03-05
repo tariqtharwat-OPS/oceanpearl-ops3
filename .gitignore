@@ -47,3 +47,4 @@ frontend/dist/
 functions/node_modules/
 functions/lib/*.js.map
 __pycache__/
+*.pyc
