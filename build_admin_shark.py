@@ -135,7 +135,7 @@ def get_admin_shark_screens():
                         Trip B1-011: Nominal. Ratio 12:1.<br>
                         Trip B1-012: Nominal. Ratio 11.5:1.<br>
                         Trip B1-013: <span class="bg-red-900/50 text-red-400 px-1 font-black">ANOMALY.</span> Ratio spiked to 24:1. Fuel drawn: 2500L, Catch reported: 104kg.<br><br>
-                        <span class="text-amber-300">CONCLUSION: High probability of fuel diversion/theft on the 3rd trip. Automatically flagging Location Manager dashboard and suspending Auto-Approval for Captain's future EXP docs.</span>
+                        <span class="text-amber-300">CONCLUSION: High probability of fuel diversion/theft on the 3rd trip. Automatically flagging Location Manager dashboard and halting Auto-Approval for Captain's future EXP docs.</span>
                         <div class="mt-4 pt-3 border-t border-purple-800/30 w-full flex space-x-3 opacity-50 group-hover:opacity-100 transition-opacity">
                              <button class="bg-purple-900/40 border border-purple-700 hover:bg-purple-800 hover:text-white px-3 py-1 rounded text-[0.6rem] uppercase tracking-widest text-purple-400 flex items-center shadow"><i data-lucide="file-text" class="w-3 h-3 mr-1 inline"></i> View Trip 13 Audit</button>
                              <button class="bg-red-900/20 border border-red-900 hover:bg-red-900 text-red-500 font-black hover:text-white px-3 py-1 rounded text-[0.6rem] uppercase tracking-widest transition shadow flex items-center"><i data-lucide="lock" class="w-3 h-3 mr-1 inline"></i> Lock User Matrix</button>

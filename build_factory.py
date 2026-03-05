@@ -151,7 +151,7 @@ def get_factory_screens():
             """ + doc_actions() + """
         </div>
         """,
-        "Subtracts Factory inventory immediately upon 'Post'. The target Cold Storage unit receives a pending Reception notice."
+        "Subtracts Factory inventory immediately upon 'Post'. The target Cold Storage unit receives an incoming Reception notice."
     ))
 
     screens.append(screen("fac_wallet", "7. Wallet Sub-View", 

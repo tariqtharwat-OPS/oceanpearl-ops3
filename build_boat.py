@@ -115,7 +115,7 @@ def get_boat_screens():
             """ + doc_actions() + """
         </div>
         """,
-        "Simultaneous block mapping: Increases inventory quantity. Checks payment method choice to preview either a reduction in Trip Wallet OR the creation of a pending AP invoice for the Hub."
+        "Simultaneous block mapping: Increases inventory quantity. Checks payment method choice to preview either a reduction in Trip Wallet OR the creation of an outstanding AP invoice for the Hub."
     ))
 
     screens.append(screen("boat_sale", "6. Boat Sales",

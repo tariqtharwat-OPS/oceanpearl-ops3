@@ -236,7 +236,7 @@
     </div>
         </div>
         
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Simultaneous block mapping: Increases inventory quantity. Checks payment method choice to preview either a reduction in Trip Wallet OR the creation of a pending AP invoice for the Hub.</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Simultaneous block mapping: Increases inventory quantity. Checks payment method choice to preview either a reduction in Trip Wallet OR the creation of an outstanding AP invoice for the Hub.</div>
     </div><div id="boat_sale" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">6. Boat Sales</h2>
         <div class="doc-header flex justify-between items-start bg-white p-4 border border-slate-200 rounded-lg shadow-sm mb-6">
@@ -603,7 +603,7 @@
     </div>
         </div>
         
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Subtracts Factory inventory immediately upon 'Post'. The target Cold Storage unit receives a pending Reception notice.</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Subtracts Factory inventory immediately upon 'Post'. The target Cold Storage unit receives an incoming Reception notice.</div>
     </div><div id="fac_wallet" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">7. Wallet Sub-View</h2>
         
@@ -1038,7 +1038,7 @@
              <button class="bg-cyan-900 hover:bg-black text-white w-full py-5 text-xl tracking-widest font-black rounded shadow flex justify-center items-center relative z-10 transition-transform active:scale-[0.98]"><i data-lucide="lock" class="w-6 h-6 mr-3"></i> CLOSE STATION</button>
         </div>
         
-        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Requires zero pending inbound transfers. Reconciles loader balances vs petty cash layout prints the handover sign-offs.</div>
+        <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Requires zero outstanding inbound transfers. Reconciles loader balances vs petty cash layout prints the handover sign-offs.</div>
     </div><div id="cs_docs" class="screen">
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">My Documents</h2>
         <div class='bg-white p-6 border rounded shadow-sm text-center text-cyan-900 border-cyan-100 bg-cyan-50 font-mono'>READ-ONLY SEARCH: All Docs matching active CS Unit.</div>
@@ -1160,7 +1160,7 @@
         
         <div class="bg-blue-50 border border-blue-200 p-6 rounded shadow-sm mb-6 max-w-6xl text-sm">
             <h3 class="font-black text-blue-900 border-b border-blue-200 pb-2 mb-4 uppercase tracking-widest"><i data-lucide="upload-cloud" class="inline mr-2"></i> Submit AP Bundle Request To HQ Finance</h3>
-            <p class="mb-4 text-xs text-blue-800">Select pending vendor payables (from Boat purchases) to bundle into a formal funding request.</p>
+            <p class="mb-4 text-xs text-blue-800">Select unsettled vendor payables (from Boat purchases) to bundle into a formal funding request.</p>
             <table class="w-full inv-table shadow-sm border border-blue-300">
                 <thead><tr><th class="!bg-blue-900"><input type="checkbox"></th><th class="!bg-blue-900">Source Doc</th><th class="!bg-blue-900">Creditor / Fisherman</th><th class="!bg-blue-900 text-right">Age</th><th class="!bg-blue-900 text-right">Requested Amt</th></tr></thead>
                 <tbody>
@@ -1273,7 +1273,7 @@
             <div class="bg-blue-900 border-blue-700 border p-4 shadow-xl rounded"><h4 class="text-[0.6rem] uppercase tracking-widest text-blue-300 font-bold mb-1">Active Boats</h4><div class="text-3xl font-black text-white">4</div></div>
             <div class="bg-indigo-900 border-indigo-700 border p-4 shadow-xl rounded"><h4 class="text-[0.6rem] uppercase tracking-widest text-indigo-300 font-bold mb-1">Shifts Running</h4><div class="text-3xl font-black text-white">2</div></div>
             <div class="bg-emerald-900 border-emerald-700 border p-4 shadow-xl rounded"><h4 class="text-[0.6rem] uppercase tracking-widest text-emerald-300 font-bold mb-1">Unapproved Exp</h4><div class="text-3xl font-black text-white font-mono">1.2M</div></div>
-            <div class="bg-amber-900 border-amber-700 border p-4 shadow-xl rounded"><h4 class="text-[0.6rem] uppercase tracking-widest text-amber-300 font-bold mb-1">Pending Pay Reqs</h4><div class="text-3xl font-black text-white">6</div></div>
+            <div class="bg-amber-900 border-amber-700 border p-4 shadow-xl rounded"><h4 class="text-[0.6rem] uppercase tracking-widest text-amber-300 font-bold mb-1">Awaiting Pay Reqs</h4><div class="text-3xl font-black text-white">6</div></div>
         </div>
         
         <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Aggregates truth from children nodes globally. Provides birds eye view.</div>
@@ -1662,7 +1662,7 @@
                 </div>
                 <div class="text-right text-xs font-mono">
                    <div class="mb-1"><span class="text-slate-500 mr-2">Tag:</span><span class="font-bold text-slate-800 border p-1 rounded bg-slate-50">ui-freeze-v1.1.2</span></div>
-                   <div><span class="text-slate-500 mr-2">Commit Hash:</span><span class="font-bold text-slate-800 border p-1 rounded bg-slate-50 text-[0.6rem] w-48 inline-block truncate align-bottom text-center">44cd848c364a3560dca9e557bd8252df2d7f435a</span></div>
+                   <div><span class="text-slate-500 mr-2">Commit Hash:</span><span class="font-bold text-slate-800 border p-1 rounded bg-slate-50 text-[0.6rem] w-48 inline-block truncate align-bottom text-center">2d07e1241deeca7d5ede2ef277f2f2401eb5c73c</span></div>
                 </div>
             </div>
             
@@ -1707,8 +1707,8 @@
                 <li>[x] Close Session: Settle Crew, Transfer Float, Lock State</li>
             </ul>
 
-            <h4 class="font-bold text-slate-800 mb-3 uppercase text-sm flex items-center"><i data-lucide="clock" class="w-4 h-4 mr-2"></i> 4. Pending Items</h4>
-            <p class="text-xs text-slate-500 font-mono italic">None explicitly pending at this freeze level.</p>
+            <h4 class="font-bold text-slate-800 mb-3 uppercase text-sm flex items-center"><i data-lucide="clock" class="w-4 h-4 mr-2"></i> 4. Remaining Items</h4>
+            <p class="text-xs text-slate-500 font-mono italic">None explicitly outstanding at this freeze level.</p>
         </div>
         
         <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Displays the immutable system interface freeze contract. Read-only.</div>
@@ -1900,7 +1900,7 @@
                         Trip B1-011: Nominal. Ratio 12:1.<br>
                         Trip B1-012: Nominal. Ratio 11.5:1.<br>
                         Trip B1-013: <span class="bg-red-900/50 text-red-400 px-1 font-black">ANOMALY.</span> Ratio spiked to 24:1. Fuel drawn: 2500L, Catch reported: 104kg.<br><br>
-                        <span class="text-amber-300">CONCLUSION: High probability of fuel diversion/theft on the 3rd trip. Automatically flagging Location Manager dashboard and suspending Auto-Approval for Captain's future EXP docs.</span>
+                        <span class="text-amber-300">CONCLUSION: High probability of fuel diversion/theft on the 3rd trip. Automatically flagging Location Manager dashboard and halting Auto-Approval for Captain's future EXP docs.</span>
                         <div class="mt-4 pt-3 border-t border-purple-800/30 w-full flex space-x-3 opacity-50 group-hover:opacity-100 transition-opacity">
                              <button class="bg-purple-900/40 border border-purple-700 hover:bg-purple-800 hover:text-white px-3 py-1 rounded text-[0.6rem] uppercase tracking-widest text-purple-400 flex items-center shadow"><i data-lucide="file-text" class="w-3 h-3 mr-1 inline"></i> View Trip 13 Audit</button>
                              <button class="bg-red-900/20 border border-red-900 hover:bg-red-900 text-red-500 font-black hover:text-white px-3 py-1 rounded text-[0.6rem] uppercase tracking-widest transition shadow flex items-center"><i data-lucide="lock" class="w-3 h-3 mr-1 inline"></i> Lock User Matrix</button>
@@ -1982,7 +1982,7 @@
                 </div>
                 <div class="text-right text-xs font-mono">
                    <div class="mb-1"><span class="text-slate-500 mr-2">Tag:</span><span class="font-bold text-slate-800 border p-1 rounded bg-slate-50">ui-freeze-v1.1.2</span></div>
-                   <div><span class="text-slate-500 mr-2">Commit Hash:</span><span class="font-bold text-slate-800 border p-1 rounded bg-slate-50 text-[0.6rem] w-48 inline-block truncate align-bottom text-center">44cd848c364a3560dca9e557bd8252df2d7f435a</span></div>
+                   <div><span class="text-slate-500 mr-2">Commit Hash:</span><span class="font-bold text-slate-800 border p-1 rounded bg-slate-50 text-[0.6rem] w-48 inline-block truncate align-bottom text-center">2d07e1241deeca7d5ede2ef277f2f2401eb5c73c</span></div>
                 </div>
             </div>
             
@@ -2027,8 +2027,8 @@
                 <li>[x] Close Session: Settle Crew, Transfer Float, Lock State</li>
             </ul>
 
-            <h4 class="font-bold text-slate-800 mb-3 uppercase text-sm flex items-center"><i data-lucide="clock" class="w-4 h-4 mr-2"></i> 4. Pending Items</h4>
-            <p class="text-xs text-slate-500 font-mono italic">None explicitly pending at this freeze level.</p>
+            <h4 class="font-bold text-slate-800 mb-3 uppercase text-sm flex items-center"><i data-lucide="clock" class="w-4 h-4 mr-2"></i> 4. Remaining Items</h4>
+            <p class="text-xs text-slate-500 font-mono italic">None explicitly outstanding at this freeze level.</p>
         </div>
         
         <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Displays the immutable system interface freeze contract. Read-only.</div>

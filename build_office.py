@@ -91,7 +91,7 @@ def get_office_screens():
         """
         <div class="bg-blue-50 border border-blue-200 p-6 rounded shadow-sm mb-6 max-w-6xl text-sm">
             <h3 class="font-black text-blue-900 border-b border-blue-200 pb-2 mb-4 uppercase tracking-widest"><i data-lucide="upload-cloud" class="inline mr-2"></i> Submit AP Bundle Request To HQ Finance</h3>
-            <p class="mb-4 text-xs text-blue-800">Select pending vendor payables (from Boat purchases) to bundle into a formal funding request.</p>
+            <p class="mb-4 text-xs text-blue-800">Select unsettled vendor payables (from Boat purchases) to bundle into a formal funding request.</p>
             <table class="w-full inv-table shadow-sm border border-blue-300">
                 <thead><tr><th class="!bg-blue-900"><input type="checkbox"></th><th class="!bg-blue-900">Source Doc</th><th class="!bg-blue-900">Creditor / Fisherman</th><th class="!bg-blue-900 text-right">Age</th><th class="!bg-blue-900 text-right">Requested Amt</th></tr></thead>
                 <tbody>

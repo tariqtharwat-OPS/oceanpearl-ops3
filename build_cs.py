@@ -218,7 +218,7 @@ def get_cs_screens():
              <button class="bg-cyan-900 hover:bg-black text-white w-full py-5 text-xl tracking-widest font-black rounded shadow flex justify-center items-center relative z-10 transition-transform active:scale-[0.98]"><i data-lucide="lock" class="w-6 h-6 mr-3"></i> CLOSE STATION</button>
         </div>
         """,
-        "Requires zero pending inbound transfers. Reconciles loader balances vs petty cash layout prints the handover sign-offs."
+        "Requires zero outstanding inbound transfers. Reconciles loader balances vs petty cash layout prints the handover sign-offs."
     ))
 
     screens.append(screen("cs_docs", "My Documents", "<div class='bg-white p-6 border rounded shadow-sm text-center text-cyan-900 border-cyan-100 bg-cyan-50 font-mono'>READ-ONLY SEARCH: All Docs matching active CS Unit.</div>", ""))

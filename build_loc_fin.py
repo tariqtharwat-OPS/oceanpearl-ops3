@@ -10,7 +10,7 @@ def get_loc_fin_screens():
             <div class="bg-blue-900 border-blue-700 border p-4 shadow-xl rounded"><h4 class="text-[0.6rem] uppercase tracking-widest text-blue-300 font-bold mb-1">Active Boats</h4><div class="text-3xl font-black text-white">4</div></div>
             <div class="bg-indigo-900 border-indigo-700 border p-4 shadow-xl rounded"><h4 class="text-[0.6rem] uppercase tracking-widest text-indigo-300 font-bold mb-1">Shifts Running</h4><div class="text-3xl font-black text-white">2</div></div>
             <div class="bg-emerald-900 border-emerald-700 border p-4 shadow-xl rounded"><h4 class="text-[0.6rem] uppercase tracking-widest text-emerald-300 font-bold mb-1">Unapproved Exp</h4><div class="text-3xl font-black text-white font-mono">1.2M</div></div>
-            <div class="bg-amber-900 border-amber-700 border p-4 shadow-xl rounded"><h4 class="text-[0.6rem] uppercase tracking-widest text-amber-300 font-bold mb-1">Pending Pay Reqs</h4><div class="text-3xl font-black text-white">6</div></div>
+            <div class="bg-amber-900 border-amber-700 border p-4 shadow-xl rounded"><h4 class="text-[0.6rem] uppercase tracking-widest text-amber-300 font-bold mb-1">Awaiting Pay Reqs</h4><div class="text-3xl font-black text-white">6</div></div>
         </div>
         """,
         "Aggregates truth from children nodes globally. Provides birds eye view."

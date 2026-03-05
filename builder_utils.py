@@ -292,7 +292,7 @@ def freeze_checklist_screen():
                 </div>
                 <div class="text-right text-xs font-mono">
                    <div class="mb-1"><span class="text-slate-500 mr-2">Tag:</span><span class="font-bold text-slate-800 border p-1 rounded bg-slate-50">ui-freeze-v1.1.2</span></div>
-                   <div><span class="text-slate-500 mr-2">Commit Hash:</span><span class="font-bold text-slate-800 border p-1 rounded bg-slate-50 text-[0.6rem] w-48 inline-block truncate align-bottom text-center">44cd848c364a3560dca9e557bd8252df2d7f435a</span></div>
+                   <div><span class="text-slate-500 mr-2">Commit Hash:</span><span class="font-bold text-slate-800 border p-1 rounded bg-slate-50 text-[0.6rem] w-48 inline-block truncate align-bottom text-center">2d07e1241deeca7d5ede2ef277f2f2401eb5c73c</span></div>
                 </div>
             </div>
             
@@ -337,8 +337,8 @@ def freeze_checklist_screen():
                 <li>[x] Close Session: Settle Crew, Transfer Float, Lock State</li>
             </ul>
 
-            <h4 class="font-bold text-slate-800 mb-3 uppercase text-sm flex items-center"><i data-lucide="clock" class="w-4 h-4 mr-2"></i> 4. Pending Items</h4>
-            <p class="text-xs text-slate-500 font-mono italic">None explicitly pending at this freeze level.</p>
+            <h4 class="font-bold text-slate-800 mb-3 uppercase text-sm flex items-center"><i data-lucide="clock" class="w-4 h-4 mr-2"></i> 4. Remaining Items</h4>
+            <p class="text-xs text-slate-500 font-mono italic">None explicitly outstanding at this freeze level.</p>
         </div>
         """,
         "Displays the immutable system interface freeze contract. Read-only."
