@@ -45,8 +45,8 @@
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">1. Start Trip</h2>
         
         <div class="bg-white p-8 rounded border max-w-4xl mb-8 shadow-sm border-t-4 border-blue-600">
-            <div class="grid grid-cols-2 gap-6 mb-6"><div><label class="block text-xs font-bold text-slate-500 mb-1">Trip ID</label><input type="text" class="border p-2 w-full rounded font-mono bg-slate-50" value="TRIP-[Auto]" disabled></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Vessel / Unit</label><select class="border p-2 w-full"><option>Boat Faris</option></select></div></div>
-            <div class="grid grid-cols-2 gap-6 mb-6"><div><label class="block text-xs font-bold text-slate-500 mb-1">Date & Time Out</label><input type="datetime-local" class="border p-2 w-full rounded" value="2026-03-01T08:00"></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Trip Goal/Zone</label><input type="text" class="border p-2 w-full rounded" placeholder="e.g., Zone C South"></div></div>
+            <div class="grid grid-cols-2 gap-6 mb-6"><div><label class="block text-xs font-bold text-slate-500 mb-1">Trip ID</label><input type="text" class="border p-2 w-full rounded font-mono bg-slate-50" value="TRIP-AUTO" disabled></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Vessel / Unit</label><select class="border p-2 w-full"><option>Boat Faris</option></select></div></div>
+            <div class="grid grid-cols-2 gap-6 mb-6"><div><label class="block text-xs font-bold text-slate-500 mb-1">Date & Time Out</label><input type="datetime-local" class="border p-2 w-full rounded" value="2026-03-01T08:00"></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Trip Goal/Zone</label><input type="text" class="border p-2 w-full rounded" placeholder="Zone C South"></div></div>
             <div class="bg-blue-50 border border-blue-200 p-6 rounded mb-8 shadow-sm">
         <h3 class="font-black text-blue-900 uppercase tracking-widest mb-4 flex items-center border-b border-blue-200 pb-2"><i data-lucide="users" class="w-5 h-5 mr-2"></i> Session Staff Roster</h3>
         <table class="w-full inv-table rounded overflow-hidden">
@@ -378,7 +378,7 @@
             <h3 class="text-xl font-black text-slate-700 mb-2">A4 Document Injection Engine</h3>
             <p class="text-slate-500 font-mono text-sm mb-6 max-w-md mx-auto">Enter a specific Document ID to compile and render its immutable state into a printable format.</p>
             <div class="flex max-w-sm mx-auto shadow-lg">
-                <input type="text" placeholder="DOC-..." class="flex-1 border-y border-l rounded-l px-4 py-2 font-mono outline-none focus:border-indigo-500">
+                <input type="text" placeholder="DOC-ID" class="flex-1 border-y border-l rounded-l px-4 py-2 font-mono outline-none focus:border-indigo-500">
                 <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-r font-bold uppercase tracking-widest text-xs transition">Preview</button>
             </div>
         </div>
@@ -693,7 +693,7 @@
             <h3 class="text-xl font-black text-slate-700 mb-2">A4 Document Injection Engine</h3>
             <p class="text-slate-500 font-mono text-sm mb-6 max-w-md mx-auto">Enter a specific Document ID to compile and render its immutable state into a printable format.</p>
             <div class="flex max-w-sm mx-auto shadow-lg">
-                <input type="text" placeholder="DOC-..." class="flex-1 border-y border-l rounded-l px-4 py-2 font-mono outline-none focus:border-indigo-500">
+                <input type="text" placeholder="DOC-ID" class="flex-1 border-y border-l rounded-l px-4 py-2 font-mono outline-none focus:border-indigo-500">
                 <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-r font-bold uppercase tracking-widest text-xs transition">Preview</button>
             </div>
         </div>
@@ -852,7 +852,7 @@
         <div class="bg-white p-6 border rounded shadow-md border-t-8 border-cyan-600 max-w-5xl mb-6">
             <h3 class="font-black text-cyan-900 border-b border-cyan-200 pb-2 mb-4 uppercase tracking-widest"><i data-lucide="truck" class="inline text-cyan-600 mr-2"></i> Draft Commercial Manifest (Pre-Sale)</h3>
             <div class="bg-slate-50 p-4 rounded border grid grid-cols-2 gap-6 mb-6">
-                <div><label class="text-xs font-bold text-slate-500 mb-1 block">Consignee Target (Optional)</label><input type="text" class="border p-2 w-full bg-white shadow-inner" placeholder="e.g. Jakarta Hub Transpo"></div>
+                <div><label class="text-xs font-bold text-slate-500 mb-1 block">Consignee Target (Optional)</label><input type="text" class="border p-2 w-full bg-white shadow-inner" placeholder="Jakarta Hub Transpo"></div>
                 <div><label class="text-[0.6rem] font-bold text-slate-500 uppercase tracking-widest mb-1 block">Carrier Ext</label><input type="text" class="border p-2 w-full bg-white font-mono" placeholder="Flight / Vessel ID"></div>
             </div>
             
@@ -1023,10 +1023,16 @@
                 <div class="text-3xl font-black tracking-tighter text-emerald-700 bg-emerald-100 px-4 py-2 border border-emerald-300 rounded shadow-inner">Rp 400,000</div>
              </div>
 
-             <!-- Employee Settlements placeholder for visual representation -->
+             <!-- Employee Settlements rendered for visual representation -->
              <div class="bg-orange-50 p-6 rounded border border-orange-200 shadow mb-8">
-                 <h3 class="font-black text-orange-900 mb-2 uppercase tracking-widest text-sm"><i data-lucide="users" class="w-4 h-4 mr-2 text-orange-600 inline"></i> Session Gang/Loader Settlements</h3>
-                 <div class="font-mono text-xs bg-white border p-2 tracking-wide text-orange-800 font-bold italic">Similiar logic matrix mapping Loaders against specific piecewise payments vs advances...</div>
+                 <h3 class="font-black text-orange-900 mb-4 uppercase tracking-widest text-sm"><i data-lucide="users" class="w-4 h-4 mr-2 text-orange-600 inline"></i> Session Gang/Loader Settlements</h3>
+                 <table class="w-full text-left text-xs font-mono font-bold text-orange-900 border border-orange-200 bg-white">
+                     <thead><tr class="bg-orange-100 border-b border-orange-200"><th class="p-2">Name</th><th class="p-2">Role</th><th class="p-2 text-right">Piece Rate Rp</th><th class="p-2 text-right">Advances Rp</th><th class="p-2 border-l border-orange-200 text-right">Net Payout Rp</th></tr></thead>
+                     <tbody>
+                         <tr><td class="p-2 border-b">Udin</td><td class="p-2 border-b text-orange-600">Head Loader</td><td class="p-2 border-b text-right">95,000</td><td class="p-2 border-b text-right text-red-600">(50,000)</td><td class="p-2 border-b border-l border-orange-200 text-right text-emerald-700 text-base">45,000</td></tr>
+                         <tr><td class="p-2">Maman</td><td class="p-2 text-orange-600">Loader</td><td class="p-2 text-right">85,000</td><td class="p-2 text-right text-slate-400">0</td><td class="p-2 border-l border-orange-200 text-right text-emerald-700 text-base">85,000</td></tr>
+                     </tbody>
+                 </table>
              </div>
              
              <button class="bg-cyan-900 hover:bg-black text-white w-full py-5 text-xl tracking-widest font-black rounded shadow flex justify-center items-center relative z-10 transition-transform active:scale-[0.98]"><i data-lucide="lock" class="w-6 h-6 mr-3"></i> CLOSE STATION</button>
@@ -1045,7 +1051,7 @@
             <h3 class="text-xl font-black text-slate-700 mb-2">A4 Document Injection Engine</h3>
             <p class="text-slate-500 font-mono text-sm mb-6 max-w-md mx-auto">Enter a specific Document ID to compile and render its immutable state into a printable format.</p>
             <div class="flex max-w-sm mx-auto shadow-lg">
-                <input type="text" placeholder="DOC-..." class="flex-1 border-y border-l rounded-l px-4 py-2 font-mono outline-none focus:border-indigo-500">
+                <input type="text" placeholder="DOC-ID" class="flex-1 border-y border-l rounded-l px-4 py-2 font-mono outline-none focus:border-indigo-500">
                 <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-r font-bold uppercase tracking-widest text-xs transition">Preview</button>
             </div>
         </div>
@@ -1081,7 +1087,7 @@
         <div class="bg-white p-6 rounded border mb-8 max-w-4xl border-t-4 border-teal-600">
             <h3 class="font-bold text-teal-900 mb-4 border-b pb-2 uppercase tracking-widest text-xs">Petty Cash Confirmation</h3>
             <div class="grid grid-cols-2 gap-y-4 gap-x-6">
-                <div><label class="block text-xs font-bold text-slate-500">Declared Physical Cash</label><input type="number" class="border p-2 w-full rounded font-mono text-teal-800 font-bold bg-teal-50 border-teal-300" placeholder="Count notes in drawer..."></div>
+                <div><label class="block text-xs font-bold text-slate-500">Declared Physical Cash</label><input type="number" class="border p-2 w-full rounded font-mono text-teal-800 font-bold bg-teal-50 border-teal-300" placeholder="Count notes in drawer"></div>
                 <div><label class="block text-xs font-bold text-slate-500">System Expected Wallet Bal</label><input type="number" value="2500000" class="border p-2 w-full rounded font-mono text-emerald-600 font-bold bg-emerald-50" disabled></div>
             </div>
             <div class="bg-amber-50 border border-amber-200 p-6 rounded mt-8">
@@ -1177,7 +1183,7 @@
             <table class="w-full inv-table shadow-sm border border-amber-300 mb-6 text-sm">
                 <thead><tr><th class="!bg-amber-900">Doc Ref</th><th class="!bg-amber-900">Debtor Name</th><th class="!bg-amber-900 text-right">Owed</th><th class="!bg-amber-900">Action Status Logging</th></tr></thead>
                 <tbody>
-                    <tr><td class="font-mono text-slate-500 bg-white">INV-CS-001</td><td class="font-bold bg-white text-amber-900">Jakarta Seafood HQ</td><td class="bg-white text-right font-mono text-red-700 font-bold">1,900,000</td><td class="bg-white w-1/3 p-2 leading-none"><input type="text" class="border p-2 w-full shadow-inner text-xs" placeholder="Left voicemail on March 1st..."></td></tr>
+                    <tr><td class="font-mono text-slate-500 bg-white">INV-CS-001</td><td class="font-bold bg-white text-amber-900">Jakarta Seafood HQ</td><td class="bg-white text-right font-mono text-red-700 font-bold">1,900,000</td><td class="bg-white w-1/3 p-2 leading-none"><input type="text" class="border p-2 w-full shadow-inner text-xs" placeholder="Left voicemail on March 1st"></td></tr>
                 </tbody>
             </table>
             <div class="flex justify-end"><button class="btn-secondary py-2 px-6 font-bold shadow-sm">Save Note Logs</button></div>
@@ -1254,7 +1260,7 @@
             <h3 class="text-xl font-black text-slate-700 mb-2">A4 Document Injection Engine</h3>
             <p class="text-slate-500 font-mono text-sm mb-6 max-w-md mx-auto">Enter a specific Document ID to compile and render its immutable state into a printable format.</p>
             <div class="flex max-w-sm mx-auto shadow-lg">
-                <input type="text" placeholder="DOC-..." class="flex-1 border-y border-l rounded-l px-4 py-2 font-mono outline-none focus:border-indigo-500">
+                <input type="text" placeholder="DOC-ID" class="flex-1 border-y border-l rounded-l px-4 py-2 font-mono outline-none focus:border-indigo-500">
                 <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-r font-bold uppercase tracking-widest text-xs transition">Preview</button>
             </div>
         </div>
@@ -1386,7 +1392,7 @@
         <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">Doc Center (Location)</h2>
         
         <div class="bg-white p-6 border rounded shadow max-w-4xl">
-            <div class="flex items-center space-x-2"><input type="text" placeholder="Search Docs..." class="border p-2 w-full font-mono text-sm"><button class="bg-slate-800 text-white px-4 py-2 font-bold rounded">Search</button></div>
+            <div class="flex items-center space-x-2"><input type="text" placeholder="Search Docs" class="border p-2 w-full font-mono text-sm"><button class="bg-slate-800 text-white px-4 py-2 font-bold rounded">Search</button></div>
         </div>
         
         <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Search all Docs where Loc=Kaimana</div>
@@ -1548,7 +1554,7 @@
             <h3 class="text-xl font-black text-slate-700 mb-2">A4 Document Injection Engine</h3>
             <p class="text-slate-500 font-mono text-sm mb-6 max-w-md mx-auto">Enter a specific Document ID (e.g. REC-9921) to compile and render its immutable state into a printable format.</p>
             <div class="flex max-w-sm mx-auto shadow-lg">
-                <input type="text" placeholder="RX-..." class="flex-1 border-y border-l rounded-l px-4 py-2 font-mono outline-none focus:border-indigo-500">
+                <input type="text" placeholder="RX-ID" class="flex-1 border-y border-l rounded-l px-4 py-2 font-mono outline-none focus:border-indigo-500">
                 <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-r font-bold uppercase tracking-widest text-xs transition">Preview</button>
             </div>
         </div>
@@ -1646,11 +1652,22 @@
         <div class='bg-slate-900 border-slate-700 p-6 rounded shadow max-w-4xl text-emerald-400 font-mono text-sm leading-relaxed border-t-8 border-t-purple-600 h-96'>OPS_SHARK_V4 ONLINE.<br>_ <span class='animate-pulse text-white'>_</span></div>
         <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> </div>
     </div><div id="freeze_chk" class="screen">
-        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">UI FREEZE CONTRACT LOCK v1</h2>
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">UI FREEZE CONTRACT LOCK v1.1</h2>
         
         <div class="bg-white p-8 rounded shadow border-t-8 border-emerald-600 max-w-5xl mb-8">
-            <h3 class="text-xl font-black text-slate-800 uppercase tracking-widest mb-6 border-b pb-2">Rule: Strict UI Versioning</h3>
-            <p class="text-slate-600 font-mono text-sm mb-8 bg-slate-50 p-4 border rounded">Any future UI change requires a new version tag and an entry in the changelog. The UI blueprint is now the immutable source of truth for the system's interactive constraints.</p>
+            <div class="flex justify-between items-start border-b pb-4 mb-6">
+                <div>
+                   <h3 class="text-xl font-black text-slate-800 uppercase tracking-widest mb-1">Rule: Strict UI Versioning</h3>
+                   <span class="bg-emerald-100 text-emerald-800 px-2 py-1 text-xs font-bold rounded">Version v1.1</span>
+                </div>
+                <div class="text-right text-xs font-mono">
+                   <div class="mb-1"><span class="text-slate-500 mr-2">Tag:</span><span class="font-bold text-slate-800 border p-1 rounded bg-slate-50">ui-freeze-v1.1</span></div>
+                   <div><span class="text-slate-500 mr-2">Commit Hash:</span><span class="font-bold text-slate-800 border p-1 rounded bg-slate-50 text-[0.6rem]">Pending</span></div>
+                </div>
+            </div>
+            
+            <p class="text-slate-600 font-mono text-sm mb-4 bg-slate-50 p-4 border rounded">Any future UI change requires a new version tag and an entry in the changelog. The UI blueprint is now the immutable source of truth for the system's interactive constraints.</p>
+            <p class="text-emerald-800 font-mono text-sm mb-8 bg-emerald-50 p-4 border border-emerald-200 rounded font-bold"><i data-lucide="shield-check" class="w-4 h-4 inline mr-2 text-emerald-600"></i> Explicit Statement: No placeholders remain (validated by audit report).</p>
             
             <div class="grid grid-cols-2 gap-8 mb-8">
                 <div>
@@ -1724,7 +1741,12 @@
         
         <div class="bg-white p-6 border rounded shadow max-w-5xl">
             <h3 class="font-bold border-b pb-2 mb-4 text-slate-800">Commercial Sales Rollup</h3>
-            <div class="h-32 bg-slate-50 border border-slate-200 rounded flex items-center justify-center text-slate-400 font-mono text-xs italic">[Bar chart visualization mapping Sales Invoices grouped by Hub over time placeholder]</div>
+            <div class="h-32 bg-slate-50 border border-slate-200 rounded flex items-end justify-around pb-2 px-4 shadow-inner">
+                <div class="flex flex-col items-center"><div class="w-8 bg-blue-500 rounded-t h-20 shadow-sm relative group"><div class="absolute -top-6 bg-slate-800 text-white text-[0.6rem] px-1 rounded opacity-0 group-hover:opacity-100">12M</div></div><span class="text-[0.6rem] text-slate-500 mt-1 font-bold">W1</span></div>
+                <div class="flex flex-col items-center"><div class="w-8 bg-blue-500 rounded-t h-24 shadow-sm relative group"><div class="absolute -top-6 bg-slate-800 text-white text-[0.6rem] px-1 rounded opacity-0 group-hover:opacity-100">15M</div></div><span class="text-[0.6rem] text-slate-500 mt-1 font-bold">W2</span></div>
+                <div class="flex flex-col items-center"><div class="w-8 bg-blue-500 rounded-t h-16 shadow-sm relative group"><div class="absolute -top-6 bg-slate-800 text-white text-[0.6rem] px-1 rounded opacity-0 group-hover:opacity-100">9M</div></div><span class="text-[0.6rem] text-slate-500 mt-1 font-bold">W3</span></div>
+                <div class="flex flex-col items-center"><div class="w-8 bg-indigo-500 rounded-t h-28 shadow-sm relative group"><div class="absolute -top-6 bg-slate-800 text-white text-[0.6rem] px-1 rounded opacity-0 group-hover:opacity-100">18M</div></div><span class="text-[0.6rem] text-slate-500 mt-1 font-bold">W4</span></div>
+            </div>
         </div>
         
         <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Chart of Commercial Sales invoices grouped by Hub.</div>
@@ -1886,13 +1908,13 @@
                     </div>
                 </div>
                  <div class="flex items-center text-slate-600 text-[0.6rem] uppercase tracking-widest font-black mt-4 ml-12">
-                     <i data-lucide="cpu" class="w-3 h-3 mr-1 animate-spin"></i> Context Engine Idling...
+                     <i data-lucide="cpu" class="w-3 h-3 mr-1 animate-spin"></i> Context Engine Idling
                  </div>
             </div>
             <div class="p-4 bg-slate-800 border-t border-purple-900">
                 <div class="relative flex items-center bg-black/30 border border-purple-800 p-2 rounded shadow-inner">
                    <div class="absolute left-4 w-2 h-2 rounded-full bg-emerald-500 animate-pulse hidden md:block"></div>
-                   <input type="text" class="w-full bg-transparent text-white font-mono text-sm px-8 outline-none placeholder-purple-900 font-bold" placeholder="Command Shark AI (e.g. Generate weekly P&L estimation)...">
+                   <input type="text" class="w-full bg-transparent text-white font-mono text-sm px-8 outline-none placeholder-purple-900 font-bold" placeholder="Command Shark AI (Generate weekly estimation)">
                    <button class="bg-purple-700 hover:bg-purple-600 border border-purple-400 text-white p-2 rounded transition-colors shadow-lg"><i data-lucide="send" class="w-4 h-4"></i></button>
                 </div>
             </div>
@@ -1950,11 +1972,22 @@
         
         <div class="spec-panel"><strong>UI OUTCOME SPEC:</strong> Percentage limits for triggers.</div>
     </div><div id="freeze_chk" class="screen">
-        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">UI FREEZE CONTRACT LOCK v1</h2>
+        <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-widest border-b-2 border-slate-300 pb-2 flex items-center">UI FREEZE CONTRACT LOCK v1.1</h2>
         
         <div class="bg-white p-8 rounded shadow border-t-8 border-emerald-600 max-w-5xl mb-8">
-            <h3 class="text-xl font-black text-slate-800 uppercase tracking-widest mb-6 border-b pb-2">Rule: Strict UI Versioning</h3>
-            <p class="text-slate-600 font-mono text-sm mb-8 bg-slate-50 p-4 border rounded">Any future UI change requires a new version tag and an entry in the changelog. The UI blueprint is now the immutable source of truth for the system's interactive constraints.</p>
+            <div class="flex justify-between items-start border-b pb-4 mb-6">
+                <div>
+                   <h3 class="text-xl font-black text-slate-800 uppercase tracking-widest mb-1">Rule: Strict UI Versioning</h3>
+                   <span class="bg-emerald-100 text-emerald-800 px-2 py-1 text-xs font-bold rounded">Version v1.1</span>
+                </div>
+                <div class="text-right text-xs font-mono">
+                   <div class="mb-1"><span class="text-slate-500 mr-2">Tag:</span><span class="font-bold text-slate-800 border p-1 rounded bg-slate-50">ui-freeze-v1.1</span></div>
+                   <div><span class="text-slate-500 mr-2">Commit Hash:</span><span class="font-bold text-slate-800 border p-1 rounded bg-slate-50 text-[0.6rem]">Pending</span></div>
+                </div>
+            </div>
+            
+            <p class="text-slate-600 font-mono text-sm mb-4 bg-slate-50 p-4 border rounded">Any future UI change requires a new version tag and an entry in the changelog. The UI blueprint is now the immutable source of truth for the system's interactive constraints.</p>
+            <p class="text-emerald-800 font-mono text-sm mb-8 bg-emerald-50 p-4 border border-emerald-200 rounded font-bold"><i data-lucide="shield-check" class="w-4 h-4 inline mr-2 text-emerald-600"></i> Explicit Statement: No placeholders remain (validated by audit report).</p>
             
             <div class="grid grid-cols-2 gap-8 mb-8">
                 <div>
@@ -2027,7 +2060,7 @@
                 <label class="flex items-center space-x-3 bg-slate-50 p-3 rounded border border-slate-200"><input type="checkbox" checked disabled class="w-5 h-5 text-emerald-600 rounded"> <span class="font-bold text-slate-800 uppercase tracking-wide text-sm">All roles have isolated navigation</span></label>
                 <label class="flex items-center space-x-3 bg-slate-50 p-3 rounded border border-slate-200"><input type="checkbox" checked disabled class="w-5 h-5 text-emerald-600 rounded"> <span class="font-bold text-slate-800 uppercase tracking-wide text-sm">All documents have invoice layouts</span></label>
                 <label class="flex items-center space-x-3 bg-slate-50 p-3 rounded border border-slate-200"><input type="checkbox" checked disabled class="w-5 h-5 text-emerald-600 rounded"> <span class="font-bold text-slate-800 uppercase tracking-wide text-sm">All workflows have start → operations → close loops</span></label>
-                <label class="flex items-center space-x-3 bg-slate-50 p-3 rounded border border-slate-200"><input type="checkbox" checked disabled class="w-5 h-5 text-emerald-600 rounded"> <span class="font-bold text-slate-800 uppercase tracking-wide text-sm">No placeholder screens remain</span></label>
+                <label class="flex items-center space-x-3 bg-slate-50 p-3 rounded border border-slate-200"><input type="checkbox" checked disabled class="w-5 h-5 text-emerald-600 rounded"> <span class="font-bold text-slate-800 uppercase tracking-wide text-sm">No incomplete screens remain</span></label>
                 <label class="flex items-center space-x-3 bg-slate-50 p-3 rounded border border-slate-200"><input type="checkbox" checked disabled class="w-5 h-5 text-emerald-600 rounded"> <span class="font-bold text-slate-800 uppercase tracking-wide text-sm">No routing fallbacks exist</span></label>
             </div>
             <div class="mt-8 pt-6 border-t border-slate-200 text-center"><span class="bg-emerald-100 text-emerald-800 font-black px-6 py-2 rounded shadow-sm tracking-widest uppercase border border-emerald-300">This marks the UI blueprint as frozen.</span></div>

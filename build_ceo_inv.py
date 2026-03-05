@@ -117,7 +117,12 @@ def get_ceo_inv_screens():
         """
         <div class="bg-white p-6 border rounded shadow max-w-5xl">
             <h3 class="font-bold border-b pb-2 mb-4 text-slate-800">Commercial Sales Rollup</h3>
-            <div class="h-32 bg-slate-50 border border-slate-200 rounded flex items-center justify-center text-slate-400 font-mono text-xs italic">[Bar chart visualization mapping Sales Invoices grouped by Hub over time placeholder]</div>
+            <div class="h-32 bg-slate-50 border border-slate-200 rounded flex items-end justify-around pb-2 px-4 shadow-inner">
+                <div class="flex flex-col items-center"><div class="w-8 bg-blue-500 rounded-t h-20 shadow-sm relative group"><div class="absolute -top-6 bg-slate-800 text-white text-[0.6rem] px-1 rounded opacity-0 group-hover:opacity-100">12M</div></div><span class="text-[0.6rem] text-slate-500 mt-1 font-bold">W1</span></div>
+                <div class="flex flex-col items-center"><div class="w-8 bg-blue-500 rounded-t h-24 shadow-sm relative group"><div class="absolute -top-6 bg-slate-800 text-white text-[0.6rem] px-1 rounded opacity-0 group-hover:opacity-100">15M</div></div><span class="text-[0.6rem] text-slate-500 mt-1 font-bold">W2</span></div>
+                <div class="flex flex-col items-center"><div class="w-8 bg-blue-500 rounded-t h-16 shadow-sm relative group"><div class="absolute -top-6 bg-slate-800 text-white text-[0.6rem] px-1 rounded opacity-0 group-hover:opacity-100">9M</div></div><span class="text-[0.6rem] text-slate-500 mt-1 font-bold">W3</span></div>
+                <div class="flex flex-col items-center"><div class="w-8 bg-indigo-500 rounded-t h-28 shadow-sm relative group"><div class="absolute -top-6 bg-slate-800 text-white text-[0.6rem] px-1 rounded opacity-0 group-hover:opacity-100">18M</div></div><span class="text-[0.6rem] text-slate-500 mt-1 font-bold">W4</span></div>
+            </div>
         </div>
         """, "Chart of Commercial Sales invoices grouped by Hub."))
     screens.append(screen("inv_risk", "Risk Summary", 

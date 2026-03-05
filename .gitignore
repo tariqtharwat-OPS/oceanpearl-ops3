@@ -46,3 +46,4 @@ yarn-error.log*
 frontend/dist/
 functions/node_modules/
 functions/lib/*.js.map
+__pycache__/

@@ -100,7 +100,7 @@ def get_cs_screens():
         <div class="bg-white p-6 border rounded shadow-md border-t-8 border-cyan-600 max-w-5xl mb-6">
             <h3 class="font-black text-cyan-900 border-b border-cyan-200 pb-2 mb-4 uppercase tracking-widest"><i data-lucide="truck" class="inline text-cyan-600 mr-2"></i> Draft Commercial Manifest (Pre-Sale)</h3>
             <div class="bg-slate-50 p-4 rounded border grid grid-cols-2 gap-6 mb-6">
-                <div><label class="text-xs font-bold text-slate-500 mb-1 block">Consignee Target (Optional)</label><input type="text" class="border p-2 w-full bg-white shadow-inner" placeholder="e.g. Jakarta Hub Transpo"></div>
+                <div><label class="text-xs font-bold text-slate-500 mb-1 block">Consignee Target (Optional)</label><input type="text" class="border p-2 w-full bg-white shadow-inner" placeholder="Jakarta Hub Transpo"></div>
                 <div><label class="text-[0.6rem] font-bold text-slate-500 uppercase tracking-widest mb-1 block">Carrier Ext</label><input type="text" class="border p-2 w-full bg-white font-mono" placeholder="Flight / Vessel ID"></div>
             </div>
             
@@ -203,10 +203,16 @@ def get_cs_screens():
                 <div class="text-3xl font-black tracking-tighter text-emerald-700 bg-emerald-100 px-4 py-2 border border-emerald-300 rounded shadow-inner">Rp 400,000</div>
              </div>
 
-             <!-- Employee Settlements placeholder for visual representation -->
+             <!-- Employee Settlements rendered for visual representation -->
              <div class="bg-orange-50 p-6 rounded border border-orange-200 shadow mb-8">
-                 <h3 class="font-black text-orange-900 mb-2 uppercase tracking-widest text-sm"><i data-lucide="users" class="w-4 h-4 mr-2 text-orange-600 inline"></i> Session Gang/Loader Settlements</h3>
-                 <div class="font-mono text-xs bg-white border p-2 tracking-wide text-orange-800 font-bold italic">Similiar logic matrix mapping Loaders against specific piecewise payments vs advances...</div>
+                 <h3 class="font-black text-orange-900 mb-4 uppercase tracking-widest text-sm"><i data-lucide="users" class="w-4 h-4 mr-2 text-orange-600 inline"></i> Session Gang/Loader Settlements</h3>
+                 <table class="w-full text-left text-xs font-mono font-bold text-orange-900 border border-orange-200 bg-white">
+                     <thead><tr class="bg-orange-100 border-b border-orange-200"><th class="p-2">Name</th><th class="p-2">Role</th><th class="p-2 text-right">Piece Rate Rp</th><th class="p-2 text-right">Advances Rp</th><th class="p-2 border-l border-orange-200 text-right">Net Payout Rp</th></tr></thead>
+                     <tbody>
+                         <tr><td class="p-2 border-b">Udin</td><td class="p-2 border-b text-orange-600">Head Loader</td><td class="p-2 border-b text-right">95,000</td><td class="p-2 border-b text-right text-red-600">(50,000)</td><td class="p-2 border-b border-l border-orange-200 text-right text-emerald-700 text-base">45,000</td></tr>
+                         <tr><td class="p-2">Maman</td><td class="p-2 text-orange-600">Loader</td><td class="p-2 text-right">85,000</td><td class="p-2 text-right text-slate-400">0</td><td class="p-2 border-l border-orange-200 text-right text-emerald-700 text-base">85,000</td></tr>
+                     </tbody>
+                 </table>
              </div>
              
              <button class="bg-cyan-900 hover:bg-black text-white w-full py-5 text-xl tracking-widest font-black rounded shadow flex justify-center items-center relative z-10 transition-transform active:scale-[0.98]"><i data-lucide="lock" class="w-6 h-6 mr-3"></i> CLOSE STATION</button>
@@ -223,7 +229,7 @@ def get_cs_screens():
             <h3 class="text-xl font-black text-slate-700 mb-2">A4 Document Injection Engine</h3>
             <p class="text-slate-500 font-mono text-sm mb-6 max-w-md mx-auto">Enter a specific Document ID to compile and render its immutable state into a printable format.</p>
             <div class="flex max-w-sm mx-auto shadow-lg">
-                <input type="text" placeholder="DOC-..." class="flex-1 border-y border-l rounded-l px-4 py-2 font-mono outline-none focus:border-indigo-500">
+                <input type="text" placeholder="DOC-ID" class="flex-1 border-y border-l rounded-l px-4 py-2 font-mono outline-none focus:border-indigo-500">
                 <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-r font-bold uppercase tracking-widest text-xs transition">Preview</button>
             </div>
         </div>

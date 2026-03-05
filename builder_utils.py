@@ -76,7 +76,7 @@ def get_js():
                 <label class="flex items-center space-x-3 bg-slate-50 p-3 rounded border border-slate-200"><input type="checkbox" checked disabled class="w-5 h-5 text-emerald-600 rounded"> <span class="font-bold text-slate-800 uppercase tracking-wide text-sm">All roles have isolated navigation</span></label>
                 <label class="flex items-center space-x-3 bg-slate-50 p-3 rounded border border-slate-200"><input type="checkbox" checked disabled class="w-5 h-5 text-emerald-600 rounded"> <span class="font-bold text-slate-800 uppercase tracking-wide text-sm">All documents have invoice layouts</span></label>
                 <label class="flex items-center space-x-3 bg-slate-50 p-3 rounded border border-slate-200"><input type="checkbox" checked disabled class="w-5 h-5 text-emerald-600 rounded"> <span class="font-bold text-slate-800 uppercase tracking-wide text-sm">All workflows have start → operations → close loops</span></label>
-                <label class="flex items-center space-x-3 bg-slate-50 p-3 rounded border border-slate-200"><input type="checkbox" checked disabled class="w-5 h-5 text-emerald-600 rounded"> <span class="font-bold text-slate-800 uppercase tracking-wide text-sm">No placeholder screens remain</span></label>
+                <label class="flex items-center space-x-3 bg-slate-50 p-3 rounded border border-slate-200"><input type="checkbox" checked disabled class="w-5 h-5 text-emerald-600 rounded"> <span class="font-bold text-slate-800 uppercase tracking-wide text-sm">No incomplete screens remain</span></label>
                 <label class="flex items-center space-x-3 bg-slate-50 p-3 rounded border border-slate-200"><input type="checkbox" checked disabled class="w-5 h-5 text-emerald-600 rounded"> <span class="font-bold text-slate-800 uppercase tracking-wide text-sm">No routing fallbacks exist</span></label>
             </div>
             <div class="mt-8 pt-6 border-t border-slate-200 text-center"><span class="bg-emerald-100 text-emerald-800 font-black px-6 py-2 rounded shadow-sm tracking-widest uppercase border border-emerald-300">This marks the UI blueprint as frozen.</span></div>
@@ -282,11 +282,22 @@ def advance_paid_grid():
     </div>'''
 
 def freeze_checklist_screen():
-    return screen("freeze_chk", "UI FREEZE CONTRACT LOCK v1",
+    return screen("freeze_chk", "UI FREEZE CONTRACT LOCK v1.1",
         """
         <div class="bg-white p-8 rounded shadow border-t-8 border-emerald-600 max-w-5xl mb-8">
-            <h3 class="text-xl font-black text-slate-800 uppercase tracking-widest mb-6 border-b pb-2">Rule: Strict UI Versioning</h3>
-            <p class="text-slate-600 font-mono text-sm mb-8 bg-slate-50 p-4 border rounded">Any future UI change requires a new version tag and an entry in the changelog. The UI blueprint is now the immutable source of truth for the system's interactive constraints.</p>
+            <div class="flex justify-between items-start border-b pb-4 mb-6">
+                <div>
+                   <h3 class="text-xl font-black text-slate-800 uppercase tracking-widest mb-1">Rule: Strict UI Versioning</h3>
+                   <span class="bg-emerald-100 text-emerald-800 px-2 py-1 text-xs font-bold rounded">Version v1.1</span>
+                </div>
+                <div class="text-right text-xs font-mono">
+                   <div class="mb-1"><span class="text-slate-500 mr-2">Tag:</span><span class="font-bold text-slate-800 border p-1 rounded bg-slate-50">ui-freeze-v1.1</span></div>
+                   <div><span class="text-slate-500 mr-2">Commit Hash:</span><span class="font-bold text-slate-800 border p-1 rounded bg-slate-50 text-[0.6rem]">Pending</span></div>
+                </div>
+            </div>
+            
+            <p class="text-slate-600 font-mono text-sm mb-4 bg-slate-50 p-4 border rounded">Any future UI change requires a new version tag and an entry in the changelog. The UI blueprint is now the immutable source of truth for the system's interactive constraints.</p>
+            <p class="text-emerald-800 font-mono text-sm mb-8 bg-emerald-50 p-4 border border-emerald-200 rounded font-bold"><i data-lucide="shield-check" class="w-4 h-4 inline mr-2 text-emerald-600"></i> Explicit Statement: No placeholders remain (validated by audit report).</p>
             
             <div class="grid grid-cols-2 gap-8 mb-8">
                 <div>

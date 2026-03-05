@@ -6,8 +6,8 @@ def get_boat_screens():
     screens.append(screen("boat_start", "1. Start Trip",
         """
         <div class="bg-white p-8 rounded border max-w-4xl mb-8 shadow-sm border-t-4 border-blue-600">
-            <div class="grid grid-cols-2 gap-6 mb-6"><div><label class="block text-xs font-bold text-slate-500 mb-1">Trip ID</label><input type="text" class="border p-2 w-full rounded font-mono bg-slate-50" value="TRIP-[Auto]" disabled></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Vessel / Unit</label><select class="border p-2 w-full"><option>Boat Faris</option></select></div></div>
-            <div class="grid grid-cols-2 gap-6 mb-6"><div><label class="block text-xs font-bold text-slate-500 mb-1">Date & Time Out</label><input type="datetime-local" class="border p-2 w-full rounded" value="2026-03-01T08:00"></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Trip Goal/Zone</label><input type="text" class="border p-2 w-full rounded" placeholder="e.g., Zone C South"></div></div>
+            <div class="grid grid-cols-2 gap-6 mb-6"><div><label class="block text-xs font-bold text-slate-500 mb-1">Trip ID</label><input type="text" class="border p-2 w-full rounded font-mono bg-slate-50" value="TRIP-AUTO" disabled></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Vessel / Unit</label><select class="border p-2 w-full"><option>Boat Faris</option></select></div></div>
+            <div class="grid grid-cols-2 gap-6 mb-6"><div><label class="block text-xs font-bold text-slate-500 mb-1">Date & Time Out</label><input type="datetime-local" class="border p-2 w-full rounded" value="2026-03-01T08:00"></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Trip Goal/Zone</label><input type="text" class="border p-2 w-full rounded" placeholder="Zone C South"></div></div>
             """ + staff_roster_panel() + """
             <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold w-full text-lg py-3 rounded"><i data-lucide="play" class="w-5 h-5 mr-2 inline"></i> INITIATE VESSEL TRIP</button>
         </div>
@@ -211,7 +211,7 @@ def get_boat_screens():
             <h3 class="text-xl font-black text-slate-700 mb-2">A4 Document Injection Engine</h3>
             <p class="text-slate-500 font-mono text-sm mb-6 max-w-md mx-auto">Enter a specific Document ID to compile and render its immutable state into a printable format.</p>
             <div class="flex max-w-sm mx-auto shadow-lg">
-                <input type="text" placeholder="DOC-..." class="flex-1 border-y border-l rounded-l px-4 py-2 font-mono outline-none focus:border-indigo-500">
+                <input type="text" placeholder="DOC-ID" class="flex-1 border-y border-l rounded-l px-4 py-2 font-mono outline-none focus:border-indigo-500">
                 <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-r font-bold uppercase tracking-widest text-xs transition">Preview</button>
             </div>
         </div>

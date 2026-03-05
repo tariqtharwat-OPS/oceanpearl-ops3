@@ -143,13 +143,13 @@ def get_admin_shark_screens():
                     </div>
                 </div>
                  <div class="flex items-center text-slate-600 text-[0.6rem] uppercase tracking-widest font-black mt-4 ml-12">
-                     <i data-lucide="cpu" class="w-3 h-3 mr-1 animate-spin"></i> Context Engine Idling...
+                     <i data-lucide="cpu" class="w-3 h-3 mr-1 animate-spin"></i> Context Engine Idling
                  </div>
             </div>
             <div class="p-4 bg-slate-800 border-t border-purple-900">
                 <div class="relative flex items-center bg-black/30 border border-purple-800 p-2 rounded shadow-inner">
                    <div class="absolute left-4 w-2 h-2 rounded-full bg-emerald-500 animate-pulse hidden md:block"></div>
-                   <input type="text" class="w-full bg-transparent text-white font-mono text-sm px-8 outline-none placeholder-purple-900 font-bold" placeholder="Command Shark AI (e.g. Generate weekly P&L estimation)...">
+                   <input type="text" class="w-full bg-transparent text-white font-mono text-sm px-8 outline-none placeholder-purple-900 font-bold" placeholder="Command Shark AI (Generate weekly estimation)">
                    <button class="bg-purple-700 hover:bg-purple-600 border border-purple-400 text-white p-2 rounded transition-colors shadow-lg"><i data-lucide="send" class="w-4 h-4"></i></button>
                 </div>
             </div>

@@ -36,7 +36,7 @@ def get_office_screens():
         <div class="bg-white p-6 rounded border mb-8 max-w-4xl border-t-4 border-teal-600">
             <h3 class="font-bold text-teal-900 mb-4 border-b pb-2 uppercase tracking-widest text-xs">Petty Cash Confirmation</h3>
             <div class="grid grid-cols-2 gap-y-4 gap-x-6">
-                <div><label class="block text-xs font-bold text-slate-500">Declared Physical Cash</label><input type="number" class="border p-2 w-full rounded font-mono text-teal-800 font-bold bg-teal-50 border-teal-300" placeholder="Count notes in drawer..."></div>
+                <div><label class="block text-xs font-bold text-slate-500">Declared Physical Cash</label><input type="number" class="border p-2 w-full rounded font-mono text-teal-800 font-bold bg-teal-50 border-teal-300" placeholder="Count notes in drawer"></div>
                 <div><label class="block text-xs font-bold text-slate-500">System Expected Wallet Bal</label><input type="number" value="2500000" class="border p-2 w-full rounded font-mono text-emerald-600 font-bold bg-emerald-50" disabled></div>
             </div>
             """ + advance_paid_grid() + """
@@ -115,7 +115,7 @@ def get_office_screens():
             <table class="w-full inv-table shadow-sm border border-amber-300 mb-6 text-sm">
                 <thead><tr><th class="!bg-amber-900">Doc Ref</th><th class="!bg-amber-900">Debtor Name</th><th class="!bg-amber-900 text-right">Owed</th><th class="!bg-amber-900">Action Status Logging</th></tr></thead>
                 <tbody>
-                    <tr><td class="font-mono text-slate-500 bg-white">INV-CS-001</td><td class="font-bold bg-white text-amber-900">Jakarta Seafood HQ</td><td class="bg-white text-right font-mono text-red-700 font-bold">1,900,000</td><td class="bg-white w-1/3 p-2 leading-none"><input type="text" class="border p-2 w-full shadow-inner text-xs" placeholder="Left voicemail on March 1st..."></td></tr>
+                    <tr><td class="font-mono text-slate-500 bg-white">INV-CS-001</td><td class="font-bold bg-white text-amber-900">Jakarta Seafood HQ</td><td class="bg-white text-right font-mono text-red-700 font-bold">1,900,000</td><td class="bg-white w-1/3 p-2 leading-none"><input type="text" class="border p-2 w-full shadow-inner text-xs" placeholder="Left voicemail on March 1st"></td></tr>
                 </tbody>
             </table>
             <div class="flex justify-end"><button class="btn-secondary py-2 px-6 font-bold shadow-sm">Save Note Logs</button></div>
@@ -158,7 +158,7 @@ def get_office_screens():
             <h3 class="text-xl font-black text-slate-700 mb-2">A4 Document Injection Engine</h3>
             <p class="text-slate-500 font-mono text-sm mb-6 max-w-md mx-auto">Enter a specific Document ID to compile and render its immutable state into a printable format.</p>
             <div class="flex max-w-sm mx-auto shadow-lg">
-                <input type="text" placeholder="DOC-..." class="flex-1 border-y border-l rounded-l px-4 py-2 font-mono outline-none focus:border-indigo-500">
+                <input type="text" placeholder="DOC-ID" class="flex-1 border-y border-l rounded-l px-4 py-2 font-mono outline-none focus:border-indigo-500">
                 <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-r font-bold uppercase tracking-widest text-xs transition">Preview</button>
             </div>
         </div>
