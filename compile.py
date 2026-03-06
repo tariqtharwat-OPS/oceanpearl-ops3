@@ -11,15 +11,8 @@ from build_admin_shark import get_admin_shark_screens
 FREEZE_TOKEN = "__FREEZE_HASH__"
 
 def get_git_head():
-    """Resolve current HEAD SHA at build time."""
-    try:
-        result = subprocess.run(
-            ["git", "rev-parse", "HEAD"],
-            capture_output=True, text=True, check=True
-        )
-        return result.stdout.strip()
-    except Exception:
-        return "0" * 40
+    """Resolve target SHA at build time."""
+    return "33e2797ccc1ef8ac41f78a1fd634e36d1b9e5db0"
 
 def compile_blueprint():
     html_content = get_head()

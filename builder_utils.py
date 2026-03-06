@@ -282,16 +282,16 @@ def advance_paid_grid():
     </div>'''
 
 def freeze_checklist_screen():
-    return screen("freeze_chk", "UI FREEZE CONTRACT LOCK v1.1.3",
+    return screen("freeze_chk", "UI FREEZE CONTRACT LOCK v1.1.2",
         """
         <div class="bg-white p-8 rounded shadow border-t-8 border-emerald-600 max-w-5xl mb-8">
             <div class="flex justify-between items-start border-b pb-4 mb-6">
                 <div>
                    <h3 class="text-xl font-black text-slate-800 uppercase tracking-widest mb-1">Rule: Strict UI Versioning</h3>
-                   <span class="bg-emerald-100 text-emerald-800 px-2 py-1 text-xs font-bold rounded">Version v1.1.3</span>
+                   <span class="bg-emerald-100 text-emerald-800 px-2 py-1 text-xs font-bold rounded">Version v1.1.2</span>
                 </div>
                 <div class="text-right text-xs font-mono">
-                   <div class="mb-1"><span class="text-slate-500 mr-2">Tag:</span><span class="font-bold text-slate-800 border p-1 rounded bg-slate-50">ui-freeze-v1.1.3</span></div>
+                   <div class="mb-1"><span class="text-slate-500 mr-2">Tag:</span><span class="font-bold text-slate-800 border p-1 rounded bg-slate-50">ui-freeze-v1.1.2</span></div>
                    <div><span class="text-slate-500 mr-2">Commit:</span><span class="font-bold text-emerald-800 border p-1 rounded bg-emerald-50 text-[0.6rem] w-56 inline-block truncate align-bottom text-center font-mono">__FREEZE_HASH__</span></div>
                 </div>
             </div>
