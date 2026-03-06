@@ -2,28 +2,29 @@
 
 ## Deny-By-Default Foundation
 All collections, documents, and storage buckets default to explicitly denying read and write operations.
-A request must perfectly thread a gauntlet of boolean checks evaluating authentication and authorization claims to succeed.
+A request must flawlessly thread a gauntlet of compound boolean checks evaluating authentication and authorization to succeed.
 
-## Role Scope Inheritance
-Authorization is governed by Custom Claims injected into the user's JWT at the authentication phase.
-Scopes are heavily localized.
-- `role: boat_operator` can exclusively read/write documents where `hubId` or `tripId` map to their explicit assignments.
-- `role: finance` possesses read access across assigned hubs, but restricted write capabilities.
-- `role: sysadmin` bypasses normal operational checks.
+## Compound Scope Checks
+Authorization relies on multi-dimensional JWT Custom Claims. A single rule does not grant access.
+A user attempting a write must satisfy concurrent boundaries:
+- **Company:** The top-level isolation tenant. `request.auth.token.companyId == resource.data.companyId`.
+- **Location:** `request.auth.token.locationId == resource.data.locationId`.
+- **Unit:** Specific vehicles/factories (e.g., `unitId` ensures Boat A cannot write to Boat B).
+- **Trip/Session:** `tripId` must remain actively strictly open.
 
-## Company/Location/Unit Boundaries
-- **Company:** The top-level isolation tenant. `companyId` is an absolute boundary. Users from Company A cannot retrieve documents from Company B regardless of role privileges.
-- **Location:** Operational boundary (Hubs). `locationId` binds Boat Operators, Managers, and Cold Storage staff.
-- **Unit:** Specific vehicles/factories. `unitId` ensures a Boat Operator on Boat X cannot post an expense for Boat Y.
+## Shark AI Privacy Rule
+The "Shark AI" operates purely as a scoped proxy.
+- **Inheritance:** Shark inherits the exact precision scope of the invoking user.
+- **Raw Data Masking:** Shark must NEVER return raw operational data outside the user's scope.
+- **Aggregated Insights:** Shark may return aggregated anonymized insights ("Yield averages across the fleet are 5% higher") but never specific identifiable records ("Boat B caught 500kg").
 
-## Shark AI Scope Inheritance
-The "Shark AI" functions on a passthrough authorization model. It exclusively inherits the exact read scope of the user querying it.
-- **Example:** A `location_manager` asking Shark for an anomaly report will strictly receive anomalies concerning their precise location assignment. Shark possesses no omnipotent bypass.
+## Immutable Audit Trail Requirement
+- Every security-sensitive action (Voiding, overriding, modifying privileges) MUST log to an append-only `system_audit` ledger.
+- This ledger tracks `uid`, `timestamp`, `deviceId`, `ip`, and contextual `before/after` delta states.
+- Posted documents and immutable event logs physically cannot be edited or deleted (`allow update, delete: if false;`).
 
-## Immutable Event Protection
-- Security rules enforce that `InventoryEvent` and `WalletEvent` collections strictly allow `.create`.
-- Any `.update` or `.delete` request explicitly fails with `PERMISSION_DENIED`.
-
-## Posted Document Protection
-- Documents stamped with `status == 'posted'` freeze specific fields (amounts, items, user IDs).
-- Rules validate `request.resource.data.totalAmount == resource.data.totalAmount`, enforcing immutability on critical structures.
+## Advanced Threat Protections
+- **Cross-Unit Leakage:** Compound checks negate the risk of Location Managers accessing adjacent Hub data.
+- **Unauthorized Approval Transitions:** State changes (e.g. `transit` -> `received`) require the auth token to explicitly match the *Destination* location, preventing the Sender from spoofing receipt.
+- **Forged Device Context:** Idempotency payloads bind metadata. Forged device timestamps are overwritten by Firestore's internal `request.time`.
+- **Privilege Escalation via Inference:** Read rules block "list" queries that lack explicit indexed filters for the user's `locationId`, preventing pagination scraping behavior.
