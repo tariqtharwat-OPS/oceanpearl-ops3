@@ -26,5 +26,5 @@ The "Shark AI" operates purely as a scoped proxy.
 ## Advanced Threat Protections
 - **Cross-Unit Leakage:** Compound checks negate the risk of Location Managers accessing adjacent Hub data.
 - **Unauthorized Approval Transitions:** State changes (e.g. `transit` -> `received`) require the auth token to explicitly match the *Destination* location, preventing the Sender from spoofing receipt.
-- **Forged Device Context:** Idempotency payloads bind metadata. Forged device timestamps are overwritten by Firestore's internal `request.time`.
+- **Forged Device Context:** Idempotency payloads bind metadata. The system strictly requires `eventId = HMAC(secret, payload_hash + nonce)`. Forged device timestamps are overwritten by Firestore's internal `request.time`.
 - **Privilege Escalation via Inference:** Read rules block "list" queries that lack explicit indexed filters for the user's `locationId`, preventing pagination scraping behavior.

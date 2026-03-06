@@ -4,7 +4,7 @@ This matrix governs QA processes for the Operational offline state architecture.
 
 | Scenario | Setup | Expected Behavior | Rejection/Acceptance Rule | Recovery Path | Audit Expectation |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Duplicate Submission** | Network spams same `eventId` | First succeeds, identical retries silent no-op. | Payload idempotency exact match. | N/A | None. |
+| **Duplicate Submission** | Network spams same `eventId` | First succeeds, identical retries silent no-op. | Payload idempotency exact match via `eventId = HMAC(secret, payload_hash + nonce)`. | N/A | None. |
 | **Two Devices Overspend Wallet** | Boat Captain and Mate offline on separate iPads. Spend same float. Sync. | Chronological First-In wins. Second sync triggers overdraft boundary. | Accept first. Second converts to `PayableEvent` debt. | Operator pays debt to company. | Log `OVERDRAFT_CREATED`. |
 | **Two Devices Consume Same Stock** | Factory offline iPad 1 & 2 attempt to process final 100kg of Batch A. Sync. | First sync succeeds. Second sync attempts to drive stock negative. | Reject second sync via `STOCK_DEFICIT`. | Failed event moves to Resolution Queue. Operator physical counts. | Log `INVENTORY_COLLISION`. |
 | **Partial Sync Failure** | Document has 5 batches. Network drops on batch 3. | Entire document write fails OR succeeds atomically. | Firestore Batch writes must hold ALL or NOTHING. | Retry entire batch upon reconnect. | Log `SYNC_RETRY`. |
