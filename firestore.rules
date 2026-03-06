@@ -1,108 +1,58 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    function isAuthenticated() { return request.auth != null; }
-    function uid() { return request.auth.uid; }
-
-    function userDoc() {
-      return get(/databases/$(database)/documents/v3_users/$(uid())).data;
+    
+    function isAuth() {
+      return request.auth != null && request.auth.uid != null;
+    }
+    
+    function matchesScope(data) {
+      return (data.company_id == request.auth.token.company_id)
+          && (data.location_id == request.auth.token.location_id)
+          && (data.unit_id == request.auth.token.unit_id);
     }
 
-    function role() {
-      return isAuthenticated() ? userDoc().role : null;
+    match /users/{userId} {
+      allow read: if isAuth() && request.auth.uid == userId;
+      allow write: if false; // Deny mutations from client
     }
 
-    // Role Normalization Helper
-    function normalizedRole() {
-      return role() != null ? role().lower() : "";
+    match /locations/{locationId} {
+      allow read: if isAuth() && resource.data.location_id == request.auth.token.location_id;
+      allow write: if false;
     }
 
-    // Canonical Checks (Case-Insensitive)
-    function isAdmin() { 
-      return normalizedRole() == "admin"; 
-    }
-    function isCEO() { 
-      return normalizedRole() == "ceo"; 
-    }
-    function isUnitOperator() { 
-      return normalizedRole() == "unit_operator" || normalizedRole() == "operator"; // Compat with old OPERATOR
-    }
-    function isFinance() { 
-      return normalizedRole() == "finance_officer" || normalizedRole() == "hq_finance"; 
-    }
-    function isLocationManager() {
-      return normalizedRole() == "location_manager";
+    match /units/{unitId} {
+      allow read: if isAuth() && resource.data.unit_id == request.auth.token.unit_id;
+      allow write: if false;
     }
 
-    // -------------------------
-    // User Profiles (v3_users)
-    // -------------------------
-    match /v3_users/{userId} {
-      allow read: if isAuthenticated() && (
-        userId == uid() || 
-        isAdmin() || 
-        isCEO() || 
-        isFinance() ||
-        isLocationManager() // Managers need to see profiles sometimes
-      );
-      // Only Admin/CEO can create/update profiles (provisioning)
-      allow write: if isAuthenticated() && (isAdmin() || isCEO()); 
+    match /wallet_events/{eventId} {
+      allow read: if isAuth() && matchesScope(resource.data);
+      allow create: if isAuth() && matchesScope(request.resource.data);
+      allow update, delete: if false; // Immutable ledger
     }
 
-    // -------------------------
-    // Public metadata (optional)
-    // -------------------------
-    match /v3_locations/{locationId} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && (isAdmin() || isCEO());
+    match /inventory_events/{eventId} {
+      allow read: if isAuth() && matchesScope(resource.data);
+      allow create: if isAuth() && matchesScope(request.resource.data);
+      allow update, delete: if false; // Immutable ledger
     }
 
-    match /v3_units/{unitId} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && (isAdmin() || isCEO());
-    }
-    match /v3_partners/{id} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && (isAdmin() || isCEO());
-    }
-    match /v3_species/{id} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && (isAdmin() || isCEO());
-    }
-    match /v3_products/{id} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && (isAdmin() || isCEO());
-    }
-    match /v3_system/{id} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && (isAdmin() || isCEO());
-    }
-    match /v3_seed_packs/{id} {
-      allow read: if isAuthenticated() && (isAdmin() || isCEO());
+    match /documents/{docId} {
+      allow read: if isAuth() && matchesScope(resource.data);
+      allow create: if isAuth() && matchesScope(request.resource.data);
+      allow update: if isAuth() 
+                    && matchesScope(resource.data) 
+                    && matchesScope(request.resource.data)
+                    && resource.data.status != 'posted'; // Cannot mutate posted documents
+      allow delete: if false;
     }
 
-    // -------------------------
-    // Core operational / financial collections (SERVER ONLY)
-    // Clients MUST NOT read/write directly. Access via Cloud Functions.
-    // -------------------------
-    match /v3_ledger_entries/{docId} {
-      allow read, write: if false;
-    }
-    match /v3_inventory_valuations/{docId} {
-      allow read, write: if false;
-    }
-    match /v3_trace_events/{docId} {
-      allow read, write: if false;
-    }
-    match /v3_batches/{docId} {
-      allow read, write: if false;
-    }
-    match /v3_shark_alerts/{docId} {
-      allow read, write: if false;
-    }
-    match /v3_shark_location_risk/{docId} {
-      allow read, write: if false;
+    match /audit_logs/{logId} {
+      allow read: if isAuth() && matchesScope(resource.data);
+      allow create: if isAuth() && matchesScope(request.resource.data);
+      allow update, delete: if false; // Audit logs must not be deleted
     }
 
     // Default deny

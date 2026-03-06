@@ -1,16 +1,19 @@
 # OPS3 Developer Handbook — Phase 0 & 0.5 Implementation
 
 ## Quick Start
-1. **Running Firebase Emulator:**
-   - Execute `npm run emulator:start` to boot the local suite (Firestore, Auth, Functions).
-   - Ensure you are bound to `127.0.0.1:8080` (Firestore) to prevent accidental cloud connects.
+1. **Initial Setup:**
+   Run the following commands to install dependencies and boot the emulator. 
+   ```bash
+   npm install
+   npm run dev
+   firebase emulators:start
+   ```
 2. **Seeding Test Data:**
-   - Run `node scripts/seed_phase0.js` to inject test tenant boundaries (`companyId`, `locationId`) and test Auth tokens.
-3. **Enabling Offline Mode:**
-   - In your React app entry point, `enableIndexedDbPersistence()` must be toggled for staging builds.
-4. **Triggering Chaos Simulations:**
-   - Drop the emulator socket briefly via `npm run emulator:kill-network` to test partial-sync batch holds.
-
+   - Execute `npx ts-node scripts/seed_local_env.ts` to automatically populate test branches, fleets, and Auth users. No manual config required.
+3. **Triggering Chaos Simulations:**
+   - Execute `npm run chaos-test` (maps to `npx ts-node scripts/run_chaos_tests.ts`) to validate the conflict matrix.
+4. **Enabling Offline Mode:**
+   - In your React app entry point, `enableIndexedDbPersistence()` must be temporarily toggled testing offline sync behavior.
 ## Key Architecture Decisions
 
 ### Server-Sequence Ordering
