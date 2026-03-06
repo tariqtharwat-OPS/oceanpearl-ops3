@@ -1,44 +1,28 @@
-# OPS3 DATA MODEL: OFFLINE-FIRST WALLETS
+# OPS3 Data Model: Offline Wallets
 
-## Core Principle: Event-Driven Derived States
+## Immutable Derivation
+Wallet balances are strictly derived from an immutable stream of event transactions.
+- **NO mutable balance fields** exist in the entity record. If a wallet's current balance is needed, it is computed in real-time by reducing all associated `WalletEvent` documents.
+- Server-side, Cloud Functions maintain an aggregated snapshot (`_currentBalance`) purely as an optimization cache, but it is not the source of truth.
 
-In the physical world of fishing operations, boats and factories often operate outside of network connectivity boundaries. This necessitates an offline-first data model. A traditional monolithic mutable row (e.g., `Update Wallet SET balance = balance - 10`) is fundamentally unsafe in this environment.
+## Transfer Two-Phase Pattern
+To handle physical cash flowing across varying network states, transfers require a two-phase commit:
+1. `transfer_initiated`: Emitted by the sender (e.g., Boat returning float to Hub). Reduces sender's virtual wallet.
+2. `transfer_received`: Emitted by the receiver (e.g., Hub cashier). Increases receiver's virtual wallet.
+- The state in-between represents "Cash in Transit".
 
-Instead, the OPS3 system treats numerical financial or inventory balances exclusively as derived states mathematically aggregating an immutable ledger of transactions.
+## Idempotency Keys
+- Every `WalletEvent` contains a client-generated UUID as its document ID.
+- Network retries implicitly attempt to write the same document ID. Firestore inherently treats this as a no-op if the document already exists, preventing duplicate processing.
 
-## Wallet Entity vs Wallet Transactions
+## Conflict Handling
+- If an offline device processes 5 transactions, syncs, but another device operating the same wallet has already synced 3 conflicting transactions, Firestore correctly interleaves them chronologically by `recordedAt` timestamps.
 
-**1. The Ledger (Wallet Sub-Transactions)**
-Every time an operation happens (an expense is logged, cash is handed over, or a trip begins), the application generates an immutable event block containing:
+## Overdraft Rejection Rules
+- **Boat Wallets:** Soft boundaries. If expenses > wallet, a `PayableEvent` is automatically spawned recognizing debt to the Boat Captain.
+- **Hub/Factory Wallets:** Hard boundaries. Physical vault limits are strictly enforced server-side.
 
-- `transaction_id`: A UUID v4 idempotency key generated on the client.
-- `wallet_id`: The target aggregate node (e.g., `WALLET_B1_TRIP_099`)
-- `type`: Either `CREDIT` (+) or `DEBIT` (-).
-- `amount`: Raw integer string.
-- `document_ref`: Pointer to the parent document (e.g., `EXP-9921`).
-- `timestamp`: The client-stamped creation time, enforcing chronology.
-- `status`: Either `PENDING_SYNC`, `POSTED`, or `VOIDED`.
-
-**2. The Aggregation (The Wallet Document)**
-The Wallet itself acts simply as a caching snapshot node readable by the UI to easily display "available float." This relies on a backend Cloud Function listening to the `transactions` subcollection and actively maintaining a sum. 
-
-## The Negative-Balance Prevention Strategy
-
-If an entity generates expenditures locally exceeding their granted float *while offline*, the client-side UI will soft-block the action mathematically (`available_balance < req_amount`).
-
-However, if a malicious client bypasses this, the fundamental safeguard lies in the backend Firestore Rules paired with Cloud Function sync logic. When the connection is restored, the array of events hits the queue. The backend sequentially attempts to apply writes. If applying `DEBIT 1,000,000` drives the aggregated snapshot below zero, the entire transaction is rejected and the offending document is flagged as `FAILED_SYNC_NSF` (Non-Sufficient Funds).
-
-## The Transfer Two-Phase Commit Pattern
-
-To move value from `Kaimana Hub Treasury` (Location Mgr) to `Trip Cash B1` (Boat Captain) requires explicitly a two-phase architecture mirrored by our UI freeze:
-
-1. **Pending Phase (Dispatch):** Location Manager creates a transfer document (`TRF`). A `DEBIT` hits Kaimana's Wallet. A `CREDIT` appears in Boat B1's Wallet, but uniquely tagged as `state: PENDING`. The money is effectively in transit.
-2. **Receipt Phase (Acceptance):** The Boat Captain, physically receiving the envelope, clicks the "Receive Cash" button (as frozen in the blueprint). This writes a formal receipt signature event to the same `TRF` doc, flipping the `CREDIT` to `state: POSTED`.
-
-*If the funds are never accepted, they remain visibly floating between entities, triggering a Shark AI float anomaly.* 
-
-## UI Blueprint Mapping
-This data model directly maps to the froze UI blueprint structures. For example:
-- **`boat_wallet`** or **`fac_wallet`**: The table grids explicitly display the mathematical ledger of historical Txns mapped against a running balance.
-- **`loc_app_recv`**: Reconciles the Two-Phase commit state visually.
-- **`fin_ledg`**: Directly outputs the raw global sum aggregation in real-time.
+## Offline Sync Reconciliation Model
+- The client UI explicitly differentiates between **Server Confirmed Balance** and **Optimistic Local Balance**.
+- Upon network restore, queued local events are pushed to Firestore.
+- Subscriptions update the local cache, forcing convergence with the authoritative server ledger.

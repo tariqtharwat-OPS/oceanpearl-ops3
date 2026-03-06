@@ -1,61 +1,36 @@
-# OPS3 ACTIVATION PLAN
+# OPS3 Activation Plan
 
-## Overview
-This document serves as the bridging mechanism translating the `OPS3_BLUEPRINT.html` (UI Freeze v1) into an executable, strict timeline.
+## Execution Order
+The execution from the frozen UI (`ui-freeze-v1.1.2`) to the live system strictly follows an incremental phase model, validating the immutable event architecture before compounding complexity.
 
-## Phase 0: Hygiene & Foundation (Zero State)
-- **Goal:** Lock project rules before the first component is written. Establish offline-first immutable schema bounds.
-- **Repository Rules:** The UI Blueprint is officially treated as the Immutable Contract. No "on-the-fly" functional additions allowed without a preceding UI Draft update and CEO signoff. 
-- **Tooling:** React (Vite), Firebase (Firestore + Cloud Functions + Authentication locally emulated). `lucide-react` for parity with blueprint iconography, `tailwindcss` for precise alignment.
+### Why Boat Operator MVP is First
+The Boat Operator represents the most critical, highest-risk, and most decentralized aspect of the business. Capturing origin data (catch receiving, trip expenses, crew advances) securely at the edge establishes the foundation for all downstream operations. If the Boat MVP successfully implements the offline-first wallet and inventory event log without corruption or spoofing, the same architectural patterns will natively scale to the Factory and Cold Storage.
 
-## Phase 1: Boat Operator MVP
-- **Focus Scope:** `role_boat` isolated flow mapped directly to `build_boat.py` outputs.
-- **Target Audience:** Captains operating in offline environments.
-- **Components Required:** 
-  1. `BoatStartShift` (Local auth and bound context initialization)
-  2. `BoatWalletTracker` (Derived wallet logic display)
-  3. `LocalCatchReceiving` (Document Form Type: `REC` - Owned)
-  4. `OutsideBuyReceiving` (Document Form Type: `REC` - Bought)
-  5. `TripExpenseInput` (Document Form Type: `EXP`)
-  6. `TripClosure` (Yield generation, net logic execution, zero-out, and print view block)
-- **Definition of Done (DoD 1):** From a completely wiped database, a test script successfully spins up a Captain role, executes a closed-loop trip offline, reconnects, syncs writes properly to Firestore, and zero-sum closes the local wallet with no infinite loops.
+## Phase Sequence
 
-## Phase 2: Middle-Layer Extensibility (Factory, CS, Admin)
-- **Focus Scope:** `role_factory`, `role_cs`, `role_office`, `role_locationmgr` mapped directly to `build_factory.py`, `build_cs.py`, `build_office.py`, `build_loc_fin.py` (Manager context).
-- **Target Audience:** Hub Workers and Processors in semi-connected settings.
-- **Components Required:**
-  1. `InboundCrossDock` (Comparing DO Transfer inputs to actuals)
-  2. `ProcessingBatchForm` (Converts whole fish SKU metrics against raw limits into Fillet A/B mapping yields)
-  3. `DispatchTransfers` (Document Form Type: `TRF` Outbound)
-  4. `GlobalStockScanner` (Location Manager tree hierarchy mapped against active unit scopes)
-- **Definition of Done (DoD 2):** Trip closed by Boat -> Receive into Factory -> Process Batch -> Transfer to Cold Storage -> Readout via Location Manager yields correctly aligned values at each step.
+### Phase 0: Safety Foundation
+- **Focus:** Backend project structure, authentication, Firestore security rules, immutable event ledger architecture, offline conflict resolution harness, deployment pipelines.
+- **Entry Criteria:** UI Freeze v1.1.2 approved and tagged.
+- **Exit Criteria:** Secure empty shell deployed. All roles return correctly bound, unauthorized routes block. Schema passes invariant tests.
+- **Definition of Done:** Infrastructure-as-code complete. Empty database passes security audits.
 
-## Phase 3: Head Office Control (Finance, CEO, Shark AI)
-- **Focus Scope:** `role_finance`, `role_ceo`, `role_investor`, `role_shark` mapped directly to `build_loc_fin.py` (Finance context), `build_ceo_inv.py`, `build_admin_shark.py`.
-- **Target Audience:** High-level corporate validation and overarching anomaly sweeps.
-- **Components Required:**
-  1. `FinanceLedgerBoard` (Double-entry raw aggregation mapped to COA)
-  2. `PaymentRunEngine` (Batch clearing AR/AP outstanding flags)
-  3. `CEOHealthPulse` (Aggregated high-order charts reading direct from materialized views)
-  4. `SharkAIEngine` (Cloud Function chron job analyzing standard deviations on yield/expense logic to flag limits automatically)
-- **Definition of Done (DoD 3):** Finance executes a multi-trip Batch Settlement Payment correctly zeroing AR/AP balances against Master BCA Node. Shark successfully outputs a fraud flag into the dashboard.
+### Phase 1: Boat Operator MVP
+- **Focus:** Implementation of `boat_*` screens. End-to-end trips, offline caching, receipt printing (Bluetooth), immutable ledger updates for catch, expense, and advances.
+- **Entry Criteria:** Phase 0 Safety Foundation locked.
+- **Exit Criteria:** Boat operator can conduct a full simulated trip offline, sync to cloud, and close session with zero reconciliation errors.
+- **Definition of Done:** 8 boat screens functional. Integration tests pass. 100% test coverage on wallet invariants.
 
-## Security & offline Synchronization Method
-We must operate using **Event-Sourced Sub-Transactions** mapped locally using `idempotency_keys` triggered by UI button clicks. A wallet balance is calculated by aggregating these events, *never* blindly overwritten.
+### Phase 2: Factory + Cold Storage + Office
+- **Focus:** Receiving downstream data from boats. Batch processing, yield calculations, inter-unit transfers, cold storage inventory checks. Payables workflow in Office.
+- **Entry Criteria:** Phase 1 Boat MVP deployed in production test environment.
+- **Exit Criteria:** Full product lifecycle (catch → factory → storage → sale) complete.
+- **Definition of Done:** All intra-company transfers execute cleanly with the two-phase commit pattern.
 
-## Top 15 Risks & Mitigations
-1. **Network Disconnects during Write**: Handled via Firestore Offline Persistence limits.
-2. **Double-Click Submissions**: Blocked logically via globally-unique Idempotency UUID generation.
-3. **Negative Wallets Flow**: UI bounds limits checks; backend fails gracefully if `available_balance < req_amount` upon sync replay.
-4. **App Update Desync**: Handled via forced reload on version mismatch token fetch.
-5. **Unauthorized Node Access**: Bound tightly via Firestore Matrix Rules (Admin hard-bound contexts).
-6. **Data Sprawl**: Subcollections used logically `locations/{locId}/units/{unitId}/trips/{tripId}`. 
-7. **Cross-Shift Overlaps**: Strict `shift_status: "CLOSED"` flags blocking trailing document additions.
-8. **Malicious Date Overrides**: Stamped server-side via `FieldValue.serverTimestamp()`.
-9. **Role Escalation**: Hard-coded mappings within JWT claims synced via Firebase Auth.
-10. **Cloud Function Cold Starts**: Minimal modularization to ensure fast boot.
-11. **Print Inconsistencies**: Forced CSS rules using `@media print` mimicking exactly the mockup bounds.
-12. **Master Data Sync Mismatch**: Locales cache SKUs upon successful boot/network handshake. 
-13. **Currency Conversion Creep**: All mathematical logic restricted strictly to Integers (`Rp`).
-14. **Yield Exploit Formatting**: Bounds mapping checking if raw input > limit output, failing transaction mathematically if invalid.
-15. **Shark AI Hallucination**: Shark AI triggers *flags*, but never silent overrides (Requires human Loc Mgr override input).
+### Phase 3: Finance + CEO + Investor + Shark
+- **Focus:** Read-heavy validation, reporting, aggregated dashboards, Shark AI anomaly detection.
+- **Entry Criteria:** Phase 2 operations generating synthetic data successfully.
+- **Exit Criteria:** Analytics match raw event sum perfectly. Shark AI successfully flags predefined fraud test cases.
+- **Definition of Done:** System deployed to production, fully audited.
+
+## Approval Gates
+Each phase requires manual authorization from the Project Lead before the next phase's tasks are initiated. No backend implementations for a subsequent phase may begin prior to the explicit sign-off of the current phase.
