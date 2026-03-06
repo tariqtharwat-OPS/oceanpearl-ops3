@@ -14,9 +14,9 @@ Wallet balances are strictly derived from an immutable stream of event transacti
 - The snapshot mathematically seals the balance up to a specific `seq_num`. Future recalculations only aggregate events that occurred *after* the latest snapshot.
 
 ## Idempotency Strategy
-- **Duplicate Prevention:** Every `WalletEvent` requires a client-generated UUIDv4 (`eventId`). Firestore rejects duplicates natively.
+- **Duplicate Prevention:** Every `WalletEvent` requires a cryptographically secure idempotency key. The structure MUST be `eventId = HMAC(secret, payload_hash + nonce)` to prevent client-side guessing or brute-forcing. Firestore rejects duplicates of this key natively.
 - **Zombie Retries:** A strict expiry window is enforced. An offline device returning after weeks cannot submit a zombie transaction without admin review.
-- **Replay Protection:** The idempotency key is cryptographically bound to a hash of the payload integrity. If the payload is tampered with on retry, it yields a mismatched signature and is hard-rejected.
+- **Replay Protection:** The idempotency key is cryptographically bound to the payload hash. If the payload is tampered with on retry or middle-man interception, the HMAC validation fails and the event is hard-rejected.
 
 ## Two-Phase Transfer Logic
 Transfers between physical entities are strictly two-phase to reflect physical cash in transit:

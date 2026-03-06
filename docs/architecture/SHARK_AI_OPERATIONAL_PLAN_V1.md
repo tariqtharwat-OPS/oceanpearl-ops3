@@ -37,4 +37,4 @@ Implementable directly out of the box using structured few-shot prompting and st
 - **Expense Range Warnings:** Real-time flag comparing current expense input against trailing 30-day average for that Boat.
 - **Yield Deviation Warnings:** Flags mathematically improbable batch processing outcomes.
 - **Sync-Health Warnings:** Dashboard highlight if a boat has been active but offline > 48 hours.
-- **Duplicate Pattern Detection:** Highlights structurally similar expenses (amount + vendor) across different trips that bypassed standard idempotency.
+- **Duplicate Pattern Detection:** Highlights structurally similar expenses (amount + vendor) across different trips that bypassed standard idempotency (where `eventId = HMAC(secret, payload_hash + nonce)` was properly applied but the user physically performed a double entry).
