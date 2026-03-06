@@ -15,21 +15,21 @@ function enforceQueryLimits(collection, params = {}) {
     const constrainedLimit = Math.min(limit, MAX_LIMIT);
 
     // 2. Collection specific strictly enforced rules
-    if (collection === "v3_ledger_entries") {
+    if (collection === "wallet_events") {
         const LEDGER_MAX = 5000;
         if (limit > LEDGER_MAX) {
             throw new HttpsError("failed-precondition", "QUERY_GUARD_VIOLATION: Ledger scan exceeds 5000 limit.");
         }
     }
 
-    if (collection === "v3_trace_events") {
+    if (collection === "audit_logs") {
         const TRACE_MAX = 2000;
         if (limit > TRACE_MAX) {
             throw new HttpsError("failed-precondition", "QUERY_GUARD_VIOLATION: Trace scan exceeds 2000 limit.");
         }
     }
 
-    if (collection === "v3_shark_alerts") {
+    if (collection === "audit_logs") {
         const SHARK_MAX = 1000;
         if (limit > SHARK_MAX) {
             throw new HttpsError("failed-precondition", "QUERY_GUARD_VIOLATION: Alert scan exceeds 1000 limit.");

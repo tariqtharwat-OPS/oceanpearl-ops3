@@ -28,7 +28,7 @@ async function recordAlerts(transaction, entryId, entry, alerts) {
 
   alerts.forEach(a => {
     const alertId = `${entryId}__${a.code}`;
-    const alertRef = db.collection("v3_shark_alerts").doc(alertId);
+    const alertRef = db.collection("audit_logs").doc(alertId);
 
     transaction.set(alertRef, {
       ...a,
@@ -51,7 +51,7 @@ async function recordAlerts(transaction, entryId, entry, alerts) {
   // Update Risk Model
   const locationId = entry.locationId || "UNKNOWN";
   const unitId = entry.unitId || "UNKNOWN";
-  const riskRef = db.collection("v3_shark_location_risk").doc(`${locationId}__${unitId}`);
+  const riskRef = db.collection("audit_logs").doc(`${locationId}__${unitId}`);
 
   let high = 0, medium = 0, low = 0, totalScore = 0;
   alerts.forEach(a => {
@@ -79,13 +79,13 @@ async function recordAlerts(transaction, entryId, entry, alerts) {
  * 2. REPEATED_CASH_PATTERN
  * 3. MARGIN_ANOMALY (if entry is REVENUE/COGS)
  */
-exports.processLedgerEvent = onDocumentCreated("v3_ledger_entries/{entryId}", async (event) => {
+exports.processLedgerEvent = onDocumentCreated("wallet_events/{entryId}", async (event) => {
   const snap = event.data;
   if (!snap) return;
   const entry = snap.data();
   const entryId = snap.id;
 
-  const processedRef = db.collection("v3_shark_processed_entries").doc(entryId);
+  const processedRef = db.collection("audit_logs").doc(entryId);
 
   await db.runTransaction(async (transaction) => {
     const pSnap = await transaction.get(processedRef);
@@ -100,7 +100,7 @@ exports.processLedgerEvent = onDocumentCreated("v3_ledger_entries/{entryId}", as
     // 2. REPEATED_CASH_PATTERN (Cash per hour check)
     if (entry.accountCategory === "CASH") {
       const oneHourAgo = new Date(Date.now() - 3600000).toISOString();
-      const cashSnap = await db.collection("v3_ledger_entries")
+      const cashSnap = await db.collection("wallet_events")
         .where("locationId", "==", entry.locationId)
         .where("accountCategory", "==", "CASH")
         .where("createdAt", ">=", Timestamp.fromDate(new Date(oneHourAgo)))
@@ -114,7 +114,7 @@ exports.processLedgerEvent = onDocumentCreated("v3_ledger_entries/{entryId}", as
     // 3. MARGIN_ANOMALY
     if (entry.accountCategory === "REVENUE" || entry.accountCategory === "COGS") {
       // Need transaction siblings
-      const sibSnap = await db.collection("v3_ledger_entries")
+      const sibSnap = await db.collection("wallet_events")
         .where("transactionId", "==", entry.transactionId)
         .get();
       const siblings = sibSnap.docs.map(d => d.data());
@@ -138,7 +138,7 @@ exports.processLedgerEvent = onDocumentCreated("v3_ledger_entries/{entryId}", as
  * Trigger: processTraceEvent
  * Logic: YIELD_ANOMALY
  */
-exports.processTraceEvent = onDocumentCreated("v3_trace_events/{eventId}", async (event) => {
+exports.processTraceEvent = onDocumentCreated("audit_logs/{eventId}", async (event) => {
   const snap = event.data;
   if (!snap) return;
   const trace = snap.data();
@@ -146,7 +146,7 @@ exports.processTraceEvent = onDocumentCreated("v3_trace_events/{eventId}", async
 
   if (trace.type !== "PRODUCTION") return;
 
-  const processedRef = db.collection("v3_shark_processed_trace").doc(eventId);
+  const processedRef = db.collection("audit_logs").doc(eventId);
 
   await db.runTransaction(async (transaction) => {
     const pSnap = await transaction.get(processedRef);
@@ -190,7 +190,7 @@ exports.closeSharkAlert = onCall(async (request) => {
     throw new HttpsError("invalid-argument", "resolutionNote must be at least 10 chars.");
   }
 
-  const ref = db.collection("v3_shark_alerts").doc(alertId);
+  const ref = db.collection("audit_logs").doc(alertId);
   return await db.runTransaction(async (transaction) => {
     const snap = await transaction.get(ref);
     if (!snap.exists) throw new HttpsError("not-found", "Alert not found.");
@@ -222,7 +222,7 @@ exports.listSharkAlerts = onCall(async (request) => {
   requireLocationScope(user, locationId);
   requireUnitScope(user, unitId);
 
-  let q = db.collection("v3_shark_alerts");
+  let q = db.collection("audit_logs");
   if (locationId) q = q.where("locationId", "==", locationId);
   if (unitId) q = q.where("unitId", "==", unitId);
   if (status) q = q.where("status", "==", status);
@@ -230,7 +230,7 @@ exports.listSharkAlerts = onCall(async (request) => {
   q = q.orderBy("openedAt", "desc").limit(Math.min(limit, 100));
 
   if (startAfterId) {
-    const lastDoc = await db.collection("v3_shark_alerts").doc(startAfterId).get();
+    const lastDoc = await db.collection("audit_logs").doc(startAfterId).get();
     if (lastDoc.exists) q = q.startAfter(lastDoc);
   }
 
@@ -264,7 +264,7 @@ exports.getRiskSummary = onCall(async (request) => {
   requireUnitScope(user, unitId);
 
   const riskId = `${locationId || "UNKNOWN"}__${unitId || "UNKNOWN"}`;
-  const snap = await db.collection("v3_shark_location_risk").doc(riskId).get();
+  const snap = await db.collection("audit_logs").doc(riskId).get();
 
   if (!snap.exists) {
     return { totalScore: 0, highSeverityCount: 0, status: "NO_DATA" };
@@ -288,7 +288,7 @@ exports.getTopRiskLocations = onCall(async (request) => {
   const user = await getUserProfile(uid);
   requireRole(user, ["admin", "ceo", "finance_officer", "shark"]);
 
-  const q = db.collection("v3_shark_location_risk")
+  const q = db.collection("audit_logs")
     .orderBy("totalScore", "desc")
     .limit(10);
 

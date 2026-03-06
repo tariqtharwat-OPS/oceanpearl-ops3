@@ -15,14 +15,14 @@ exports.nightlyBalanceIntegrityMonitor = onSchedule("0 1 * * *", async (event) =
     logger.info("Starting Nightly Balance Integrity Check", { module: "MONITOR", action: "BALANCE_CHECK" });
 
     // Sample: Get 5 accounts
-    const shards = await db.collection("v3_account_balance_shards").limit(5).get();
+    const shards = await db.collection("wallet_events").limit(5).get();
 
     for (const shardDoc of shards.docs) {
         const d = shardDoc.data();
         const { accountId, locationId, unitId } = d;
 
         // Sum shards for this specific account scope
-        const allShards = await db.collection("v3_account_balance_shards")
+        const allShards = await db.collection("wallet_events")
             .where("accountId", "==", accountId)
             .where("locationId", "==", locationId)
             .where("unitId", "==", unitId)
@@ -32,7 +32,7 @@ exports.nightlyBalanceIntegrityMonitor = onSchedule("0 1 * * *", async (event) =
         allShards.forEach(s => shardSum += Number(s.data().balance || 0));
 
         // Aggregate ledger (Note: this is a scan, but bounded by monitor frequency and sampling)
-        const ledgerSnap = await db.collection("v3_ledger_entries")
+        const ledgerSnap = await db.collection("wallet_events")
             .where("accountId", "==", accountId)
             .where("locationId", "==", locationId)
             .where("unitId", "==", unitId)
@@ -48,7 +48,7 @@ exports.nightlyBalanceIntegrityMonitor = onSchedule("0 1 * * *", async (event) =
 
         if (shardSum !== ledgerSum) {
             const incidentId = `DRIFT_${accountId}_${Date.now()}`;
-            await db.collection("v3_incidents").doc(incidentId).set({
+            await db.collection("audit_logs").doc(incidentId).set({
                 incidentId,
                 type: "BALANCE_DRIFT",
                 severity: "HIGH",
@@ -74,7 +74,7 @@ exports.nightlyLedgerChainMonitor = onSchedule("0 2 * * *", async (event) => {
     logger.info("Starting Nightly Ledger Chain Integrity Check", { module: "MONITOR", action: "HASH_VERIFY" });
 
     // Sample 3 accounts that have recent activity
-    const recentEntries = await db.collection("v3_ledger_entries")
+    const recentEntries = await db.collection("wallet_events")
         .orderBy("createdAt", "desc")
         .limit(100)
         .get();
@@ -87,7 +87,7 @@ exports.nightlyLedgerChainMonitor = onSchedule("0 2 * * *", async (event) => {
 
     for (const aid of accountSample) {
         // We reuse the verify logic here internally
-        let q = db.collection("v3_ledger_entries")
+        let q = db.collection("wallet_events")
             .where("accountId", "==", aid)
             .orderBy("createdAt", "asc")
             .limit(100); // Check last 100 in chain
@@ -107,7 +107,7 @@ exports.nightlyLedgerChainMonitor = onSchedule("0 2 * * *", async (event) => {
 
             if (e.entryHash !== reHash || e.previousHash !== lastHash) {
                 const incidentId = `TAMPER_${aid}_${Date.now()}`;
-                await db.collection("v3_incidents").doc(incidentId).set({
+                await db.collection("audit_logs").doc(incidentId).set({
                     incidentId,
                     type: "LEDGER_TAMPER",
                     severity: "CRITICAL",
@@ -129,7 +129,7 @@ exports.nightlyLedgerChainMonitor = onSchedule("0 2 * * *", async (event) => {
  */
 exports.weeklyCostMonitor = onSchedule("0 3 * * 0", async (event) => {
     const counts = {};
-    const cols = ["v3_ledger_entries", "v3_trace_events", "v3_ops_dedup", "v3_shark_alerts"];
+    const cols = ["wallet_events", "audit_logs", "v3_ops_dedup", "audit_logs"];
 
     for (const col of cols) {
         const snap = await db.collection(col).count().get();

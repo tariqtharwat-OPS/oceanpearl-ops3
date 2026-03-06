@@ -29,7 +29,7 @@ async function getInventoryUpdatePayload({ locationId, unitId, skuId, deltaQtyKg
   if (!transaction) throw new Error("Inventory update requires an active transaction.");
 
   const docId = `${locationId}__${unitId}__${skuId}`;
-  const ref = db.collection("v3_inventory_valuations").doc(docId);
+  const ref = db.collection("inventory_events").doc(docId);
 
   const snap = await transaction.get(ref);
   const current = snap.exists ? snap.data() : { qtyKg: 0, avgCostIDR: 0 };
@@ -89,7 +89,7 @@ exports.getInventoryValuation = onCall(async (request) => {
   requireUnitScope(user, unitId);
 
   const docId = `${locationId}__${unitId}__${skuId}`;
-  const snap = await db.collection("v3_inventory_valuations").doc(docId).get();
+  const snap = await db.collection("inventory_events").doc(docId).get();
 
   if (!snap.exists) {
     return { locationId, unitId, skuId, qtyKg: 0, avgCostIDR: 0 };
@@ -120,7 +120,7 @@ exports.listInventoryValuations = onCall(async (request) => {
   requireLocationScope(user, locationId);
   requireUnitScope(user, unitId);
 
-  const q = db.collection("v3_inventory_valuations")
+  const q = db.collection("inventory_events")
     .where("locationId", "==", locationId)
     .where("unitId", "==", unitId)
     .limit(Math.min(Number(limit || 200), 500));

@@ -3,9 +3,9 @@
  *
  * All business events flow through workflows.
  * Workflows are the ONLY approved path to mutate:
- *  - v3_ledger_entries (via internal ledger helper)
- *  - v3_inventory_valuations (via internal inventory helper)
- *  - v3_trace_events / v3_batches (traceability)
+ *  - wallet_events (via internal ledger helper)
+ *  - inventory_events (via internal inventory helper)
+ *  - audit_logs / documents (traceability)
  */
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
@@ -36,7 +36,7 @@ function requirePositiveNumber(v, name) {
 }
 
 async function createTraceEvent(transaction, event) {
-  const ref = db.collection("v3_trace_events").doc();
+  const ref = db.collection("audit_logs").doc();
   transaction.set(ref, {
     ...event,
     createdAt: FieldValue.serverTimestamp(),
@@ -67,7 +67,7 @@ exports.recordReceiving = onCall(async (request) => {
 
     const batchId = idempotencyKey;
     const transactionId = `recv_${idempotencyKey}`;
-    const batchRef = db.collection("v3_batches").doc(batchId);
+    const batchRef = db.collection("documents").doc(batchId);
 
     // --- PHASE 1: ALL READS ---
     const bSnap = await transaction.get(batchRef);
@@ -152,7 +152,7 @@ exports.recordProduction = onCall(async (request) => {
     });
 
     // --- PHASE 1: ALL READS ---
-    const inputSnap = await transaction.get(db.collection("v3_batches").doc(inputBatchId));
+    const inputSnap = await transaction.get(db.collection("documents").doc(inputBatchId));
     if (!inputSnap.exists) throw new HttpsError("not-found", "inputBatch not found.");
     const input = inputSnap.data() || {};
     if (input.locationId !== locationId || input.unitId !== unitId) throw new HttpsError("permission-denied", "Batch scope mismatch.");
@@ -225,7 +225,7 @@ exports.recordProduction = onCall(async (request) => {
 
     // --- PHASE 2: ALL WRITES ---
     // Update Input Batch
-    transaction.set(db.collection("v3_batches").doc(inputBatchId), {
+    transaction.set(db.collection("documents").doc(inputBatchId), {
       status: "CONSUMED",
       consumedByTransactionId: transactionId,
       consumedAt: FieldValue.serverTimestamp()
@@ -237,7 +237,7 @@ exports.recordProduction = onCall(async (request) => {
       const outputBatchId = `${idempotencyKey}_${i + 1}`;
       createdBatchIds.push(outputBatchId);
 
-      transaction.set(db.collection("v3_batches").doc(outputBatchId), {
+      transaction.set(db.collection("documents").doc(outputBatchId), {
         batchId: outputBatchId,
         parentBatchId: inputBatchId,
         locationId,
@@ -296,7 +296,7 @@ exports.recordTransfer = onCall(async (request) => {
     requireUnitScope(user, fromUnitId);
 
     // --- PHASE 1: ALL READS ---
-    const bSnap = await transaction.get(db.collection("v3_batches").doc(batchId));
+    const bSnap = await transaction.get(db.collection("documents").doc(batchId));
     if (!bSnap.exists) throw new HttpsError("not-found", "batch not found.");
     const b = bSnap.data() || {};
     if (b.locationId !== fromLocationId || b.unitId !== fromUnitId) throw new HttpsError("failed-precondition", "Batch not at source scope.");
@@ -317,7 +317,7 @@ exports.recordTransfer = onCall(async (request) => {
     const ledgData = await getLedgerUpdatePayload({ transactionId, entries, createdByUid: uid }, transaction);
 
     // --- PHASE 2: ALL WRITES ---
-    transaction.set(db.collection("v3_batches").doc(batchId), {
+    transaction.set(db.collection("documents").doc(batchId), {
       locationId: toLocationId,
       unitId: toUnitId,
       lastTransfer: { fromLocationId, fromUnitId, toLocationId, toUnitId, at: FieldValue.serverTimestamp(), by: uid },
@@ -363,7 +363,7 @@ exports.recordTripExpense = onCall(async (request) => {
 
     await createLedgerEntriesInternal({ transactionId, entries, createdByUid: uid }, transaction);
 
-    const traceRef = db.collection("v3_trace_events").doc();
+    const traceRef = db.collection("audit_logs").doc();
     transaction.set(traceRef, {
       type: "TRIP_EXPENSE",
       locationId,
@@ -396,7 +396,7 @@ exports.recordTripStart = onCall(async (request) => {
     requireUnitScope(user, unitId);
 
     const tripId = `TRIP-${idempotencyKey}`;
-    const tripRef = db.collection("v3_trips").doc(tripId);
+    const tripRef = db.collection("documents").doc(tripId);
 
     transaction.set(tripRef, {
       tripId,
@@ -434,7 +434,7 @@ exports.recordSale = onCall(async (request) => {
     const revenue = Math.round(qty * price);
 
     // --- PHASE 1: ALL READS ---
-    const bSnap = await transaction.get(db.collection("v3_batches").doc(batchId));
+    const bSnap = await transaction.get(db.collection("documents").doc(batchId));
     if (!bSnap.exists) throw new HttpsError("not-found", "batch not found.");
     const b = bSnap.data();
     if (b.locationId !== locationId || b.unitId !== unitId) throw new HttpsError("permission-denied", "Batch scope mismatch.");
@@ -459,7 +459,7 @@ exports.recordSale = onCall(async (request) => {
     const ledgData = await getLedgerUpdatePayload({ transactionId, entries, createdByUid: uid }, transaction);
 
     // --- PHASE 2: ALL WRITES ---
-    transaction.set(db.collection("v3_batches").doc(batchId), {
+    transaction.set(db.collection("documents").doc(batchId), {
       status: "SOLD",
       sale: { customerName, pricePerKgIDR: price, qtyKg: qty, revenueIDR: revenue, transactionId, at: FieldValue.serverTimestamp() }
     }, { merge: true });
@@ -532,7 +532,7 @@ exports.recordWaste = onCall(async (request) => {
     requireUnitScope(user, unitId);
 
     const qty = requirePositiveNumber(qtyKg, "qtyKg");
-    const bRef = db.collection("v3_batches").doc(batchId);
+    const bRef = db.collection("documents").doc(batchId);
 
     // --- PHASE 1: ALL READS ---
     const bSnap = await transaction.get(bRef);
@@ -590,7 +590,7 @@ exports.recordAdjustment = onCall(async (request) => {
     const transactionId = `adj_${idempotencyKey}`;
 
     // --- PHASE 1: ALL READS ---
-    const invRef = db.collection("v3_inventory_valuations").doc(`${locationId}__${unitId}__${skuId}`);
+    const invRef = db.collection("inventory_events").doc(`${locationId}__${unitId}__${skuId}`);
     const invSnap = await transaction.get(invRef);
     const avgCost = invSnap.exists ? Number(invSnap.data().avgCostIDR || 0) : 0;
     const adjustValue = Math.abs(Math.round(delta * avgCost)) || 1;
@@ -632,7 +632,7 @@ exports.recordTripClearing = onCall(async (request) => {
   return await withIdempotency(idempotencyKey, uid, async (transaction) => {
     if (!locationId || !unitId || !tripId) throw new HttpsError("invalid-argument", "locationId, unitId, tripId required.");
 
-    const summaryRef = db.collection("v3_trip_summaries").doc(tripId);
+    const summaryRef = db.collection("documents").doc(tripId);
 
     // We only write a summary doc. No ledger mutation as per MCP.
     transaction.set(summaryRef, {

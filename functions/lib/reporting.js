@@ -33,7 +33,7 @@ exports.getTrialBalance = onCall(async (request) => {
     requireUnitScope(user, unitId);
 
     // Read shards ONLY
-    let q = db.collection("v3_account_balance_shards")
+    let q = db.collection("wallet_events")
         .where("locationId", "==", locationId || null)
         .where("unitId", "==", unitId || null);
 
@@ -47,7 +47,7 @@ exports.getTrialBalance = onCall(async (request) => {
         // We'll check if any ledger entries exist to determine if it's "missing" or just "zero"
         // But the requirement says "No fallback full scan". 
         // We use a cheap check for at least ONE ledger entry in this scope.
-        const ledgerCheck = await db.collection("v3_ledger_entries")
+        const ledgerCheck = await db.collection("wallet_events")
             .where("locationId", "==", locationId || null)
             .where("unitId", "==", unitId || null)
             .limit(1)
@@ -102,7 +102,7 @@ exports.getPnLSummary = onCall(async (request) => {
     requireUnitScope(user, unitId);
 
     // Read shards
-    let q = db.collection("v3_account_balance_shards")
+    let q = db.collection("wallet_events")
         .where("locationId", "==", locationId || null)
         .where("unitId", "==", unitId || null);
 
@@ -144,7 +144,7 @@ exports.getPnLSummary = onCall(async (request) => {
 
 /**
  * Callable: getInventorySummary
- * Unchanged as it already reads from a materialized view (v3_inventory_valuations).
+ * Unchanged as it already reads from a materialized view (inventory_events).
  */
 exports.getInventorySummary = onCall(async (request) => {
     const uid = requireAuth(request);
@@ -156,7 +156,7 @@ exports.getInventorySummary = onCall(async (request) => {
     requireLocationScope(user, locationId);
     requireUnitScope(user, unitId);
 
-    let q = db.collection("v3_inventory_valuations");
+    let q = db.collection("inventory_events");
     if (locationId) q = q.where("locationId", "==", locationId);
     if (unitId) q = q.where("unitId", "==", unitId);
 

@@ -26,7 +26,7 @@ exports.exportTrialBalanceCSV = onCall(async (request) => {
 
     const { locationId, unitId } = request.data || {};
 
-    const snap = await db.collection("v3_account_balance_shards")
+    const snap = await db.collection("wallet_events")
         .where("locationId", "==", locationId || null)
         .where("unitId", "==", unitId || null)
         .get();
@@ -74,16 +74,16 @@ exports.exportLedgerWindowCSV = onCall(async (request) => {
 
     const { locationId, unitId, limit = 1000, startAfterId } = request.data || {};
 
-    const constrainedLimit = enforceQueryLimits("v3_ledger_entries", { limit });
+    const constrainedLimit = enforceQueryLimits("wallet_events", { limit });
 
-    let q = db.collection("v3_ledger_entries")
+    let q = db.collection("wallet_events")
         .where("locationId", "==", locationId || null)
         .where("unitId", "==", unitId || null)
         .orderBy("createdAt", "desc")
         .limit(constrainedLimit);
 
     if (startAfterId) {
-        const lastDoc = await db.collection("v3_ledger_entries").doc(startAfterId).get();
+        const lastDoc = await db.collection("wallet_events").doc(startAfterId).get();
         if (lastDoc.exists) q = q.startAfter(lastDoc);
     }
 
@@ -122,7 +122,7 @@ exports.exportPnLSummaryJSON = onCall(async (request) => {
 
     const { locationId, unitId } = request.data || {};
 
-    const snap = await db.collection("v3_account_balance_shards")
+    const snap = await db.collection("wallet_events")
         .where("locationId", "==", locationId || null)
         .where("unitId", "==", unitId || null)
         .get();

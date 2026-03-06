@@ -6,8 +6,8 @@
  *  - Public HTTPS endpoint verifyBatchPublic for QR scan validation
  *
  * Data model:
- *  - v3_batches/{batchId}
- *  - v3_trace_events/{eventId}
+ *  - documents/{batchId}
+ *  - audit_logs/{eventId}
  *  - Optional: v3_trace_public_cache/{batchId} (not required)
  */
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
@@ -31,14 +31,14 @@ exports.getBatchTimeline = onCall(async (request) => {
   const { batchId, limit } = request.data || {};
   if (!batchId) throw new HttpsError("invalid-argument", "batchId required.");
 
-  const batchSnap = await db.collection("v3_batches").doc(batchId).get();
+  const batchSnap = await db.collection("documents").doc(batchId).get();
   if (!batchSnap.exists) throw new HttpsError("not-found", "batch not found.");
   const b = batchSnap.data() || {};
 
   requireLocationScope(user, b.locationId);
   requireUnitScope(user, b.unitId);
 
-  const q = db.collection("v3_trace_events")
+  const q = db.collection("audit_logs")
     .where("batchId", "in", [batchId])
     .orderBy("createdAt", "asc")
     .limit(Math.min(Number(limit || 200), 500));
@@ -66,7 +66,7 @@ exports.verifyBatchPublic = onRequest({ cors: true }, async (req, res) => {
       return;
     }
 
-    const batchSnap = await db.collection("v3_batches").doc(batchId).get();
+    const batchSnap = await db.collection("documents").doc(batchId).get();
     if (!batchSnap.exists) {
       res.status(404).json({ ok: false, error: "batch not found" });
       return;
@@ -87,7 +87,7 @@ exports.verifyBatchPublic = onRequest({ cors: true }, async (req, res) => {
 
     // Minimal event timeline (types + timestamps only)
     // transactionId removed for operational security
-    const evSnap = await db.collection("v3_trace_events")
+    const evSnap = await db.collection("audit_logs")
       .where("batchId", "==", batchId)
       .orderBy("createdAt", "asc")
       .limit(200)

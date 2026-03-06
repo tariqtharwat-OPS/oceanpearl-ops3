@@ -38,7 +38,7 @@ exports.readyz = onRequest(async (req, res) => {
 
         const [pSnap, sSnap, uSnap] = await Promise.all([
             db.collection("v3_financial_periods").limit(1).get(),
-            db.collection("v3_account_balance_shards").limit(1).get(),
+            db.collection("wallet_events").limit(1).get(),
             db.collection("v3_users").limit(1).get()
         ]);
 
@@ -76,7 +76,7 @@ exports.adminRunIntegrityChecks = onCall(async (request) => {
 
     // 2. Index Presence (Small query test)
     try {
-        await db.collection("v3_ledger_entries")
+        await db.collection("wallet_events")
             .where("accountId", "==", "CASH")
             .orderBy("createdAt", "desc")
             .limit(1)

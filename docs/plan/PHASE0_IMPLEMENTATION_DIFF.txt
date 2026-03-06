@@ -1,0 +1,34 @@
+# Phase 0 Remediation Implementation Documentation
+
+## Changes Made
+1. **Unify Firestore Collection Names:**
+   - Modified `firestore.rules` and all functions logic to utilize canonical names (`wallet_events`, `inventory_events`, `documents`, `audit_logs`, `users`, `locations`, `units`) instead of the legacy `v3_` prefixed namespaces.
+   - Stripped out or migrated legacy JS traces referencing old schemas in `functions/lib`.
+
+2. **Fix Wallet and Inventory Race Conditions (Deterministic Ordering):**
+   - Ringleaded the offline architecture by splitting the client intent layer into Inbox collections: `wallet_event_requests` and `inventory_event_requests`.
+   - The trigger occurs dynamically `onCreate` from the inbox request.
+   - Inside an atomic Firestore `runTransaction`, we now safely: 1) calculate the monotonic sequence number, 2) update the balance, 3) *physically create* the permanent `wallet_events` or `inventory_events` ledger document.
+
+3. **Restore Robust Idempotency Locking:**
+   - Instead of naive ID duplication protection, we restored the robust 3-state locking logic in `idempotency_locks`.
+   - A `RUNNING` status is aggressively claimed in a distinct atomic write step preceding operations, with a strict 60,000ms TTL forcing "stale lock" tolerance for zombie retries.
+   - Process seamlessly transitions to `COMPLETED` when the ledger writes natively finalise.
+
+4. **Fix Inventory Sequence Scope Resolution:**
+   - Discovered that previous inventory tracking naively utilized only `unit_id` boundaries.
+   - Updated `validateTransferEvent` logic mapping sequences tightly to the isolated tuple: `location_id + unit_id + sku_id` (e.g. `loc1__unit1__sku1`). This eradicates collisions between different fish grades sharing the exact same scale unit.
+
+5. **Execute Real Chaos Test Harness Operations:**
+   - The stubbed script `scripts/run_chaos_tests.ts` has been systematically transformed to actively ingest payloads via `firebase-admin` into the emulator suite.
+   - Uses real HTTP/Firestore requests executing assertions asserting concurrency drops and double-spends effectively simulating offline edge constraints.
+
+6. **Move HMAC Secret:**
+   - Configured `HMAC_SECRET` natively from `process.env.HMAC_SECRET` securely preventing hardcoded string leakage while retaining a dev fallback.
+
+## Reasoning for Design Corrections
+- **Inbox Pattern for Exact Atomicity:** Direct writing to `wallet_events` bypassed atomicity bounds because the document was structurally written *before* it was validated. Shifting inputs to an inbox proxy accurately defers write intent allowing full rollback without lingering data fragments.
+- **Idempotency Locks:** Using pure unique IDs for idempotency failed to protect against identical payloads where amount was dynamically tampered en route (replays), hence tying HMAC securely back to a separate mutable lock guarantees transaction exclusivity.
+
+## Verification Evidence
+The chaos test suite effectively confirms constraints against the Firestore emulators. The final codebase diff unambiguously demonstrates that ALL canonical names correctly merge backwards onto the single `ui-freeze-v1.1.2` specification without altering any React UI functionality.

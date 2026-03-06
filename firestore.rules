@@ -14,7 +14,7 @@ service cloud.firestore {
 
     match /users/{userId} {
       allow read: if isAuth() && request.auth.uid == userId;
-      allow write: if false; // Deny mutations from client
+      allow write: if false; 
     }
 
     match /locations/{locationId} {
@@ -27,16 +27,40 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Inbox collections for offline sync
+    match /wallet_event_requests/{requestId} {
+      allow create: if isAuth() && matchesScope(request.resource.data);
+      allow read, update, delete: if false;
+    }
+
+    match /inventory_event_requests/{requestId} {
+      allow create: if isAuth() && matchesScope(request.resource.data);
+      allow read, update, delete: if false;
+    }
+
+    // Ledger collections (written by Cloud Functions only)
     match /wallet_events/{eventId} {
       allow read: if isAuth() && matchesScope(resource.data);
-      allow create: if isAuth() && matchesScope(request.resource.data);
-      allow update, delete: if false; // Immutable ledger
+      allow write: if false; 
+    }
+
+    match /wallet_states/{stateId} {
+      allow read: if isAuth();
+      allow write: if false; 
     }
 
     match /inventory_events/{eventId} {
       allow read: if isAuth() && matchesScope(resource.data);
-      allow create: if isAuth() && matchesScope(request.resource.data);
-      allow update, delete: if false; // Immutable ledger
+      allow write: if false; 
+    }
+
+    match /inventory_states/{stateId} {
+      allow read: if isAuth();
+      allow write: if false; 
+    }
+
+    match /idempotency_locks/{lockId} {
+      allow read, write: if false; // System internal
     }
 
     match /documents/{docId} {
@@ -45,17 +69,16 @@ service cloud.firestore {
       allow update: if isAuth() 
                     && matchesScope(resource.data) 
                     && matchesScope(request.resource.data)
-                    && resource.data.status != 'posted'; // Cannot mutate posted documents
+                    && resource.data.status != 'posted'; 
       allow delete: if false;
     }
 
     match /audit_logs/{logId} {
       allow read: if isAuth() && matchesScope(resource.data);
       allow create: if isAuth() && matchesScope(request.resource.data);
-      allow update, delete: if false; // Audit logs must not be deleted
+      allow update, delete: if false; 
     }
 
-    // Default deny
     match /{document=**} {
       allow read, write: if false;
     }

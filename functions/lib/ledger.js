@@ -64,7 +64,7 @@ function updateBalanceShards(transaction, entries, transactionId) {
 
   Object.keys(accountTotals).forEach(key => {
     const t = accountTotals[key];
-    const shardRef = db.collection("v3_account_balance_shards")
+    const shardRef = db.collection("wallet_events")
       .doc(`${key}__${shardId}`);
 
     transaction.set(shardRef, {
@@ -128,7 +128,7 @@ async function getLedgerUpdatePayload({ transactionId, entries, createdByUid, en
   const headHashes = {};
   for (const sKey of scopes) {
     const [aid, lid, uid] = sKey.split("__");
-    let q = db.collection("v3_ledger_entries")
+    let q = db.collection("wallet_events")
       .where("accountId", "==", aid)
       .where("locationId", "==", lid === "null" ? null : lid)
       .where("unitId", "==", uid === "null" ? null : uid)
@@ -167,7 +167,7 @@ async function getLedgerUpdatePayload({ transactionId, entries, createdByUid, en
     const entryHash = crypto.createHash("sha256").update(hashPayload).digest("hex");
 
     writePayloads.push({
-      ref: db.collection("v3_ledger_entries").doc(),
+      ref: db.collection("wallet_events").doc(),
       payload: {
         ...entry,
         accountCategory: category,
@@ -212,7 +212,7 @@ exports.adminVerifyLedgerChain = onCall(async (request) => {
   const { accountId, locationId, unitId, limit = 1000 } = request.data || {};
   if (!accountId) throw new HttpsError("invalid-argument", "accountId required.");
 
-  const constrainedLimit = enforceQueryLimits("v3_ledger_entries", { limit });
+  const constrainedLimit = enforceQueryLimits("wallet_events", { limit });
 
   logger.info("Initializing ledger chain verification", {
     module: "LEDGER",
@@ -221,7 +221,7 @@ exports.adminVerifyLedgerChain = onCall(async (request) => {
     metadata: { accountId, limit: constrainedLimit }
   });
 
-  let q = db.collection("v3_ledger_entries")
+  let q = db.collection("wallet_events")
     .where("accountId", "==", accountId)
     .where("locationId", "==", locationId || null)
     .where("unitId", "==", unitId || null)
@@ -285,7 +285,7 @@ exports.getLedgerBalance = onCall(async (request) => {
   requireLocationScope(user, locationId);
   requireUnitScope(user, unitId);
 
-  let q = db.collection("v3_account_balance_shards")
+  let q = db.collection("wallet_events")
     .where("accountId", "==", accountId)
     .where("locationId", "==", locationId || null)
     .where("unitId", "==", unitId || null);
