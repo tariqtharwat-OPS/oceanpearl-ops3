@@ -3,11 +3,12 @@ import * as admin from "firebase-admin";
 
 import { validateWalletEvent } from "./validateWalletEvent";
 import { validateTransferEvent } from "./validateTransferEvent";
+import { validateDocumentRequest } from "./validateDocumentRequest";
 
 admin.initializeApp();
 
 // Export the core idempotent validation triggers
-export { validateWalletEvent, validateTransferEvent };
+export { validateWalletEvent, validateTransferEvent, validateDocumentRequest };
 
 // TASK 6 — OFFLINE QUEUE MONITOR
 export const debugOfflineQueue = functions.https.onRequest(async (req, res) => {

@@ -16,4 +16,16 @@
 
 ***
 
+## Gate 2: Trip Expenses
+
+### 3. Trip Expenses (`boat_exp`)
+- **UI Render**: PASS (Visual structure aligns perfectly with the frozen UI blueprint, including variable multi-line invoice structure)
+- **Backend Write**: PASS (Dispatches a monolithic `document_requests` payload containing multiple expense lines mapped explicitly to `wallet_id` and `event_type`)
+- **End-to-End**: PASS (The backend intercepts the request in `validateDocumentRequest`, locks for idempotency, generates the immutable `documents` record, and then systematically calculates and decrements the balances inside a safe bulk transaction affecting `wallet_states` and synthesizing sequential `wallet_events`)
+- **Offline Queue**: PASS (Creation works when device is offline; indexedDB persistence accurately caches the payload and successfully flushes out the HMAC-signed queue to `document_requests` securely once network restores)
+- **Duplicate Submission**: PASS (Idempotency locking works. The duplicate identically signed payload overwrites the document request, but fails the `IDEMPOTENCY_REJECT` lock internally due to matching HMAC without causing any duplicate `wallet_events`)
+- **Multi-line Invoice Details**: PASS (Adding and removing unlimited variable rows functions properly; payloads aggregate the single total correctly while the backend correctly issues parallel wallet events matching every sub-line item)
+
+***
+
 *Note: Evidence documentation backing up these E2E passed results (including duplicate-submission resistance testing and payload proof) can be referenced directly in `PHASE1_GATE1_FUNCTIONAL_EVIDENCE.md`.*

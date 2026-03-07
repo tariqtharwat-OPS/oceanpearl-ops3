@@ -66,5 +66,24 @@ export const firestoreWriterService = {
         await setDoc(docRef, documentToWrite);
 
         return { eventId: idempotency_key, nonce, payloadHash: payloadHashHex };
+    },
+
+    async writeDocumentRequest(payload: any) {
+        const payloadString = JSON.stringify(payload);
+        const payloadHashHex = await sha256(payloadString);
+        const nonce = crypto.randomUUID();
+
+        const idempotency_key = await generateHmacId(payloadHashHex, nonce);
+
+        const documentToWrite = {
+            ...payload,
+            idempotency_key,
+            nonce
+        };
+
+        const docRef = doc(db, 'document_requests', idempotency_key);
+        await setDoc(docRef, documentToWrite);
+
+        return { eventId: idempotency_key, nonce, payloadHash: payloadHashHex };
     }
 };

@@ -1,11 +1,12 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Topbar from '../components/Topbar';
-import Sidebar, { NavItem } from '../components/Sidebar';
-import { Anchor, Play, DollarSign, ArrowRightLeft, Lock, FilePlus2, ShoppingBag, ShoppingCart } from 'lucide-react';
+import Sidebar, { type NavItem } from '../components/Sidebar';
+import { Anchor, Play, DollarSign, ArrowRightLeft, Lock, ShoppingBag, ShoppingCart } from 'lucide-react';
 
 import TripStart from '../pages/boat/TripStart';
 import OpeningBalances from '../pages/boat/OpeningBalances';
+import TripExpenses from '../pages/boat/TripExpenses';
 
 const BoatOperatorLayout: React.FC = () => {
 
@@ -31,7 +32,7 @@ const BoatOperatorLayout: React.FC = () => {
                     <Routes>
                         <Route path="start" element={<TripStart />} />
                         <Route path="init" element={<OpeningBalances />} />
-                        <Route path="expenses" element={<div>3. Trip Expenses - Phase 1 Gate 2</div>} />
+                        <Route path="expenses" element={<TripExpenses />} />
                         <Route path="receive-own" element={<div>4. Receiv: Own Catch - Phase 1 Gate 3</div>} />
                         <Route path="receive-buy" element={<div>5. Receiv: Buy Fishermen - Phase 1 Gate 3</div>} />
                         <Route path="sales" element={<div>6. Boat Sales - Phase 1 Gate 4</div>} />

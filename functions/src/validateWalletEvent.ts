@@ -80,6 +80,9 @@ export const validateWalletEvent = functions.firestore
                     case "transfer_initiated":
                         delta = -data.amount;
                         break;
+                    case "trip_start":
+                        delta = 0;
+                        break;
                     default:
                         delta = 0;
                 }
