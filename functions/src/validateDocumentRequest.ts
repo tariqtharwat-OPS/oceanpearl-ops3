@@ -164,9 +164,9 @@ export const validateDocumentRequest = functions.firestore
                             invState.sequenceNumber += 1;
 
                             let delta = 0;
-                            if (["receive_own", "receive_buy", "transfer_received", "transfer_cancelled"].includes(line.event_type)) {
+                            if (["receive_own", "receive_buy", "transfer_received", "transfer_cancelled", "transformation_in"].includes(line.event_type)) {
                                 delta = line.amount;
-                            } else if (["transfer_initiated", "sale_out", "waste_out"].includes(line.event_type)) {
+                            } else if (["transfer_initiated", "sale_out", "waste_out", "transformation_out"].includes(line.event_type)) {
                                 delta = -line.amount;
                             }
 
