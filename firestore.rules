@@ -1,33 +1,51 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // HELPER FUNCTIONS
+    // ─────────────────────────────────────────────────────────────────────────
+
+    // Confirms the requesting user holds a valid Firebase Auth token.
     function isAuth() {
       return request.auth != null && request.auth.uid != null;
     }
-    
+
+    // Confirms the data being written or read belongs to the same
+    // company/location/unit as the authenticated user's custom claims.
+    // This is the primary scope enforcement guard.
     function matchesScope(data) {
-      return (data.company_id == request.auth.token.company_id)
+      return (data.company_id  == request.auth.token.company_id)
           && (data.location_id == request.auth.token.location_id)
-          && (data.unit_id == request.auth.token.unit_id);
+          && (data.unit_id     == request.auth.token.unit_id);
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // REFERENCE / CONFIGURATION COLLECTIONS (read-only for clients)
+    // ─────────────────────────────────────────────────────────────────────────
+
     match /users/{userId} {
-      allow read: if isAuth() && request.auth.uid == userId;
-      allow write: if false; 
+      allow read:  if isAuth() && request.auth.uid == userId;
+      allow write: if false;
     }
 
     match /locations/{locationId} {
-      allow read: if isAuth() && resource.data.location_id == request.auth.token.location_id;
+      allow read:  if isAuth() && resource.data.location_id == request.auth.token.location_id;
       allow write: if false;
     }
 
     match /units/{unitId} {
-      allow read: if isAuth() && resource.data.unit_id == request.auth.token.unit_id;
+      allow read:  if isAuth() && resource.data.unit_id == request.auth.token.unit_id;
       allow write: if false;
     }
 
-    // Inbox collections for offline sync
+    // ─────────────────────────────────────────────────────────────────────────
+    // INBOX COLLECTIONS (client write-once, backend read/delete)
+    // Clients may only CREATE a signed request into these inboxes.
+    // All other operations are strictly forbidden for clients.
+    // The backend Cloud Functions use the Admin SDK and bypass these rules.
+    // ─────────────────────────────────────────────────────────────────────────
+
     match /wallet_event_requests/{requestId} {
       allow create: if isAuth() && matchesScope(request.resource.data);
       allow read, update, delete: if false;
@@ -43,51 +61,107 @@ service cloud.firestore {
       allow read, update, delete: if false;
     }
 
-    // Ledger collections (written by Cloud Functions only)
-    match /wallet_events/{eventId} {
-      allow read: if isAuth() && matchesScope(resource.data);
-      allow write: if false; 
-    }
+    // ─────────────────────────────────────────────────────────────────────────
+    // IMMUTABLE LEDGER COLLECTIONS (backend write-only, scoped client read)
+    //
+    // SECURITY PRINCIPLE: These collections are the source of truth.
+    // They are written EXCLUSIVELY by Cloud Functions via the Admin SDK.
+    // Clients may ONLY read records that belong to their own scope.
+    // No client-side write path exists or is permitted.
+    // ─────────────────────────────────────────────────────────────────────────
 
-    match /wallet_states/{stateId} {
-      allow read: if isAuth();
-      allow write: if false; 
+    match /wallet_events/{eventId} {
+      allow read:  if isAuth() && matchesScope(resource.data);
+      allow write: if false;
     }
 
     match /inventory_events/{eventId} {
-      allow read: if isAuth() && matchesScope(resource.data);
-      allow write: if false; 
+      allow read:  if isAuth() && matchesScope(resource.data);
+      allow write: if false;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // STATE SNAPSHOT COLLECTIONS (backend write-only, scoped client read)
+    //
+    // SECURITY FIX: Previously these rules allowed ANY authenticated user to
+    // read ANY state document (allow read: if isAuth()). This has been
+    // corrected to enforce scope isolation, preventing an operator from one
+    // vessel from reading the financial or inventory state of another vessel.
+    //
+    // NOTE: wallet_states and inventory_states are keyed by a composite ID
+    // (e.g. "LOC__UNIT__SKU") that does not embed company_id. The scope check
+    // is therefore performed against the location_id and unit_id fields stored
+    // inside the document, which are set by the backend at write time.
+    // ─────────────────────────────────────────────────────────────────────────
+
+    match /wallet_states/{stateId} {
+      allow read:  if isAuth()
+                   && resource.data.location_id == request.auth.token.location_id
+                   && resource.data.unit_id     == request.auth.token.unit_id;
+      allow write: if false;
     }
 
     match /inventory_states/{stateId} {
-      allow read: if isAuth();
-      allow write: if false; 
+      allow read:  if isAuth()
+                   && resource.data.location_id == request.auth.token.location_id
+                   && resource.data.unit_id     == request.auth.token.unit_id;
+      allow write: if false;
     }
 
     match /trip_states/{tripId} {
-      allow read: if isAuth();
-      allow write: if false; 
+      allow read:  if isAuth()
+                   && resource.data.location_id == request.auth.token.location_id
+                   && resource.data.unit_id     == request.auth.token.unit_id;
+      allow write: if false;
     }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // IDEMPOTENCY LOCKS (fully internal — no client access)
+    // ─────────────────────────────────────────────────────────────────────────
 
     match /idempotency_locks/{lockId} {
-      allow read, write: if false; // System internal
+      allow read, write: if false;
     }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // DOCUMENTS COLLECTION (backend write-only, scoped client read)
+    //
+    // SECURITY FIX: Previously this collection allowed direct client-side
+    // creation and update. This has been fully removed.
+    //
+    // The ONLY legitimate write path for this collection is:
+    //   Client → document_requests inbox → validateDocumentRequest (Admin SDK)
+    //                                                       ↓
+    //                                            documents collection
+    //
+    // Allowing clients to write directly to this collection would bypass:
+    //   - HMAC payload integrity verification
+    //   - Idempotency locking
+    //   - Atomic wallet and inventory state updates
+    //   - Trip closure immutability enforcement
+    //   - Negative inventory and overdraft guards
+    //
+    // All write operations (create, update, delete) are therefore set to false.
+    // ─────────────────────────────────────────────────────────────────────────
 
     match /documents/{docId} {
-      allow read: if isAuth() && matchesScope(resource.data);
-      allow create: if isAuth() && matchesScope(request.resource.data);
-      allow update: if isAuth() 
-                    && matchesScope(resource.data) 
-                    && matchesScope(request.resource.data)
-                    && resource.data.status != 'posted'; 
-      allow delete: if false;
+      allow read:               if isAuth() && matchesScope(resource.data);
+      allow create, update, delete: if false;
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // AUDIT LOGS (append-only for clients within scope, no delete/update)
+    // ─────────────────────────────────────────────────────────────────────────
+
     match /audit_logs/{logId} {
-      allow read: if isAuth() && matchesScope(resource.data);
-      allow create: if isAuth() && matchesScope(request.resource.data);
-      allow update, delete: if false; 
+      allow read:           if isAuth() && matchesScope(resource.data);
+      allow create:         if isAuth() && matchesScope(request.resource.data);
+      allow update, delete: if false;
     }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // DEFAULT DENY — catches all unlisted collections
+    // ─────────────────────────────────────────────────────────────────────────
 
     match /{document=**} {
       allow read, write: if false;
