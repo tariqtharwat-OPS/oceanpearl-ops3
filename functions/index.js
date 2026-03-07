@@ -32,6 +32,9 @@ exports.health = require("./lib/health");
 exports.monitors = require("./lib/monitors");
 exports.enforcement = require("./admin/v3AdminEnforcement");
 
+// Core Idempotent Document Processor
+exports.validateDocumentRequest = require("./lib/documentTriggers").validateDocumentRequest;
+
 // Export Admin functions
 const { v3Bootstrap } = require("./admin/v3Bootstrap");
 const { v3SeedTestPack } = require("./admin/v3SeedTestPack");

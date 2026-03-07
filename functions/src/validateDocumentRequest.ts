@@ -90,11 +90,12 @@ export const validateDocumentRequest = functions.firestore
                         sequenceNumber: doc?.data()?.sequence_number || 0
                     });
                 }
-                const activeInventory = new Map<string, { currentBalance: number, sequenceNumber: number }>();
+                const activeInventory = new Map<string, { currentBalance: number, avgCost: number, sequenceNumber: number }>();
                 for (const scopeId of inventoryScopes) {
                     const doc = inventoryStateDocs.get(scopeId);
                     activeInventory.set(scopeId, {
                         currentBalance: doc?.data()?.current_balance || 0,
+                        avgCost: doc?.data()?.avg_cost || 0,
                         sequenceNumber: doc?.data()?.sequence_number || 0
                     });
                 }
@@ -112,6 +113,22 @@ export const validateDocumentRequest = functions.firestore
 
                 // 4. Generate Wallet & Inventory Events
                 if (lines && Array.isArray(lines)) {
+                    // Pre-calculate Transformation Value for Cost Basis Propagation
+                    let transformationTotalValue = 0;
+                    let transformationTotalInQty = 0;
+
+                    for (const line of lines) {
+                        if (line.event_type === "transformation_out") {
+                            const sid = `${line.location_id}__${line.unit_id}__${line.sku_id}`;
+                            const is = activeInventory.get(sid);
+                            if (is) transformationTotalValue += line.amount * is.avgCost;
+                        } else if (line.event_type === "transformation_in") {
+                            transformationTotalInQty += line.amount;
+                        }
+                    }
+
+                    const derivedTransformationCost = transformationTotalInQty > 0 ? (transformationTotalValue / transformationTotalInQty) : 0;
+
                     for (let i = 0; i < lines.length; i++) {
                         const line = lines[i];
                         const eventBaseId = `${expectedHmac}_L${i}`;
@@ -163,21 +180,43 @@ export const validateDocumentRequest = functions.firestore
 
                             invState.sequenceNumber += 1;
 
+                            // Calculate Value & Cost Basis Propagation
                             let delta = 0;
-                            if (["receive_own", "receive_buy", "transfer_received", "transfer_cancelled", "transformation_in"].includes(line.event_type)) {
+                            let costToApply = line.unit_cost || 0;
+
+                            if (["receive_own", "receive_buy", "transfer_received", "transfer_cancelled"].includes(line.event_type)) {
                                 delta = line.amount;
+
+                                // WAC (Weighted Average Cost) Calculation for inflow
+                                if (delta > 0) {
+                                    const oldVal = invState.currentBalance * invState.avgCost;
+                                    const newVal = delta * costToApply;
+                                    invState.avgCost = (oldVal + newVal) / (invState.currentBalance + delta);
+                                }
+                            } else if (line.event_type === "transformation_in") {
+                                delta = line.amount;
+                                costToApply = derivedTransformationCost;
+                                if (delta > 0) {
+                                    const oldVal = invState.currentBalance * invState.avgCost;
+                                    const newVal = delta * costToApply;
+                                    invState.avgCost = (oldVal + newVal) / (invState.currentBalance + delta);
+                                }
                             } else if (["transfer_initiated", "sale_out", "waste_out", "transformation_out"].includes(line.event_type)) {
                                 delta = -line.amount;
+                                costToApply = invState.avgCost; // Outflow always uses current avg cost
                             }
 
                             if (invState.currentBalance + delta < 0) {
-                                throw new Error("STOCK_DEFICIT: Cannot drop below zero.");
+                                throw new Error(`STOCK_DEFICIT: SKU ${line.sku_id} insufficient.`);
                             }
 
                             invState.currentBalance += delta;
+                            if (invState.currentBalance === 0) invState.avgCost = 0;
+
                             const eventRef = db.collection("inventory_events").doc(eventBaseId + "_I");
                             transaction.set(eventRef, {
                                 ...line,
+                                unit_cost: costToApply,
                                 parent_document_id: expectedHmac,
                                 sequence_number: invState.sequenceNumber,
                                 server_timestamp: admin.firestore.FieldValue.serverTimestamp()
@@ -205,6 +244,7 @@ export const validateDocumentRequest = functions.firestore
                         sku_id: skuId,
                         sequence_number: state.sequenceNumber,
                         current_balance: state.currentBalance,
+                        avg_cost: Math.round(state.avgCost * 100) / 100, // Round to 2 decimals
                         last_updated: admin.firestore.FieldValue.serverTimestamp()
                     }, { merge: true });
                 }
