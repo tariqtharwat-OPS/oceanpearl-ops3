@@ -81,4 +81,16 @@ This document tracks the verification status for all Boat Operator MVP screens a
 
 ***
 
-*Note: Functional evidence artifacts (logs, snapshots, payloads) are stored in the respective `PHASE1_GATEX_FUNCTIONAL_EVIDENCE.md` files.*
+## Full Trip Simulation (E2E)
+- **Status**: PASSED
+- **Test ID**: `TRIP-SIM-001`
+- **Workflow Continuity**: PASS (Start-to-Close sequence verified)
+- **Wallet Reconciliation**: PASS (Sum of events matches state document exactly)
+- **Inventory Reconciliation**: PASS (Stock balance matches physical expected weight)
+- **Offline Flush Integrity**: PASS (Offline events processed successfully after reconnect)
+- **Duplicate Prevention**: PASS (HMAC collisions safely rejected)
+- **Post-Closure Locking**: PASS (Events against closed trips are hard-rejected by backend)
+
+***
+
+*Note: Functional evidence artifacts (logs, snapshots, payloads) are stored in the respective `PHASE1_GATEX_FUNCTIONAL_EVIDENCE.md` files and `OPS3_FULL_TRIP_SIMULATION.md`.*

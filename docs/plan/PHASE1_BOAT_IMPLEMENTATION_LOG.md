@@ -38,6 +38,15 @@ This log tracks the engineering decisions, changes, and verification milestones 
   - **Automatic Remittance:** The `trip_closure` document logic triggers `transfer_initiated` events for BOTH cash (wallet) and fish (inventory), effectively clearing the boat's local ledger and moving assets to the Hub.
   - **Digital Attestation:** The "Lock Trip" action represents a high-integrity signature (HMAC) that seals the trip against post-hoc edits.
 - **Verification:**
-  - Detailed evidence of closure, remittance, and post-closure rejection documented in `PHASE1_GATE5_FUNCTIONAL_EVIDENCE.md`.
-  - Offline-to-Online flush verified using IndexedDB persistence logs.
+  - Detailed E2E evidence for closure, remittance, and immutability recorded in `docs/qa/PHASE1_GATE5_FUNCTIONAL_EVIDENCE.md`.
+  - Verified that duplicate closure attempts are rejected by the HMAC lock, preventing double-sweeping of funds.
+
+### Phase 1: Full Trip Simulation & Ledger Verification
+- **What changed:**
+  - Executed a comprehensive E2E simulation representing a full business day for a Boat Operator.
+  - Verified the complete asset lifecycle: Procurement (Opening Bal/Buy) -> Operations (Expense/Catch) -> Commercial (Sale) -> Settlement (Closure).
+- **Evidence:**
+  - `OPS3_FULL_TRIP_SIMULATION.md`: Step-by-step operator log.
+  - `OPS3_LEDGER_RECONCILIATION_REPORT.md`: Mathematical balance proof.
+  - `OPS3_BOAT_MVP_GO_NO_GO.md`: Readiness assessment.
 - **Blockers:** None in implementation. (Future phases will refine the AR ledgering of non-cash sales).
