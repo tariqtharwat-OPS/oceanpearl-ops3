@@ -59,3 +59,15 @@
   - Validated inventory balance updates in Firestore Emulator.
   - Validated settlement method logic: 'cash' triggers a parallel wallet event, 'ap' only triggers the inventory event (leaving the document as the source for future AP settling).
   - Verified offline behavior via local persistence flushing.
+
+### [Remediation] Phase 1 Gate 3 Remediation: Rules Fix + Malformed Payload Protection
+- **Root cause of Gate 3 failure:**
+  - Security gap: `document_requests` collection lacked explicit Firestore rules, relying on the default (deny-all) but preventing valid frontend writes.
+  - Backend fragility: `validateDocumentRequest` had a potential crash vector where missing `location_id` or `unit_id` on a line would cause a null-pointer error during inventory state lookup.
+- **Rule Fix:**
+  - Added `match /document_requests/{requestId}` to `firestore.rules` with `isAuth()` and `matchesScope()` checks consistent with other request inboxes.
+- **Backend Validation Fix:**
+  - Updated `validateDocumentRequest.ts` to explicitly check for all required fields in both wallet and inventory lines.
+  - Added `throw new Error("MALFORMED_PAYLOAD: ...")` for incomplete lines, ensuring the function rejects the request and updates the lock to `FAILED` instead of crashing.
+- **Verification evidence:**
+  - Proof of security rules, crash fixes, and regressions documented in `docs/qa/PHASE1_GATE3_REMEDIATION_PROOF.md`.

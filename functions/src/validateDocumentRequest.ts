@@ -107,8 +107,14 @@ export const validateDocumentRequest = functions.firestore
                         const eventBaseId = `${expectedHmac}_L${i}`;
 
                         // Wallet Event
-                        if (line.wallet_id && line.payment_amount && line.payment_event_type) {
-                            const walletState = activeWallets.get(line.wallet_id)!;
+                        if (line.wallet_id || line.payment_amount || line.payment_event_type) {
+                            if (!line.wallet_id || !line.payment_amount || !line.payment_event_type) {
+                                throw new Error("MALFORMED_PAYLOAD: Wallet line missing required fields (wallet_id, payment_amount, payment_event_type).");
+                            }
+
+                            const walletState = activeWallets.get(line.wallet_id);
+                            if (!walletState) throw new Error(`STATE_ERROR: Wallet ${line.wallet_id} not initialized in active map.`);
+
                             walletState.sequenceNumber += 1;
 
                             let delta = 0;
@@ -136,9 +142,15 @@ export const validateDocumentRequest = functions.firestore
                         }
 
                         // Inventory Event
-                        if (line.sku_id && line.amount && line.event_type) {
+                        if (line.sku_id || line.amount || line.event_type || line.location_id || line.unit_id) {
+                            if (!line.sku_id || !line.amount || !line.event_type || !line.location_id || !line.unit_id) {
+                                throw new Error("MALFORMED_PAYLOAD: Inventory line missing required fields (sku_id, amount, event_type, location_id, unit_id).");
+                            }
+
                             const scopeId = `${line.location_id}__${line.unit_id}__${line.sku_id}`;
-                            const invState = activeInventory.get(scopeId)!;
+                            const invState = activeInventory.get(scopeId);
+                            if (!invState) throw new Error(`STATE_ERROR: Inventory scope ${scopeId} not initialized in active map.`);
+
                             invState.sequenceNumber += 1;
 
                             let delta = 0;

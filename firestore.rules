@@ -38,6 +38,11 @@ service cloud.firestore {
       allow read, update, delete: if false;
     }
 
+    match /document_requests/{requestId} {
+      allow create: if isAuth() && matchesScope(request.resource.data);
+      allow read, update, delete: if false;
+    }
+
     // Ledger collections (written by Cloud Functions only)
     match /wallet_events/{eventId} {
       allow read: if isAuth() && matchesScope(resource.data);
