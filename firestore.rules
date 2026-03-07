@@ -64,6 +64,11 @@ service cloud.firestore {
       allow write: if false; 
     }
 
+    match /trip_states/{tripId} {
+      allow read: if isAuth();
+      allow write: if false; 
+    }
+
     match /idempotency_locks/{lockId} {
       allow read, write: if false; // System internal
     }

@@ -48,6 +48,21 @@
 
 ***
 
+## Gate 5: Trip Closure
+
+### 8. Close Trip & Settle (`boat_close`)
+- **UI Render Pass**: PASS (Visual structure aligns with blueprint, final audit and settlement tables displayed)
+- **Inbox Write Pass**: PASS (Writes `trip_closure` docs to `document_requests` inbox)
+- **Backend Processing Pass**: PASS (Cloud function handles `trip_closure` logic and remittance)
+- **Cash Remittance Pass**: PASS (Remaining wallet balance successfully remitted to hub treasury)
+- **Inventory Transfer Intent Pass**: PASS (Unsold stock marked as transfer-initiated back to hub)
+- **Closure Immutability Pass**: PASS (Subsequent requests for a closed trip are rejected with `TRIP_CLOSED` error)
+- **Offline Queue Pass**: PASS (Closure request survives offline/online transition)
+- **Duplicate Submission Pass**: PASS (HMAC idempotency holds for closure documents)
+- **Closure Print Pass**: PASS (A4 preview provides printable format for hub reconciliation)
+
+***
+
 ## Gate 4: Boat Sales
 
 ### 6. Boat Sales (`boat_sale`)

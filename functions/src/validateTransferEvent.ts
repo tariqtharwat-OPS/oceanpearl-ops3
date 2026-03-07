@@ -94,6 +94,16 @@ export const validateTransferEvent = functions.firestore
 
         try {
             await db.runTransaction(async (transaction) => {
+                // Pre-fetch trip status to enforce immutability
+                const tripId = data.trip_id;
+                if (tripId) {
+                    const tripStateRef = db.collection("trip_states").doc(tripId);
+                    const tripStateDoc = await transaction.get(tripStateRef);
+                    if (tripStateDoc.exists && tripStateDoc.data()?.status === "closed") {
+                        throw new Error("TRIP_CLOSED: Cannot post further events to a closed trip.");
+                    }
+                }
+
                 // Determine correctly scoped sequence counter: location_id + unit_id + sku_id
                 if (!data.location_id || !data.unit_id || !data.sku_id) {
                     throw new Error("Missing required scope variables: location_id, unit_id, sku_id");

@@ -54,6 +54,16 @@ export const validateWalletEvent = functions.firestore
         try {
             // 3. Main Transaction (Sequence & Ledger)
             await db.runTransaction(async (transaction) => {
+                // Pre-fetch trip status to enforce immutability
+                const tripId = data.trip_id;
+                if (tripId) {
+                    const tripStateRef = db.collection("trip_states").doc(tripId);
+                    const tripStateDoc = await transaction.get(tripStateRef);
+                    if (tripStateDoc.exists && tripStateDoc.data()?.status === "closed") {
+                        throw new Error("TRIP_CLOSED: Cannot post further events to a closed trip.");
+                    }
+                }
+
                 const walletStateRef = db.collection("wallet_states").doc(walletId);
                 const walletStateDoc = await transaction.get(walletStateRef);
 

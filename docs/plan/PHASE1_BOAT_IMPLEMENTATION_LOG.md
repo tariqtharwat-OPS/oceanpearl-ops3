@@ -85,3 +85,20 @@
 - **Verification:**
   - Evidence of dual-impact vs single-impact recorded in `docs/qa/PHASE1_GATE4_FUNCTIONAL_EVIDENCE.md`.
   - Confirmed `MALFORMED_PAYLOAD` protections (added in G3 remediation) correctly safeguard the sale lines.
+
+### Phase 1 Gate 5: Trip Closure + Remittance + Settlement Locking
+- **What changed:**
+  - Implemented `TripClosure.tsx` (`boat_close`) featuring aggregate summaries and crew settlement tables.
+  - Added trip-locking logic in `validateDocumentRequest.ts`:
+    - Processing a `trip_closure` document now updates the `trip_states` record for that `trip_id` to `status: "closed"`.
+  - Enforced Immutability:
+    - Updated `validateDocumentRequest`, `validateWalletEvent`, and `validateTransferEvent` to check for `trip_id` status before processing. Rejects if closed.
+  - Remittance Handling:
+    - The `trip_closure` document triggers `transfer_initiated` events for remaining cash and inventory, effectively sweeping boat assets back to the Hub location.
+  - Integrated `TripClosure` into `BoatOperatorLayout.tsx`.
+- **Payload Design:**
+  - Document Type: `trip_closure`.
+  - Contains multi-segment lines representing both wallet and inventory transfers. This ensures the entire remittance package is atomic and tied to the closure proof.
+- **Verification:**
+  - E2E evidence for closure, remittance, and immutability recorded in `docs/qa/PHASE1_GATE5_FUNCTIONAL_EVIDENCE.md`.
+  - Verified that duplicate closure attempts are rejected by the HMAC lock, preventing double-sweeping of funds.

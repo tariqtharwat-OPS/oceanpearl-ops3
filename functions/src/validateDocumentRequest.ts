@@ -57,6 +57,16 @@ export const validateDocumentRequest = functions.firestore
                 const walletIds = [...new Set(lines ? lines.map((l: any) => l.wallet_id).filter(Boolean) : [])] as string[];
                 const inventoryScopes = [...new Set(lines ? lines.map((l: any) => l.sku_id && l.location_id && l.unit_id ? `${l.location_id}__${l.unit_id}__${l.sku_id}` : null).filter(Boolean) : [])] as string[];
 
+                // Pre-fetch trip status to enforce immutability
+                const tripId = payloadData.trip_id;
+                if (tripId) {
+                    const tripStateRef = db.collection("trip_states").doc(tripId);
+                    const tripStateDoc = await transaction.get(tripStateRef);
+                    if (tripStateDoc.exists && tripStateDoc.data()?.status === "closed") {
+                        throw new Error("TRIP_CLOSED: Cannot post further events to a closed trip.");
+                    }
+                }
+
                 const walletStateDocs = new Map<string, admin.firestore.DocumentSnapshot>();
                 const inventoryStateDocs = new Map<string, admin.firestore.DocumentSnapshot>();
 
@@ -196,6 +206,16 @@ export const validateDocumentRequest = functions.firestore
                         sequence_number: state.sequenceNumber,
                         current_balance: state.currentBalance,
                         last_updated: admin.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+                }
+
+                // 6. Lock Trip if closure
+                if (payloadData.document_type === "trip_closure" && tripId) {
+                    const tripStateRef = db.collection("trip_states").doc(tripId);
+                    transaction.set(tripStateRef, {
+                        status: "closed",
+                        closed_at: admin.firestore.FieldValue.serverTimestamp(),
+                        closed_by_doc: expectedHmac
                     }, { merge: true });
                 }
 
