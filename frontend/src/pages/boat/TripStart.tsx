@@ -1,16 +1,53 @@
-import React from 'react';
-import { Play, Users, X } from 'lucide-react';
+import React, { useState } from 'react';
+import { Play, Users, X, Loader2, CheckCircle } from 'lucide-react';
+import { firestoreWriterService } from '../../services/firestoreWriterService';
 
 const TripStart: React.FC = () => {
+    const [status, setStatus] = useState<'IDLE' | 'LOADING' | 'SUCCESS'>('IDLE');
+    const [error, setError] = useState<string | null>(null);
+
+    const handleStartTrip = async () => {
+        try {
+            setStatus('LOADING');
+            setError(null);
+
+            const payload = {
+                wallet_id: "TRIP-WALLET-B1", // The wallet created for this trip
+                event_type: "trip_start",
+                amount: 0, // No money moved, just an initialization event
+                source_screen: "boat_start",
+                recorded_at: new Date().toISOString(),
+                trip_id: "TRIP-B1-0226",
+                vessel: "Boat Faris",
+                zone: "Zone C South"
+            };
+
+            const result = await firestoreWriterService.writeWalletEvent(payload);
+            console.log("Trip Start Request queued to inbox:", result);
+            setStatus('SUCCESS');
+        } catch (e: any) {
+            console.error("Start trip error:", e);
+            setError(e.message);
+            setStatus('IDLE');
+        }
+    };
+
     return (
         <div className="p-4 flex flex-col items-center w-full">
             <h1 className="text-2xl font-black uppercase text-slate-800 tracking-widest mb-6 border-b-2 border-slate-300 pb-2 w-full max-w-4xl">1. Start Trip</h1>
+
+            {error && (
+                <div className="bg-red-50 border border-red-300 text-red-800 p-4 rounded mb-4 w-full max-w-4xl">
+                    <p className="font-bold">Failed to initiate trip</p>
+                    <p className="text-sm">{error}</p>
+                </div>
+            )}
 
             <div className="bg-white p-8 rounded border max-w-4xl w-full mb-8 shadow-sm border-t-4 border-blue-600">
                 <div className="grid grid-cols-2 gap-6 mb-6">
                     <div>
                         <label className="block text-xs font-bold text-slate-500 mb-1">Trip ID</label>
-                        <input type="text" className="border p-2 w-full rounded font-mono bg-slate-50" value="TRIP-AUTO" disabled />
+                        <input type="text" className="border p-2 w-full rounded font-mono bg-slate-50" value="TRIP-B1-0226" disabled />
                     </div>
                     <div>
                         <label className="block text-xs font-bold text-slate-500 mb-1">Vessel / Unit</label>
@@ -31,7 +68,7 @@ const TripStart: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Staff Roster Panel (converted from HTML) */}
+                {/* Staff Roster Panel */}
                 <div className="bg-blue-50 border border-blue-200 p-6 rounded mb-8 shadow-sm">
                     <h3 className="font-black text-blue-900 uppercase tracking-widest mb-4 flex items-center border-b border-blue-200 pb-2">
                         <Users className="w-5 h-5 mr-2" /> Session Staff Roster
@@ -64,14 +101,22 @@ const TripStart: React.FC = () => {
                             </tr>
                         </tbody>
                     </table>
-                    <button className="mt-4 text-sm font-bold text-blue-700 hover:text-blue-900 flex items-center transition-colors">
-                        + Add Staff Member (via People Registry)
-                    </button>
                 </div>
 
-                <button className="bg-blue-600 hover:bg-blue-700 transition flex items-center justify-center text-white font-bold w-full text-lg py-3 rounded">
-                    <Play className="w-5 h-5 mr-2" /> INITIATE VESSEL TRIP
-                </button>
+                {status === 'SUCCESS' ? (
+                    <div className="bg-green-100 border border-green-400 text-green-800 font-bold uppercase p-4 rounded flex justify-center items-center">
+                        <CheckCircle className="w-5 h-5 mr-2" /> MOCK TRIP INITIATED TO INBOX
+                    </div>
+                ) : (
+                    <button
+                        disabled={status === 'LOADING'}
+                        onClick={handleStartTrip}
+                        className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 transition flex items-center justify-center text-white font-bold w-full text-lg py-3 rounded"
+                    >
+                        {status === 'LOADING' ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Play className="w-5 h-5 mr-2" />}
+                        {status === 'LOADING' ? 'INITIATING...' : 'INITIATE VESSEL TRIP'}
+                    </button>
+                )}
             </div>
         </div>
     );
