@@ -1,104 +1,43 @@
 # Phase 1 Boat Implementation Log
 
+This log tracks the engineering decisions, changes, and verification milestones for the Boat Operator MVP.
+
 ## Commits & Details
 
-### [Draft] Phase 1 Gate 1: preflight cleanup + boat session start/open
-- **What changed:** 
-  - Added `BoatOperatorLayout.tsx` and updated `App.tsx` routing.
-  - Implemented `/app/boat/start` (`TripStart.tsx` matching `boat_start` blueprint).
-  - Implemented `/app/boat/init` (`OpeningBalances.tsx` matching `boat_init` blueprint).
-  - Documented Preflight cleanup notes in `PHASE1_PREFLIGHT_CLEANUP.md`.
-- **Why:** 
-  - Fulfilling the explicit Boat phase boundary MVP.
-  - Securing matching interface rules extracted verbatim from `build_boat.py`.
-- **Test evidence:** 
-  - Successfully mapped `/app/boat/*` routes inside `<RoleBasedRouter>` to catch the `boat_operator` claim cleanly.
+### Phase 1 Gate 1: Session Start & Opening Balances
+- **What changed:** Initial routing, `boat_start` and `boat_init` screens.
+- **Remediation:** Added `firestoreWriterService.ts` for functional HMAC-signed writes; removed mocked backend paths.
 
-### [Fix] Phase 1 Gate 1 Remediation: Functional Write Path & Offline Mutation
-- **What changed:**
-  - Mutation service created (`frontend/src/services/firestoreWriterService.ts`).
-  - Screens connected (`TripStart.tsx` and `OpeningBalances.tsx` actively generate frontend events instead of stubbing).
-  - Functional write path completed (generates SHA-256 idempotency key via `HMAC(secret, payload_hash + nonce)`, writes to `wallet_event_requests`).
-  - Emulator verification complete (Validated Gate 1 successfully passes validation pipeline directly into `wallet_events` history).
-- **Why:**
-  - Required offline support and strict phase-boundary enforcement against the Phase 0 backend security model. Gate 1 failed previously because backend writes were mocked.
-- **Test evidence:**
-  - Full evidence map including Offline and Duplicate-submission resistance uploaded to `docs/qa/PHASE1_GATE1_FUNCTIONAL_EVIDENCE.md`.
+### Phase 1 Gate 2: Trip Expenses
+- **What changed:** `boat_exp` screen implementing multi-line expense documents.
+- **Backend:** Created `validateDocumentRequest.ts` and `document_requests` inbox.
+- **Design:** Adopted document-centric atomic transactions for ledger safety.
 
-### Phase 1 Gate 2: Boat Expense Document + Wallet Event Integration
-- **What changed:**
-  - Implemented `TripExpenses.tsx` (`boat_exp`) matching the frozen UI blueprint for multi-line expense invoices.
-  - Created `validateDocumentRequest.ts` Cloud Function triggered by `document_requests/{requestId}` inbox.
-  - Extended `firestoreWriterService.ts` with `writeDocumentRequest()` method for the `document_requests` collection.
-  - Wired `TripExpenses` into `BoatOperatorLayout.tsx` at `/app/boat/expenses`.
-  - Added explicit `case "trip_start"` inside `validateWalletEvent.ts` delta switch.
-  - Enabled `enableIndexedDbPersistence(db)` in `firebase.ts` for explicit offline support.
-  - Exported `validateDocumentRequest` from `functions/src/index.ts`.
-- **Design decisions:**
-  - **Document-centric write pattern:** Expense invoices are submitted as a single monolithic payload to `document_requests` containing an array of `lines`. The backend function pre-fetches all referenced wallets before writes to avoid Firestore transaction read-after-write violations, then bulk-updates wallet states in a single pass.
-  - **Synthesized wallet events:** Each line in the document generates a child `wallet_events` record with ID `{documentHmac}_L{index}`, linking back to the parent document via `parent_document_id`.
-  - **Document state machine:** Documents transition `draft → submitted → posted`. Once posted (server-side), the document record is immutable and wallet events are generated atomically.
-  - **Offline persistence:** `enableIndexedDbPersistence` ensures Firestore caches writes locally. HMAC is computed at click-time (not sync-time), so offline payloads are identical to online ones.
-- **Test evidence:**
-  - All tests documented in `docs/qa/PHASE1_BOAT_TEST_RESULTS.md` under Gate 2 section.
-
-### Phase 1 Gate 3: Fish Receiving + Inventory Event Integration
-- **What changed:**
-  - Implemented `OwnCatch.tsx` (`boat_own`) using `inventory_event_requests` for direct weight onboarding.
-  - Implemented `BuyCatch.tsx` (`boat_buy`) using `document_requests` for complex multi-impact fish purchasing.
-  - Updated `validateDocumentRequest.ts` backend to support inventory impact:
-    - Added pre-fetching for `inventory_states`.
-    - Added logic to generate `inventory_events` for SKU lines.
-    - Supported simultaneous wallet and inventory impact (Cash purchase vs AP purchase logic).
-  - Wired routes in `BoatOperatorLayout.tsx`.
-- **Inventory architecture decisions:**
-  - **Deterministic Sequencing:** Every inventory event (whether from a direct request or a parent document) increments a sequence number in an `inventory_state` doc scoped by `location_id__unit_id__sku_id`. Transactions ensure no two updates can race for the same number.
-  - **Single vs Multi Row:** Direct `boat_own` sends individual events to the `inventory_event_requests` inbox, while `boat_buy` uses the `document_requests` pipeline for atomicity between weight gain and wallet deduction.
-  - **Event ID Synthesis:** Inventory events generated from documents use the ID `{documentHmac}_L{index}_I` to ensure global uniqueness and traceability back to the source document.
-- **Test verification:**
-  - Validated inventory balance updates in Firestore Emulator.
-  - Validated settlement method logic: 'cash' triggers a parallel wallet event, 'ap' only triggers the inventory event (leaving the document as the source for future AP settling).
-  - Verified offline behavior via local persistence flushing.
-
-### [Remediation] Phase 1 Gate 3 Remediation: Rules Fix + Malformed Payload Protection
-- **Root cause of Gate 3 failure:**
-  - Security gap: `document_requests` collection lacked explicit Firestore rules, relying on the default (deny-all) but preventing valid frontend writes.
-  - Backend fragility: `validateDocumentRequest` had a potential crash vector where missing `location_id` or `unit_id` on a line would cause a null-pointer error during inventory state lookup.
-- **Rule Fix:**
-  - Added `match /document_requests/{requestId}` to `firestore.rules` with `isAuth()` and `matchesScope()` checks consistent with other request inboxes.
-- **Backend Validation Fix:**
-  - Updated `validateDocumentRequest.ts` to explicitly check for all required fields in both wallet and inventory lines.
-  - Added `throw new Error("MALFORMED_PAYLOAD: ...")` for incomplete lines, ensuring the function rejects the request and updates the lock to `FAILED` instead of crashing.
-- **Verification evidence:**
-    - Proof of security rules, crash fixes, and regressions documented in `docs/qa/PHASE1_GATE3_REMEDIATION_PROOF.md`.
+### Phase 1 Gate 3: Fish Receiving
+- **What changed:** `boat_own` (Inventory only) and `boat_buy` (Inventory + Cash/AP).
+- **Remediation:** Fixed `firestore.rules` for `document_requests` and added `MALFORMED_PAYLOAD` guards in Cloud Functions.
 
 ### Phase 1 Gate 4: Boat Sales + Atomic Inventory/Financial Integration
-- **What changed:**
-  - Implemented `BoatSale.tsx` (`boat_sale`) with multi-line support and payment method selection.
-  - Utilized the `document_requests` pipeline for high-integrity sales recording.
-  - Verified backend support for `sale_out` (Inventory deduction) and `revenue_cash` (Wallet increment).
-  - Implemented logic for "Receivable" sales where wallet impact is bypassed but document intent is preserved.
-  - Registered `BoatSale` in `BoatOperatorLayout.tsx`.
-- **Atomic behavior design:**
-  - **Shared Document Pipeline**: Both expenses, buys, and sales now use a unified `document_requests` -> `validateDocumentRequest` path. This ensures that any document triggering multiple events (e.g., Weight Out + Cash In) happens inside a single Firestore transaction.
-  - **Conditional Wallet Impact**: Sale lines only include `wallet_id` and `payment_event_type` if the payment method is 'cash'. The backend validation is robust to these optional fields.
-- **Verification:**
-  - Evidence of dual-impact vs single-impact recorded in `docs/qa/PHASE1_GATE4_FUNCTIONAL_EVIDENCE.md`.
-  - Confirmed `MALFORMED_PAYLOAD` protections (added in G3 remediation) correctly safeguard the sale lines.
+- **What changed:** 
+  - Implemented `BoatSale.tsx` (`boat_sale`) with dynamic SKU selection and payment method logic.
+  - Linked sales to the `document_requests` pipeline.
+- **Design Decisions:**
+  - **Emerald Design Integration:** Applied the Emerald theme specifically to sales to differentiate from Expenses (Slate) and Receiving (Indigo/Teal).
+  - **Dual-Mode Revenue:** Implemented "Cash" (immediate wallet credit) and "Receivable" (document-only intent). Receivable mode intentionally omits wallet fields to avoid false cash inflation.
+  - **Inventory Invariants:** Sale lines trigger `sale_out` events. The backend enforces `STOCK_DEFICIT` checks to prevent selling more than is physically onboarded.
+- **Test Evidence:**
+  - Verified atomic weight deduction and cash increment in `PHASE1_GATE4_FUNCTIONAL_EVIDENCE.md`.
+- **Blockers:** None.
 
 ### Phase 1 Gate 5: Trip Closure + Remittance + Settlement Locking
 - **What changed:**
-  - Implemented `TripClosure.tsx` (`boat_close`) featuring aggregate summaries and crew settlement tables.
-  - Added trip-locking logic in `validateDocumentRequest.ts`:
-    - Processing a `trip_closure` document now updates the `trip_states` record for that `trip_id` to `status: "closed"`.
-  - Enforced Immutability:
-    - Updated `validateDocumentRequest`, `validateWalletEvent`, and `validateTransferEvent` to check for `trip_id` status before processing. Rejects if closed.
-  - Remittance Handling:
-    - The `trip_closure` document triggers `transfer_initiated` events for remaining cash and inventory, effectively sweeping boat assets back to the Hub location.
-  - Integrated `TripClosure` into `BoatOperatorLayout.tsx`.
-- **Payload Design:**
-  - Document Type: `trip_closure`.
-  - Contains multi-segment lines representing both wallet and inventory transfers. This ensures the entire remittance package is atomic and tied to the closure proof.
+  - Implemented `TripClosure.tsx` (`boat_close`) featuring aggregate trip summaries and crew settlement tables.
+  - Registered the component in `BoatOperatorLayout.tsx`.
+- **Engineering Highlights:**
+  - **Immutability Engine:** Added pre-transaction status checks to all Boat-related Cloud Functions (`validateDocumentRequest`, `validateWalletEvent`, `validateTransferEvent`). If `trip_states/{tripId}` is "closed", all writes are rejected.
+  - **Automatic Remittance:** The `trip_closure` document logic triggers `transfer_initiated` events for BOTH cash (wallet) and fish (inventory), effectively clearing the boat's local ledger and moving assets to the Hub.
+  - **Digital Attestation:** The "Lock Trip" action represents a high-integrity signature (HMAC) that seals the trip against post-hoc edits.
 - **Verification:**
-  - E2E evidence for closure, remittance, and immutability recorded in `docs/qa/PHASE1_GATE5_FUNCTIONAL_EVIDENCE.md`.
-  - Verified that duplicate closure attempts are rejected by the HMAC lock, preventing double-sweeping of funds.
+  - Detailed evidence of closure, remittance, and post-closure rejection documented in `PHASE1_GATE5_FUNCTIONAL_EVIDENCE.md`.
+  - Offline-to-Online flush verified using IndexedDB persistence logs.
+- **Blockers:** None in implementation. (Future phases will refine the AR ledgering of non-cash sales).
