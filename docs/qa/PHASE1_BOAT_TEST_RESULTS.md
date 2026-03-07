@@ -48,4 +48,19 @@
 
 ***
 
+## Gate 4: Boat Sales
+
+### 6. Boat Sales (`boat_sale`)
+- **UI Render Pass**: PASS (Visual structure aligns with blueprint, emerald theme applied)
+- **Inbox Write Pass**: PASS (Writes to `document_requests` with correct HMAC and payload structure)
+- **Backend Processing Pass**: PASS (`validateDocumentRequest` processes `sale_invoice` docs)
+- **Inventory Deduction Pass**: PASS (`sale_out` event correctly reduces stock in `inventory_states`)
+- **Cash Sale Wallet Credit Pass**: PASS (Setting payment to 'cash' results in `revenue_cash` wallet event)
+- **Receivable Sale No-Wallet-Credit Pass**: PASS (Setting payment to 'receivable' omits wallet impact while preserving AR intent)
+- **Atomic Dual-Impact Pass**: PASS (Single transaction handles both weight deduction and cash credit)
+- **Offline Queue Pass**: PASS (Verified through manual network toggle; requests flush upon reconnect)
+- **Duplicate Submission Pass**: PASS (Idempotency lock prevents double-deduction)
+
+***
+
 *Note: Evidence documentation backing up these E2E passed results (including duplicate-submission resistance testing and payload proof) can be referenced directly in `PHASE1_GATE1_FUNCTIONAL_EVIDENCE.md`.*

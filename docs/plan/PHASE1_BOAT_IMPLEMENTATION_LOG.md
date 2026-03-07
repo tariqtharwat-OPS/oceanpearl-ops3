@@ -70,4 +70,18 @@
   - Updated `validateDocumentRequest.ts` to explicitly check for all required fields in both wallet and inventory lines.
   - Added `throw new Error("MALFORMED_PAYLOAD: ...")` for incomplete lines, ensuring the function rejects the request and updates the lock to `FAILED` instead of crashing.
 - **Verification evidence:**
-  - Proof of security rules, crash fixes, and regressions documented in `docs/qa/PHASE1_GATE3_REMEDIATION_PROOF.md`.
+    - Proof of security rules, crash fixes, and regressions documented in `docs/qa/PHASE1_GATE3_REMEDIATION_PROOF.md`.
+
+### Phase 1 Gate 4: Boat Sales + Atomic Inventory/Financial Integration
+- **What changed:**
+  - Implemented `BoatSale.tsx` (`boat_sale`) with multi-line support and payment method selection.
+  - Utilized the `document_requests` pipeline for high-integrity sales recording.
+  - Verified backend support for `sale_out` (Inventory deduction) and `revenue_cash` (Wallet increment).
+  - Implemented logic for "Receivable" sales where wallet impact is bypassed but document intent is preserved.
+  - Registered `BoatSale` in `BoatOperatorLayout.tsx`.
+- **Atomic behavior design:**
+  - **Shared Document Pipeline**: Both expenses, buys, and sales now use a unified `document_requests` -> `validateDocumentRequest` path. This ensures that any document triggering multiple events (e.g., Weight Out + Cash In) happens inside a single Firestore transaction.
+  - **Conditional Wallet Impact**: Sale lines only include `wallet_id` and `payment_event_type` if the payment method is 'cash'. The backend validation is robust to these optional fields.
+- **Verification:**
+  - Evidence of dual-impact vs single-impact recorded in `docs/qa/PHASE1_GATE4_FUNCTIONAL_EVIDENCE.md`.
+  - Confirmed `MALFORMED_PAYLOAD` protections (added in G3 remediation) correctly safeguard the sale lines.

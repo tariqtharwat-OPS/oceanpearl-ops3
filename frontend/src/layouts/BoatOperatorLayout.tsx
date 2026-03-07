@@ -9,6 +9,7 @@ import OpeningBalances from '../pages/boat/OpeningBalances';
 import TripExpenses from '../pages/boat/TripExpenses';
 import OwnCatch from '../pages/boat/OwnCatch';
 import BuyCatch from '../pages/boat/BuyCatch';
+import BoatSale from '../pages/boat/BoatSale';
 
 const BoatOperatorLayout: React.FC = () => {
 
@@ -37,7 +38,7 @@ const BoatOperatorLayout: React.FC = () => {
                         <Route path="expenses" element={<TripExpenses />} />
                         <Route path="receive-own" element={<OwnCatch />} />
                         <Route path="receive-buy" element={<BuyCatch />} />
-                        <Route path="sales" element={<div>6. Boat Sales - Phase 1 Gate 4</div>} />
+                        <Route path="sales" element={<BoatSale />} />
                         <Route path="wallet" element={<div>7. Wallet Transfers - Phase 1 Gate 4</div>} />
                         <Route path="close" element={<div>8. Close Trip - Phase 1 Gate 5</div>} />
                         <Route path="*" element={<Navigate to="start" replace />} />
