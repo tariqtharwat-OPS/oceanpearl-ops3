@@ -53,33 +53,40 @@ export const validateDocumentRequest = functions.firestore
 
         try {
             await db.runTransaction(async (transaction) => {
-                // 3a. Pre-fetch all referenced wallets to avoid read-after-write errors
+                // 3a. Pre-fetch all referenced wallets AND inventory scopes to avoid read-after-write errors
                 const walletIds = [...new Set(lines ? lines.map((l: any) => l.wallet_id).filter(Boolean) : [])] as string[];
+                const inventoryScopes = [...new Set(lines ? lines.map((l: any) => l.sku_id && l.location_id && l.unit_id ? `${l.location_id}__${l.unit_id}__${l.sku_id}` : null).filter(Boolean) : [])] as string[];
+
                 const walletStateDocs = new Map<string, admin.firestore.DocumentSnapshot>();
+                const inventoryStateDocs = new Map<string, admin.firestore.DocumentSnapshot>();
 
                 for (const wid of walletIds) {
                     const walletStateRef = db.collection("wallet_states").doc(wid);
                     const doc = await transaction.get(walletStateRef);
-                    if (doc.exists) {
-                        walletStateDocs.set(wid, doc);
-                    }
+                    if (doc.exists) walletStateDocs.set(wid, doc);
+                }
+                for (const scopeId of inventoryScopes) {
+                    const inventoryStateRef = db.collection("inventory_states").doc(scopeId);
+                    const doc = await transaction.get(inventoryStateRef);
+                    if (doc.exists) inventoryStateDocs.set(scopeId, doc);
                 }
 
                 // 3b. Keep mutable state in memory
                 const activeWallets = new Map<string, { currentBalance: number, sequenceNumber: number }>();
                 for (const wid of walletIds) {
                     const doc = walletStateDocs.get(wid);
-                    if (doc) {
-                        activeWallets.set(wid, {
-                            currentBalance: doc.data()?.current_balance || 0,
-                            sequenceNumber: doc.data()?.sequence_number || 0
-                        });
-                    } else {
-                        activeWallets.set(wid, {
-                            currentBalance: 0,
-                            sequenceNumber: 0
-                        });
-                    }
+                    activeWallets.set(wid, {
+                        currentBalance: doc?.data()?.current_balance || 0,
+                        sequenceNumber: doc?.data()?.sequence_number || 0
+                    });
+                }
+                const activeInventory = new Map<string, { currentBalance: number, sequenceNumber: number }>();
+                for (const scopeId of inventoryScopes) {
+                    const doc = inventoryStateDocs.get(scopeId);
+                    activeInventory.set(scopeId, {
+                        currentBalance: doc?.data()?.current_balance || 0,
+                        sequenceNumber: doc?.data()?.sequence_number || 0
+                    });
                 }
 
                 // 3c. Document Creation (Immutable)
@@ -93,32 +100,23 @@ export const validateDocumentRequest = functions.firestore
                     server_timestamp: admin.firestore.FieldValue.serverTimestamp()
                 });
 
-                // 4. Generate Wallet Events
+                // 4. Generate Wallet & Inventory Events
                 if (lines && Array.isArray(lines)) {
                     for (let i = 0; i < lines.length; i++) {
                         const line = lines[i];
-                        if (line.wallet_id && line.amount && line.event_type) {
+                        const eventBaseId = `${expectedHmac}_L${i}`;
 
+                        // Wallet Event
+                        if (line.wallet_id && line.payment_amount && line.payment_event_type) {
                             const walletState = activeWallets.get(line.wallet_id)!;
                             walletState.sequenceNumber += 1;
 
                             let delta = 0;
-                            switch (line.event_type) {
-                                case "deposit":
-                                case "transfer_received":
-                                case "deposit_cash_handover":
-                                case "revenue_cash":
-                                    delta = line.amount;
-                                    break;
-                                case "expense":
-                                case "expense_advance":
-                                case "expense_trip":
-                                case "expense_purchase":
-                                case "transfer_initiated":
-                                    delta = -line.amount;
-                                    break;
-                                default:
-                                    delta = 0;
+                            const evtType = line.payment_event_type;
+                            if (["deposit", "transfer_received", "deposit_cash_handover", "revenue_cash"].includes(evtType)) {
+                                delta = line.payment_amount;
+                            } else if (["expense", "expense_advance", "expense_trip", "expense_purchase", "transfer_initiated"].includes(evtType)) {
+                                delta = -line.payment_amount;
                             }
 
                             if (line.wallet_type === "hub" && walletState.currentBalance + delta < 0) {
@@ -126,29 +124,65 @@ export const validateDocumentRequest = functions.firestore
                             }
 
                             walletState.currentBalance += delta;
+                            const eventRef = db.collection("wallet_events").doc(eventBaseId + "_W");
+                            transaction.set(eventRef, {
+                                ...line,
+                                amount: line.payment_amount,
+                                event_type: line.payment_event_type,
+                                parent_document_id: expectedHmac,
+                                sequence_number: walletState.sequenceNumber,
+                                server_timestamp: admin.firestore.FieldValue.serverTimestamp()
+                            });
+                        }
 
-                            // Use a unique ID for the synthesized wallet event
-                            const synthesizedEventId = `${expectedHmac}_L${i}`;
-                            const eventRef = db.collection("wallet_events").doc(synthesizedEventId);
+                        // Inventory Event
+                        if (line.sku_id && line.amount && line.event_type) {
+                            const scopeId = `${line.location_id}__${line.unit_id}__${line.sku_id}`;
+                            const invState = activeInventory.get(scopeId)!;
+                            invState.sequenceNumber += 1;
 
+                            let delta = 0;
+                            if (["receive_own", "receive_buy", "transfer_received", "transfer_cancelled"].includes(line.event_type)) {
+                                delta = line.amount;
+                            } else if (["transfer_initiated", "sale_out", "waste_out"].includes(line.event_type)) {
+                                delta = -line.amount;
+                            }
+
+                            if (invState.currentBalance + delta < 0) {
+                                throw new Error("STOCK_DEFICIT: Cannot drop below zero.");
+                            }
+
+                            invState.currentBalance += delta;
+                            const eventRef = db.collection("inventory_events").doc(eventBaseId + "_I");
                             transaction.set(eventRef, {
                                 ...line,
                                 parent_document_id: expectedHmac,
-                                sequence_number: walletState.sequenceNumber,
+                                sequence_number: invState.sequenceNumber,
                                 server_timestamp: admin.firestore.FieldValue.serverTimestamp()
                             });
                         }
                     }
                 }
 
-                // 5. Write back all final wallet states
-                for (const wid of walletIds) {
+                // 5. Write back all final states
+                for (const [wid, state] of activeWallets.entries()) {
                     const walletStateRef = db.collection("wallet_states").doc(wid);
-                    const finalState = activeWallets.get(wid)!;
                     transaction.set(walletStateRef, {
                         wallet_id: wid,
-                        sequence_number: finalState.sequenceNumber,
-                        current_balance: finalState.currentBalance,
+                        sequence_number: state.sequenceNumber,
+                        current_balance: state.currentBalance,
+                        last_updated: admin.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+                }
+                for (const [scopeId, state] of activeInventory.entries()) {
+                    const inventoryStateRef = db.collection("inventory_states").doc(scopeId);
+                    const [locId, unitId, skuId] = scopeId.split("__");
+                    transaction.set(inventoryStateRef, {
+                        location_id: locId,
+                        unit_id: unitId,
+                        sku_id: skuId,
+                        sequence_number: state.sequenceNumber,
+                        current_balance: state.currentBalance,
                         last_updated: admin.firestore.FieldValue.serverTimestamp()
                     }, { merge: true });
                 }

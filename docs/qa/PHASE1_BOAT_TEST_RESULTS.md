@@ -28,4 +28,21 @@
 
 ***
 
+## Gate 3: Fish Receiving
+
+### 4. Receiving Own Catch (`boat_own`)
+- **UI Render**: PASS (Visual structure aligns with blueprint, teal/cyan theme applied)
+- **Backend Write**: PASS (Dispatches individual `inventory_event_requests` for each fish SKU being onboarded)
+- **End-to-End**: PASS (Backend `validateTransferEvent` correctly sequences the incoming weight into `inventory_states` scoped by `location_id`, `unit_id`, and `sku_id`)
+- **Offline Queue**: PASS (Tested by disabling network; requests queue in IndexedDB and flush sequentially upon reconnect, maintaining deterministic inventory sequence)
+
+### 5. Receiving Purchase From Fishermen (`boat_buy`)
+- **UI Render**: PASS (Visual structure aligns with blueprint, indigo theme applied)
+- **Backend Write**: PASS (Dispatches a monolithic `document_requests` payload containing SKU weights and financial settlement requirements)
+- **End-to-End**: PASS (The updated `validateDocumentRequest` backend function handles atomic dual-impact: creating the `documents` record, incrementing `inventory_states`, and decrementing `wallet_states` if cash settlement is chosen. All updates are performed inside a single transaction to prevent race conditions)
+- **Inventory Sequence Ordering**: PASS (Each purchase line receives a strict, deterministic `sequence_number` in `inventory_events` matching the state transition)
+- **Duplicate Submission Safety**: PASS (HMAC idempotency ensures that clicking 'Post' twice results in a single document and single sets of events being created)
+
+***
+
 *Note: Evidence documentation backing up these E2E passed results (including duplicate-submission resistance testing and payload proof) can be referenced directly in `PHASE1_GATE1_FUNCTIONAL_EVIDENCE.md`.*

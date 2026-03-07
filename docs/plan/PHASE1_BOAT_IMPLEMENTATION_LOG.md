@@ -41,3 +41,21 @@
   - **Offline persistence:** `enableIndexedDbPersistence` ensures Firestore caches writes locally. HMAC is computed at click-time (not sync-time), so offline payloads are identical to online ones.
 - **Test evidence:**
   - All tests documented in `docs/qa/PHASE1_BOAT_TEST_RESULTS.md` under Gate 2 section.
+
+### Phase 1 Gate 3: Fish Receiving + Inventory Event Integration
+- **What changed:**
+  - Implemented `OwnCatch.tsx` (`boat_own`) using `inventory_event_requests` for direct weight onboarding.
+  - Implemented `BuyCatch.tsx` (`boat_buy`) using `document_requests` for complex multi-impact fish purchasing.
+  - Updated `validateDocumentRequest.ts` backend to support inventory impact:
+    - Added pre-fetching for `inventory_states`.
+    - Added logic to generate `inventory_events` for SKU lines.
+    - Supported simultaneous wallet and inventory impact (Cash purchase vs AP purchase logic).
+  - Wired routes in `BoatOperatorLayout.tsx`.
+- **Inventory architecture decisions:**
+  - **Deterministic Sequencing:** Every inventory event (whether from a direct request or a parent document) increments a sequence number in an `inventory_state` doc scoped by `location_id__unit_id__sku_id`. Transactions ensure no two updates can race for the same number.
+  - **Single vs Multi Row:** Direct `boat_own` sends individual events to the `inventory_event_requests` inbox, while `boat_buy` uses the `document_requests` pipeline for atomicity between weight gain and wallet deduction.
+  - **Event ID Synthesis:** Inventory events generated from documents use the ID `{documentHmac}_L{index}_I` to ensure global uniqueness and traceability back to the source document.
+- **Test verification:**
+  - Validated inventory balance updates in Firestore Emulator.
+  - Validated settlement method logic: 'cash' triggers a parallel wallet event, 'ap' only triggers the inventory event (leaving the document as the source for future AP settling).
+  - Verified offline behavior via local persistence flushing.
