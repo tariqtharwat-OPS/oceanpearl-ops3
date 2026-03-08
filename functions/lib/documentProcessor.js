@@ -223,12 +223,21 @@ exports.validateDocumentRequest = onDocumentCreated({
             wallets.forEach((v, k) => transaction.set(db.collection("wallet_states").doc(k), { ...v, last_updated: FieldValue.serverTimestamp() }, { merge: true }));
             invs.forEach((v, k) => {
                 const [locId, unitId, skuId] = k.split("__");
+
+                // Find unit_type from lines to persist in state
+                let unitType = v.unit_type || null;
+                if (lines) {
+                    const match = lines.find(l => l.location_id === locId && l.unit_id === unitId);
+                    if (match && match.unit_type) unitType = match.unit_type;
+                }
+
                 const roundedCost = Math.round((v.avg_cost || 0) * 100) / 100;
                 transaction.set(db.collection("inventory_states").doc(k), {
                     ...v,
                     location_id: locId,
                     unit_id: unitId,
                     sku_id: skuId,
+                    unit_type: unitType,
                     avg_cost: roundedCost,
                     last_updated: FieldValue.serverTimestamp()
                 }, { merge: true });
