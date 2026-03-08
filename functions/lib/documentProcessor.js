@@ -89,7 +89,33 @@ exports.validateDocumentRequest = onDocumentCreated({
             }
             logger.info(`[DEBUG] Read phase complete. Wallets: ${wallets.size}, Invs: ${invs.size}, docType: ${docType}`);
 
-            // 3b. Hub receive validation: verify source inventory is sufficient
+            // 3b. Lineage Inheritance (Automatic)
+            logger.info(`[TRACE] Inheriting lineage for ${expectedHmac}`, { sourceDocId: payloadData.source_document_id || payloadData.source_receiving_doc });
+            let inheritedLineage = {};
+            const sourceDocId = payloadData.source_document_id || payloadData.source_receiving_doc;
+            if (sourceDocId) {
+                const sourceDoc = await transaction.get(db.collection("documents").doc(sourceDocId));
+                if (sourceDoc.exists) {
+                    const sd = sourceDoc.data();
+                    const sLineage = sd.lineage || {};
+                    inheritedLineage = {
+                        trip_id: sd.trip_id || sLineage.trip_id,
+                        batch_id: sd.batch_id || sLineage.batch_id,
+                        origin_location_id: sd.origin_location_id || sd.location_id || sLineage.origin_location_id,
+                        origin_unit_id: sd.origin_unit_id || sd.unit_id || sLineage.origin_unit_id,
+                        source_receiving_doc: sd.source_receiving_doc || (sd.document_type === "hub_receive_from_boat" ? sourceDocId : sLineage.source_receiving_doc)
+                    };
+                }
+            }
+            const lineage = {
+                trip_id: payloadData.trip_id || inheritedLineage.trip_id || null,
+                batch_id: payloadData.batch_id || inheritedLineage.batch_id || null,
+                origin_location_id: payloadData.origin_location_id || inheritedLineage.origin_location_id || null,
+                origin_unit_id: payloadData.origin_unit_id || inheritedLineage.origin_unit_id || null,
+                source_receiving_doc: payloadData.source_receiving_doc || inheritedLineage.source_receiving_doc || null
+            };
+
+            // 3c. Hub receive validation: verify source inventory is sufficient
             if (docType === "hub_receive_from_boat" && lines) {
                 for (const l of lines) {
                     if (l.event_type === "transfer_initiated") {
@@ -103,9 +129,8 @@ exports.validateDocumentRequest = onDocumentCreated({
             }
 
             // 4. TRANSFORMATION PRE-CALC
-            let transValue = 0;
-            let transQty = 0;
-            let transOutQty = 0;
+            let transValue = 0, transQty = 0, transOutQty = 0, wasteQty = 0, byproductQty = 0;
+
             if (lines) {
                 for (const l of lines) {
                     if (l.event_type === "transformation_out") {
@@ -115,6 +140,8 @@ exports.validateDocumentRequest = onDocumentCreated({
                         transOutQty += l.amount;
                     } else if (l.event_type === "transformation_in") {
                         transQty += l.amount;
+                        if (l.sku_id && l.sku_id.includes("waste")) wasteQty += l.amount;
+                        else if (l.sku_id && (l.sku_id.includes("roe") || l.sku_id.includes("byproduct"))) byproductQty += l.amount;
                     }
                 }
             }
@@ -124,31 +151,37 @@ exports.validateDocumentRequest = onDocumentCreated({
             // 5. WRITE PHASE — Immutable document
             transaction.set(db.collection("documents").doc(expectedHmac), {
                 ...payloadData,
+                lineage,
                 lines: lines || [],
                 status: "posted",
                 server_timestamp: FieldValue.serverTimestamp()
             });
 
-            // 5b. Create Processing Batch record if transformation
+            // 5b. Create Processing Batch record
             if (docType === "inventory_transformation") {
-                const batchId = payloadData.batch_id || payloadData.document_id;
-                if (batchId) {
-                    transaction.set(db.collection("processing_batches").doc(expectedHmac), {
-                        batch_id: batchId,
-                        document_id: expectedHmac,
-                        operator_id: payloadData.operator_id || "SYSTEM",
-                        factory_unit_id: payloadData.factory_unit_id || payloadData.unit_id,
-                        company_id: payloadData.company_id,
-                        location_id: payloadData.location_id,
-                        unit_id: payloadData.factory_unit_id || payloadData.unit_id,
-                        source_receiving_doc: payloadData.source_receiving_doc || null,
-                        input_qty: transOutQty,
-                        output_qty: transQty,
-                        yield_ratio: Math.round(yieldRatio * 10000) / 10000,
-                        status: "posted",
-                        server_timestamp: FieldValue.serverTimestamp()
-                    });
-                }
+                const bId = lineage.batch_id || payloadData.batch_id || expectedHmac;
+                transaction.set(db.collection("processing_batches").doc(expectedHmac), {
+                    batch_id: bId, document_id: expectedHmac, lineage,
+                    operator_id: payloadData.operator_id || "SYSTEM",
+                    factory_unit_id: payloadData.factory_unit_id || payloadData.unit_id,
+                    company_id: payloadData.company_id, location_id: payloadData.location_id,
+                    unit_id: payloadData.factory_unit_id || payloadData.unit_id,
+                    input_qty: transOutQty, output_qty: transQty,
+                    waste_qty: wasteQty, byproduct_qty: byproductQty,
+                    yield_ratio: Math.round(yieldRatio * 10000) / 10000,
+                    waste_ratio: transOutQty > 0 ? Math.round((wasteQty / transOutQty) * 10000) / 10000 : 0,
+                    status: "posted", server_timestamp: FieldValue.serverTimestamp()
+                });
+            }
+
+            // 5c. Create Transfer View record
+            if (docType === "transfer_interlocation" && lines) {
+                const toLoc = lines.find(l => l.event_type === "transfer_received")?.location_id;
+                transaction.set(db.collection("transfer_views").doc(expectedHmac), {
+                    document_id: expectedHmac, company_id: payloadData.company_id,
+                    from_location: payloadData.location_id, to_location: toLoc || null,
+                    status: "completed", lineage, server_timestamp: FieldValue.serverTimestamp()
+                });
             }
 
             // 6. Generate Wallet & Inventory Events
@@ -164,9 +197,7 @@ exports.validateDocumentRequest = onDocumentCreated({
                         if (["deposit", "transfer_received", "deposit_cash_handover", "revenue_cash"].includes(et)) delta = line.amount || line.payment_amount;
                         else if (["expense", "expense_trip", "expense_purchase", "transfer_initiated"].includes(et)) delta = -(line.amount || line.payment_amount);
 
-                        if (line.wallet_type === "hub" && w.current_balance + delta < 0) {
-                            throw new Error("OVERDRAFT_BLOCKED: Hub wallets cannot fall below zero.");
-                        }
+                        if (line.wallet_type === "hub" && w.current_balance + delta < 0) throw new Error("OVERDRAFT_BLOCKED: Hub wallets cannot fall below zero.");
 
                         w.current_balance += delta;
                         transaction.set(db.collection("wallet_events").doc(`${baseId}_W`), {
@@ -181,8 +212,7 @@ exports.validateDocumentRequest = onDocumentCreated({
                         const sid = `${line.location_id}__${line.unit_id}__${line.sku_id}`;
                         const s = invs.get(sid);
                         s.sequence_number += 1;
-                        let delta = 0;
-                        let cost = line.unit_cost || 0;
+                        let delta = 0, cost = line.unit_cost || 0;
 
                         if (["receive_own", "receive_buy", "transfer_received", "transfer_cancelled"].includes(line.event_type)) {
                             delta = line.amount;
@@ -192,16 +222,14 @@ exports.validateDocumentRequest = onDocumentCreated({
                                 s.avg_cost = (oldV + newV) / (s.current_balance + delta);
                             }
                         } else if (line.event_type === "transformation_in") {
-                            delta = line.amount;
-                            cost = transCost;
+                            delta = line.amount; cost = transCost;
                             if (delta > 0) {
                                 const oldV = s.current_balance * (s.avg_cost || 0);
                                 const newV = delta * cost;
                                 s.avg_cost = (oldV + newV) / (s.current_balance + delta);
                             }
                         } else if (["sale_out", "waste_out", "transformation_out", "transfer_initiated"].includes(line.event_type)) {
-                            delta = -line.amount;
-                            cost = s.avg_cost || 0;
+                            delta = -line.amount; cost = s.avg_cost || 0;
                         }
 
                         if (s.current_balance + delta < 0) throw new Error(`STOCK_DEFICIT: ${line.sku_id}`);
@@ -209,7 +237,7 @@ exports.validateDocumentRequest = onDocumentCreated({
                         if (s.current_balance === 0) s.avg_cost = 0;
 
                         transaction.set(db.collection("inventory_events").doc(`${baseId}_I`), {
-                            ...line,
+                            ...line, lineage: { ...lineage, ...(line.lineage || {}) },
                             unit_cost: cost,
                             parent_document_id: expectedHmac,
                             sequence_number: s.sequence_number,
@@ -228,9 +256,7 @@ exports.validateDocumentRequest = onDocumentCreated({
                 // Pure state projection (Ledger)
                 transaction.set(db.collection("inventory_states").doc(k), {
                     ...v,
-                    location_id: locId,
-                    unit_id: unitId,
-                    sku_id: skuId,
+                    location_id: locId, unit_id: unitId, sku_id: skuId,
                     avg_cost: roundedCost,
                     last_updated: FieldValue.serverTimestamp()
                 }, { merge: true });
@@ -238,13 +264,23 @@ exports.validateDocumentRequest = onDocumentCreated({
                 // Read model projection (Stock View)
                 transaction.set(db.collection("stock_views").doc(k), {
                     company_id: payloadData.company_id,
-                    location_id: locId,
-                    unit_id: unitId,
-                    sku_id: skuId,
-                    qty: v.current_balance,
-                    avg_cost: roundedCost,
+                    location_id: locId, unit_id: unitId, sku_id: skuId,
+                    qty: v.current_balance, avg_cost: roundedCost,
                     last_updated: FieldValue.serverTimestamp()
                 });
+
+                // Batch-specific Stock View for HQ
+                if (lineage.batch_id && v.current_balance > 0) {
+                    const bk = `${k}__${lineage.batch_id}`;
+                    transaction.set(db.collection("stock_batch_views").doc(bk), {
+                        company_id: payloadData.company_id,
+                        location_id: locId, unit_id: unitId, sku_id: skuId,
+                        batch_id: lineage.batch_id,
+                        qty: v.current_balance,
+                        lineage,
+                        last_updated: FieldValue.serverTimestamp()
+                    });
+                }
             });
 
             // 8. Lock Trip if closure
