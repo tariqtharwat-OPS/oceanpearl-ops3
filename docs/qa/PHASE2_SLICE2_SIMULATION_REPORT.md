@@ -1,7 +1,7 @@
 # PHASE 2 SLICE 2 — SIMULATION REPORT
 
 ## 1. Objective
-Verify multi-boat, multi-factory, and multi-location operational flows with staged factory movement and unified stock visibility.
+Verify multi-boat, multi-factory, and multi-location operational flows with staged factory movement and unified stock visibility via read-model projections.
 
 ## 2. Test Environment
 - **Project ID**: `oceanpearl-ops`
@@ -18,16 +18,18 @@ Verify multi-boat, multi-factory, and multi-location operational flows with stag
 | 4 | Snapper Batch Transformation (300kg -> Fillet/Roe/Waste) | ✅ SUCCESS |
 | 5 | Staged Movement: Processing → WIP → Finished Goods | ✅ SUCCESS |
 | 6 | Inter-Location Transfer: Kaimana → Sorong Cold Storage | ✅ SUCCESS |
-| 7 | Unified Stock View Report | ✅ SUCCESS |
+| 7 | Unified Stock View Report (Projected via stock_views) | ✅ SUCCESS |
 
-## 4. Evidence: Stock Distribution
-| Location | Unit | Unit Type | SKU | Qty |
+## 4. Evidence: Stock Distribution (Projected via stock_views)
+| Location | Unit | SKU | Qty | Avg Cost |
 |---|---|---|---|---|
-| Kaimana | Factory-Finished-KM | factory_finished | snapper-fillet | 40 |
-| Kaimana | Factory-Proc-KM | factory_processing | organic-waste | 150 |
-| Kaimana | Factory-Proc-KM | factory_processing | snapper-roe | 10 |
-| Kaimana | Hub-Intake-KM | hub_intake | grouper-whole | 200 |
-| Sorong | ColdStore-SR | cold_storage | snapper-fillet | 100 |
+| Kaimana | Factory-Finished-KM | snapper-fillet | 40 | 40000 |
+| Kaimana | Factory-Proc-KM | organic-waste | 150 | 40000 |
+| Kaimana | Factory-Proc-KM | snapper-roe | 10 | 40000 |
+| Kaimana | Hub-Intake-KM | grouper-whole | 200 | 60000 |
+| Sorong | ColdStore-SR | snapper-fillet | 100 | 40000 |
 
 ## 5. Persistence Profile
-All `inventory_states` now correctly include the `unit_type` field, allowing for high-level filtering by industrial stage across multiple locations.
+- **inventory_states**: Pure ledger projection (balance/cost only). `unit_type` removed to maintain architecture purity.
+- **stock_views**: High-performance dashboard projection containing `company_id` and standardized `qty` fields.
+- **units**: External source of truth for `unit_type`.

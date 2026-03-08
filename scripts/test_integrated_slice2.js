@@ -47,7 +47,7 @@ async function post(payload) {
 }
 
 async function clearEmulator() {
-    const cols = ["processing_batches", "documents", "inventory_states", "inventory_events",
+    const cols = ["stock_views", "processing_batches", "documents", "inventory_states", "inventory_events",
         "wallet_states", "wallet_events", "idempotency_locks", "document_requests", "trip_states"];
     for (const c of cols) {
         const s = await db.collection(c).get();
@@ -207,19 +207,18 @@ async function run() {
     // ───────────────────────────────────────────────────────────────────────
     // STAGE 7 — NETWORK STOCK VIEW (Step E)
     // ───────────────────────────────────────────────────────────────────────
-    console.log("\n═══ STAGE 7: Unified Network Stock View ═══");
+    console.log("\n═══ STAGE 7: Unified Network Stock View (via stock_views) ═══");
 
-    const states = await db.collection("inventory_states").get();
+    const views = await db.collection("stock_views").get();
     const stockReport = [];
-    states.forEach(doc => {
+    views.forEach(doc => {
         const data = doc.data();
-        if (data.current_balance > 0) {
+        if (data.qty > 0) {
             stockReport.push({
                 location: data.location_id,
                 unit: data.unit_id,
-                type: data.unit_type,
                 sku: data.sku_id,
-                qty: data.current_balance,
+                qty: data.qty,
                 cost: data.avg_cost
             });
         }

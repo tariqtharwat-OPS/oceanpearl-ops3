@@ -24,3 +24,4 @@
 - All movements (Proc → WIP → Finished) were executed through unique document identifiers.
 - Idempotency locks prevented duplicate processing of any stage.
 - Mass balance was maintained across location transfers.
+- **Atomic Projections**: `stock_views` are updated within the same transaction as the ledger, ensuring zero-latency dashboard consistency.
