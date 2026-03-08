@@ -87,6 +87,11 @@ exports.validateDocumentRequest = onDocumentCreated({
                 const s = await transaction.get(db.collection("inventory_states").doc(sid));
                 invs.set(sid, s.exists ? s.data() : { current_balance: 0, avg_cost: 0, sequence_number: 0 });
             }
+
+            // 3d. Prefetch Settlement Views if applicable
+            let tripProfitDoc = null;
+            if (tripId) tripProfitDoc = await transaction.get(db.collection("trip_profit_views").doc(tripId));
+
             logger.info(`[DEBUG] Read phase complete. Wallets: ${wallets.size}, Invs: ${invs.size}, docType: ${docType}`);
 
             // 3b. Lineage Inheritance (Automatic)
@@ -128,8 +133,9 @@ exports.validateDocumentRequest = onDocumentCreated({
                 }
             }
 
-            // 4. TRANSFORMATION PRE-CALC
+            // 4. TRANSFORMATION & COST ALLOCATION PRE-CALC
             let transValue = 0, transQty = 0, transOutQty = 0, wasteQty = 0, byproductQty = 0;
+            let totalAllocatedCost = 0;
 
             if (lines) {
                 for (const l of lines) {
@@ -142,6 +148,8 @@ exports.validateDocumentRequest = onDocumentCreated({
                         transQty += l.amount;
                         if (l.sku_id && l.sku_id.includes("waste")) wasteQty += l.amount;
                         else if (l.sku_id && (l.sku_id.includes("roe") || l.sku_id.includes("byproduct"))) byproductQty += l.amount;
+                    } else if (l.event_type === "cost_allocation") {
+                        totalAllocatedCost += l.amount;
                     }
                 }
             }
@@ -174,14 +182,42 @@ exports.validateDocumentRequest = onDocumentCreated({
                 });
             }
 
-            // 5c. Create Transfer View record
+            // 5c. SETTLEMENT & VIEW PROJECTIONS
+            let tripProfitStats = tripProfitDoc?.exists ? tripProfitDoc.data() : { total_revenue: 0, total_expenses: 0, net_profit: 0 };
+
             if (docType === "transfer_interlocation" && lines) {
                 const toLoc = lines.find(l => l.event_type === "transfer_received")?.location_id;
                 transaction.set(db.collection("transfer_views").doc(expectedHmac), {
                     document_id: expectedHmac, company_id: payloadData.company_id,
                     from_location: payloadData.location_id, to_location: toLoc || null,
-                    status: "completed", lineage, server_timestamp: FieldValue.serverTimestamp()
+                    status: "in_transit", lineage, last_updated: FieldValue.serverTimestamp()
                 });
+            }
+
+            // AP/AR Logic
+            if (payloadData.supplier_id && payloadData.is_credit) {
+                const purchaseAmount = lines.reduce((acc, l) => acc + (l.amount * (l.unit_cost || 0)), 0);
+                transaction.set(db.collection("payable_views").doc(expectedHmac), {
+                    document_id: expectedHmac, company_id: payloadData.company_id,
+                    supplier_id: payloadData.supplier_id, amount: purchaseAmount,
+                    status: "pending", server_timestamp: FieldValue.serverTimestamp()
+                });
+            }
+            if (payloadData.customer_id && payloadData.is_credit) {
+                const saleAmount = lines.reduce((acc, l) => acc + (l.amount * (l.unit_price || 0)), 0);
+                transaction.set(db.collection("receivable_views").doc(expectedHmac), {
+                    document_id: expectedHmac, company_id: payloadData.company_id,
+                    customer_id: payloadData.customer_id, amount: saleAmount,
+                    status: "pending", server_timestamp: FieldValue.serverTimestamp()
+                });
+            }
+
+            // Payment reconciliation
+            if (docType === "payment_payable" && payloadData.source_document_id) {
+                transaction.set(db.collection("payable_views").doc(payloadData.source_document_id), { status: "settled", payment_doc: expectedHmac }, { merge: true });
+            }
+            if (docType === "payment_receivable" && payloadData.source_document_id) {
+                transaction.set(db.collection("receivable_views").doc(payloadData.source_document_id), { status: "settled", payment_doc: expectedHmac }, { merge: true });
             }
 
             // 6. Generate Wallet & Inventory Events
@@ -194,8 +230,13 @@ exports.validateDocumentRequest = onDocumentCreated({
                         w.sequence_number += 1;
                         let delta = 0;
                         const et = line.payment_event_type || line.event_type;
-                        if (["deposit", "transfer_received", "deposit_cash_handover", "revenue_cash"].includes(et)) delta = line.amount || line.payment_amount;
-                        else if (["expense", "expense_trip", "expense_purchase", "transfer_initiated"].includes(et)) delta = -(line.amount || line.payment_amount);
+                        if (["deposit", "transfer_received", "revenue_cash", "payment_received"].includes(et)) {
+                            delta = line.payment_amount || line.amount || 0;
+                            if (tripId) tripProfitStats.total_revenue += delta;
+                        } else if (["expense", "expense_trip", "expense_purchase", "transfer_initiated", "payment_made"].includes(et)) {
+                            delta = -(line.payment_amount || line.amount || 0);
+                            if (tripId) tripProfitStats.total_expenses += Math.abs(delta);
+                        }
 
                         if (line.wallet_type === "hub" && w.current_balance + delta < 0) throw new Error("OVERDRAFT_BLOCKED: Hub wallets cannot fall below zero.");
 
@@ -228,6 +269,10 @@ exports.validateDocumentRequest = onDocumentCreated({
                                 const newV = delta * cost;
                                 s.avg_cost = (oldV + newV) / (s.current_balance + delta);
                             }
+                        } else if (line.event_type === "cost_allocation") {
+                            if (s.current_balance > 0) {
+                                s.avg_cost += (line.amount / s.current_balance);
+                            }
                         } else if (["sale_out", "waste_out", "transformation_out", "transfer_initiated"].includes(line.event_type)) {
                             delta = -line.amount; cost = s.avg_cost || 0;
                         }
@@ -245,6 +290,12 @@ exports.validateDocumentRequest = onDocumentCreated({
                         });
                     }
                 });
+            }
+
+            // Update Trip Profit
+            if (tripId) {
+                tripProfitStats.net_profit = tripProfitStats.total_revenue - tripProfitStats.total_expenses;
+                transaction.set(db.collection("trip_profit_views").doc(tripId), { ...tripProfitStats, last_updated: FieldValue.serverTimestamp() }, { merge: true });
             }
 
             // 7. Write back all final states
@@ -285,11 +336,12 @@ exports.validateDocumentRequest = onDocumentCreated({
 
             // 8. Lock Trip if closure
             if (docType === "trip_closure" && tripId) {
-                transaction.set(db.collection("trip_states").doc(tripId), {
-                    status: "closed",
-                    closed_at: FieldValue.serverTimestamp(),
-                    closed_by_doc: expectedHmac
-                }, { merge: true });
+                transaction.set(db.collection("trip_states").doc(tripId), { status: "closed", closed_at: FieldValue.serverTimestamp(), closed_by_doc: expectedHmac }, { merge: true });
+                // Financial Settlement Record
+                transaction.set(db.collection("settlement_views").doc(tripId), {
+                    trip_id: tripId, ...tripProfitStats, status: "settled",
+                    server_timestamp: FieldValue.serverTimestamp()
+                });
             }
         });
 
