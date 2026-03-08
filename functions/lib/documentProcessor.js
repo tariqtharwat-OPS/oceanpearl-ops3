@@ -88,15 +88,36 @@ exports.validateDocumentRequest = onDocumentCreated({
                 invs.set(sid, s.exists ? s.data() : { current_balance: 0, avg_cost: 0, sequence_number: 0 });
             }
 
-            // 3d. Prefetch View Projections & Config (Atomic Reads)
-            let tripProfitDoc = null;
-            if (tripId) tripProfitDoc = await transaction.get(db.collection("trip_profit_views").doc(tripId));
-
             let sourceViewDoc = null;
             if (payloadData.source_document_id && ["payment_payable", "payment_receivable"].includes(docType)) {
                 const coll = docType === "payment_payable" ? "payable_views" : "receivable_views";
                 sourceViewDoc = await transaction.get(db.collection(coll).doc(payloadData.source_document_id));
             }
+
+            // Shard Settings
+            const SHARD_COUNT = 10;
+            const shardId = Math.floor(Math.random() * SHARD_COUNT);
+
+            // Prefetch ALL shards for Trip Profit if closing or processing financial effects
+            const tripProfitShards = [];
+            if (tripId) {
+                for (let i = 0; i < SHARD_COUNT; i++) {
+                    tripProfitShards.push(transaction.get(db.collection("trip_profit_views").doc(`${tripId}__S${i}`)));
+                }
+            }
+            const tripProfitSnaps = tripId ? await Promise.all(tripProfitShards) : [];
+            const aggregateTripProfit = () => {
+                let rev = 0, exp = 0, net = 0;
+                tripProfitSnaps.forEach(s => {
+                    if (s.exists) {
+                        const d = s.data();
+                        rev += (d.total_revenue || 0);
+                        exp += (d.total_expenses || 0);
+                        net += (d.net_profit || 0);
+                    }
+                });
+                return { total_revenue: rev, total_expenses: exp, net_profit: net };
+            };
 
             // Configuration System (Hierarchical Resolution)
             const configIds = ['default'];
@@ -262,8 +283,8 @@ exports.validateDocumentRequest = onDocumentCreated({
                     });
                 }
 
-                // HQ Analytics: Factory Performance
-                const facPerfId = `${payloadData.company_id}__${payloadData.unit_id}`;
+                // HQ Analytics: Factory Performance (SHARDED)
+                const facPerfId = `${payloadData.company_id}__${payloadData.unit_id}__S${shardId}`;
                 transaction.set(db.collection("factory_performance_views").doc(facPerfId), {
                     company_id: payloadData.company_id, location_id: payloadData.location_id, unit_id: payloadData.unit_id,
                     total_input_qty: FieldValue.increment(transOutQty),
@@ -429,9 +450,9 @@ exports.validateDocumentRequest = onDocumentCreated({
                 });
             }
 
-            // Atomic increment of trip profit
+            // Atomic increment of trip profit (SHARDED)
             if (tripId && (revenueDelta !== 0 || expenseDelta !== 0)) {
-                transaction.set(db.collection("trip_profit_views").doc(tripId), {
+                transaction.set(db.collection("trip_profit_views").doc(`${tripId}__S${shardId}`), {
                     company_id: payloadData.company_id, location_id: payloadData.location_id, unit_id: payloadData.unit_id,
                     total_revenue: FieldValue.increment(revenueDelta),
                     total_expenses: FieldValue.increment(expenseDelta),
@@ -505,11 +526,11 @@ exports.validateDocumentRequest = onDocumentCreated({
             // 8. Lock Trip if closure
             if (docType === "trip_closure" && tripId) {
                 transaction.set(db.collection("trip_states").doc(tripId), { status: "closed", closed_at: FieldValue.serverTimestamp(), closed_by_doc: expectedHmac }, { merge: true });
-                // Financial Settlement Record
-                const finalProfit = tripProfitDoc?.exists ? tripProfitDoc.data() : { total_revenue: 0, total_expenses: 0, net_profit: 0 };
+                // Financial Settlement Record (from Aggregated Shards)
+                const finalProfit = aggregateTripProfit();
 
-                // HQ Analytics: Boat Profitability
-                const boatKey = `${payloadData.company_id}__${payloadData.unit_id}`;
+                // HQ Analytics: Boat Profitability (SHARDED)
+                const boatKey = `${payloadData.company_id}__${payloadData.unit_id}__S${shardId}`;
                 transaction.set(db.collection("boat_profit_views").doc(boatKey), {
                     company_id: payloadData.company_id, location_id: payloadData.location_id, unit_id: payloadData.unit_id,
                     total_revenue: FieldValue.increment(finalProfit.total_revenue || 0),
