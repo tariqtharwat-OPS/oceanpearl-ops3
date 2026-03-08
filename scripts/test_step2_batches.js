@@ -108,6 +108,10 @@ async function runSimulation() {
     const batchData = batchDoc.data();
     console.log(`Batch ID: ${batchData.batch_id} (Expected: ${batchId})`);
     console.log(`Operator ID: ${batchData.operator_id} (Expected: ${operatorId})`);
+    console.log(`Factory Unit: ${batchData.factory_unit_id} (Expected: ${unitId})`);
+    console.log(`Company ID: ${batchData.company_id} (Expected: ${companyId})`);
+    console.log(`Location ID: ${batchData.location_id} (Expected: ${locationId})`);
+    console.log(`Unit ID (scope): ${batchData.unit_id} (Expected: ${unitId})`);
     console.log(`Input Qty: ${batchData.input_qty} KG (Expected: 100)`);
     console.log(`Output Qty: ${batchData.output_qty} KG (Expected: 50)`);
     console.log(`Yield Ratio: ${batchData.yield_ratio} (Expected: 0.5)`);
@@ -117,6 +121,9 @@ async function runSimulation() {
     const isMatch = (
         batchData.batch_id === batchId &&
         batchData.operator_id === operatorId &&
+        batchData.company_id === companyId &&
+        batchData.location_id === locationId &&
+        batchData.unit_id === unitId &&
         batchData.input_qty === 100 &&
         batchData.output_qty === 50 &&
         batchData.yield_ratio === 0.5 &&
@@ -125,7 +132,7 @@ async function runSimulation() {
     );
 
     if (isMatch) {
-        console.log("\n✅ SIMULATION SUCCESS: Processing Batch Structure Functional");
+        console.log("\n✅ SIMULATION SUCCESS: Processing Batch Structure Functional (scope fields verified)");
     } else {
         console.log("\n❌ SIMULATION FAILED: Data mismatch detected");
         process.exit(1);
