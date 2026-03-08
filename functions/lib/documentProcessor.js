@@ -56,10 +56,23 @@ exports.validateDocumentRequest = onDocumentCreated({
             const inventoryScopes = [...new Set(lines ? lines.map(l => l.sku_id && l.location_id && l.unit_id ? `${l.location_id}__${l.unit_id}__${l.sku_id}` : null).filter(Boolean) : [])];
 
             const tripId = payloadData.trip_id;
+            const docType = payloadData.document_type;
+
+            // 3a. Trip state validation (context-aware)
             if (tripId) {
                 const ts = await transaction.get(db.collection("trip_states").doc(tripId));
-                if (ts.exists && ts.data().status === "closed") {
-                    throw new Error("TRIP_CLOSED: Cannot modify a closed trip.");
+                const tripStatus = ts.exists ? ts.data().status : null;
+
+                if (docType === "hub_receive_from_boat") {
+                    // Hub receiving REQUIRES the trip to be closed
+                    if (tripStatus !== "closed") {
+                        throw new Error("TRIP_NOT_CLOSED: Hub receive requires a closed boat trip.");
+                    }
+                } else {
+                    // All other document types reject closed trips
+                    if (tripStatus === "closed") {
+                        throw new Error("TRIP_CLOSED: Cannot modify a closed trip.");
+                    }
                 }
             }
 
@@ -74,7 +87,20 @@ exports.validateDocumentRequest = onDocumentCreated({
                 const s = await transaction.get(db.collection("inventory_states").doc(sid));
                 invs.set(sid, s.exists ? s.data() : { current_balance: 0, avg_cost: 0, sequence_number: 0 });
             }
-            logger.info(`[DEBUG] Read phase complete. Wallets: ${wallets.size}, Invs: ${invs.size}`);
+            logger.info(`[DEBUG] Read phase complete. Wallets: ${wallets.size}, Invs: ${invs.size}, docType: ${docType}`);
+
+            // 3b. Hub receive validation: verify source inventory is sufficient
+            if (docType === "hub_receive_from_boat" && lines) {
+                for (const l of lines) {
+                    if (l.event_type === "transfer_initiated") {
+                        const sid = `${l.location_id}__${l.unit_id}__${l.sku_id}`;
+                        const s = invs.get(sid);
+                        if (!s || s.current_balance < l.amount) {
+                            throw new Error(`HUB_RECEIVE_OVERCOUNT: SKU ${l.sku_id} — requested ${l.amount}, boat has ${s ? s.current_balance : 0}`);
+                        }
+                    }
+                }
+            }
 
             // 4. TRANSFORMATION PRE-CALC
             let transValue = 0;
@@ -94,9 +120,8 @@ exports.validateDocumentRequest = onDocumentCreated({
             }
             const transCost = transQty > 0 ? (transValue / transQty) : 0;
             const yieldRatio = transOutQty > 0 ? (transQty / transOutQty) : 0;
-            logger.info(`[DEBUG] Trans pre-calc: cost=${transCost}, yield=${yieldRatio}`);
 
-            // 5. WRITE PHASE
+            // 5. WRITE PHASE — Immutable document
             transaction.set(db.collection("documents").doc(expectedHmac), {
                 ...payloadData,
                 lines: lines || [],
@@ -105,7 +130,7 @@ exports.validateDocumentRequest = onDocumentCreated({
             });
 
             // 5b. Create Processing Batch record if transformation
-            if (payloadData.document_type === "inventory_transformation") {
+            if (docType === "inventory_transformation") {
                 const batchId = payloadData.batch_id || payloadData.document_id;
                 if (batchId) {
                     transaction.set(db.collection("processing_batches").doc(expectedHmac), {
@@ -116,6 +141,7 @@ exports.validateDocumentRequest = onDocumentCreated({
                         company_id: payloadData.company_id,
                         location_id: payloadData.location_id,
                         unit_id: payloadData.factory_unit_id || payloadData.unit_id,
+                        source_receiving_doc: payloadData.source_receiving_doc || null,
                         input_qty: transOutQty,
                         output_qty: transQty,
                         yield_ratio: Math.round(yieldRatio * 10000) / 10000,
@@ -125,6 +151,7 @@ exports.validateDocumentRequest = onDocumentCreated({
                 }
             }
 
+            // 6. Generate Wallet & Inventory Events
             if (lines) {
                 lines.forEach((line, i) => {
                     const baseId = `${expectedHmac}_L${i}`;
@@ -134,8 +161,12 @@ exports.validateDocumentRequest = onDocumentCreated({
                         w.sequence_number += 1;
                         let delta = 0;
                         const et = line.payment_event_type || line.event_type;
-                        if (["deposit", "transfer_received", "revenue_cash"].includes(et)) delta = line.amount || line.payment_amount;
-                        else if (["expense", "transfer_initiated"].includes(et)) delta = -(line.amount || line.payment_amount);
+                        if (["deposit", "transfer_received", "deposit_cash_handover", "revenue_cash"].includes(et)) delta = line.amount || line.payment_amount;
+                        else if (["expense", "expense_trip", "expense_purchase", "transfer_initiated"].includes(et)) delta = -(line.amount || line.payment_amount);
+
+                        if (line.wallet_type === "hub" && w.current_balance + delta < 0) {
+                            throw new Error("OVERDRAFT_BLOCKED: Hub wallets cannot fall below zero.");
+                        }
 
                         w.current_balance += delta;
                         transaction.set(db.collection("wallet_events").doc(`${baseId}_W`), {
@@ -156,7 +187,7 @@ exports.validateDocumentRequest = onDocumentCreated({
                         if (["receive_own", "receive_buy", "transfer_received", "transfer_cancelled"].includes(line.event_type)) {
                             delta = line.amount;
                             if (delta > 0) {
-                                const oldV = s.current_balance * s.avg_cost;
+                                const oldV = s.current_balance * (s.avg_cost || 0);
                                 const newV = delta * cost;
                                 s.avg_cost = (oldV + newV) / (s.current_balance + delta);
                             }
@@ -164,13 +195,13 @@ exports.validateDocumentRequest = onDocumentCreated({
                             delta = line.amount;
                             cost = transCost;
                             if (delta > 0) {
-                                const oldV = s.current_balance * s.avg_cost;
+                                const oldV = s.current_balance * (s.avg_cost || 0);
                                 const newV = delta * cost;
                                 s.avg_cost = (oldV + newV) / (s.current_balance + delta);
                             }
                         } else if (["sale_out", "waste_out", "transformation_out", "transfer_initiated"].includes(line.event_type)) {
                             delta = -line.amount;
-                            cost = s.avg_cost;
+                            cost = s.avg_cost || 0;
                         }
 
                         if (s.current_balance + delta < 0) throw new Error(`STOCK_DEFICIT: ${line.sku_id}`);
@@ -188,14 +219,28 @@ exports.validateDocumentRequest = onDocumentCreated({
                 });
             }
 
+            // 7. Write back all final states
             wallets.forEach((v, k) => transaction.set(db.collection("wallet_states").doc(k), { ...v, last_updated: FieldValue.serverTimestamp() }, { merge: true }));
             invs.forEach((v, k) => {
-                const roundedCost = Math.round(v.avg_cost * 100) / 100;
-                transaction.set(db.collection("inventory_states").doc(k), { ...v, avg_cost: roundedCost, last_updated: FieldValue.serverTimestamp() }, { merge: true });
+                const [locId, unitId, skuId] = k.split("__");
+                const roundedCost = Math.round((v.avg_cost || 0) * 100) / 100;
+                transaction.set(db.collection("inventory_states").doc(k), {
+                    ...v,
+                    location_id: locId,
+                    unit_id: unitId,
+                    sku_id: skuId,
+                    avg_cost: roundedCost,
+                    last_updated: FieldValue.serverTimestamp()
+                }, { merge: true });
             });
 
-            if (payloadData.document_type === "trip_closure" && tripId) {
-                transaction.set(db.collection("trip_states").doc(tripId), { status: "closed", closed_at: FieldValue.serverTimestamp() }, { merge: true });
+            // 8. Lock Trip if closure
+            if (docType === "trip_closure" && tripId) {
+                transaction.set(db.collection("trip_states").doc(tripId), {
+                    status: "closed",
+                    closed_at: FieldValue.serverTimestamp(),
+                    closed_by_doc: expectedHmac
+                }, { merge: true });
             }
         });
 
