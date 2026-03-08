@@ -73,6 +73,14 @@ exports.v3Bootstrap = onCall({ region: 'asia-southeast1' }, async (request) => {
     adminUid: userRecord.uid
   });
 
+  // Seed default configuration (FIX 2)
+  await db.collection('control_config').doc('default').set({
+    payment_tolerance: 100,
+    yield_variance_threshold: 0.10,
+    transfer_delay_hours: 24,
+    last_updated: FieldValue.serverTimestamp()
+  }, { merge: true });
+
   return {
     success: true,
     message: 'Bootstrap completed successfully',

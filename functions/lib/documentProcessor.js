@@ -138,10 +138,10 @@ exports.validateDocumentRequest = onDocumentCreated({
 
             const resolveThresholds = (skuId) => {
                 const base = configMap.get('default') || {
-                    yield_variance_threshold: 0.1,
+                    yield_variance_threshold: 0.10,
                     transfer_delay_hours: 24,
                     max_cost_basis: 1000000,
-                    payment_tolerance: 0 // FIX 5: Default tolerance
+                    payment_tolerance: 100 // FIX 2: Pilot default
                 };
                 const loc = payloadData.location_id ? (configMap.get(`loc__${payloadData.location_id}`) || {}) : {};
                 const unit = payloadData.unit_id ? (configMap.get(`unit__${payloadData.unit_id}`) || {}) : {};

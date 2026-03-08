@@ -44,13 +44,36 @@ exports.ops3Monitor = require("./lib/monitor").ops3Monitor;
 exports.v3Bootstrap = v3Bootstrap;
 exports.v3SeedTestPack = v3SeedTestPack;
 
-const { onCall } = require("firebase-functions/v2/https");
+const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { getTripProfit } = require("./lib/documentProcessor");
 
 exports.getTripProfit = onCall(async (request) => {
-    // Audit compliance: Ensure analyst/admin scope via token
-    if (!request.auth) throw new Error("UNAUTHENTICATED");
-    return await getTripProfit(request.data.trip_id);
+    if (!request.auth) throw new HttpsError("unauthenticated", "AUTH_REQUIRED");
+
+    const db = admin.firestore();
+    const tripId = request.data.trip_id;
+    if (!tripId) throw new HttpsError("invalid-argument", "MISSING_TRIP_ID");
+
+    // 1. Read scope document (use S0 as representative)
+    const docSnap = await db.collection("trip_profit_views").doc(`${tripId}__S0`).get();
+    if (!docSnap.exists) throw new HttpsError("not-found", "TRIP_NOT_FOUND");
+
+    const doc = docSnap.data();
+    const user = request.auth.token;
+    const isHQ = ['hq_analyst', 'admin', 'ceo'].includes(user.role);
+
+    // 2. Validate Scope (FIX 1)
+    if (isHQ) {
+        if (user.company_id !== doc.company_id) {
+            throw new HttpsError("permission-denied", "COMPANY_MISMATCH");
+        }
+    } else {
+        if (user.company_id !== doc.company_id || user.unit_id !== doc.unit_id) {
+            throw new HttpsError("permission-denied", "UNIT_SCOPE_MISMATCH");
+        }
+    }
+
+    return await getTripProfit(tripId);
 });
 
 const logger = require("./lib/logger");
