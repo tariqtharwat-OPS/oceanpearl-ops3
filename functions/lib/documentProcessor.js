@@ -18,7 +18,11 @@ exports.validateDocumentRequest = onDocumentCreated({
     logger.info(`[DEBUG] Processing document_request: ${event.params.requestId}`, { type: data.document_type });
 
     const db = admin.firestore();
-    const HMAC_SECRET = process.env.HMAC_SECRET || "OPS3_PHASE0_DEV_SECRET";
+    const HMAC_SECRET = process.env.HMAC_SECRET;
+    if (!HMAC_SECRET) {
+        logger.error("[CRITICAL] HMAC_SECRET missing from environment. Failing document processing.");
+        throw new Error("SECURITY_CONFIG_ERROR: HMAC_SECRET not set.");
+    }
     const { idempotency_key, nonce, lines, ...payloadData } = data;
 
     // 1. HMAC Validation
@@ -133,7 +137,12 @@ exports.validateDocumentRequest = onDocumentCreated({
             }
 
             const resolveThresholds = (skuId) => {
-                const base = configMap.get('default') || { yield_variance_threshold: 0.1, transfer_delay_hours: 24, max_cost_basis: 1000000 };
+                const base = configMap.get('default') || {
+                    yield_variance_threshold: 0.1,
+                    transfer_delay_hours: 24,
+                    max_cost_basis: 1000000,
+                    payment_tolerance: 0 // FIX 5: Default tolerance
+                };
                 const loc = payloadData.location_id ? (configMap.get(`loc__${payloadData.location_id}`) || {}) : {};
                 const unit = payloadData.unit_id ? (configMap.get(`unit__${payloadData.unit_id}`) || {}) : {};
                 const sku = skuId ? (configMap.get(`sku__${skuId}`) || {}) : {};
@@ -351,8 +360,13 @@ exports.validateDocumentRequest = onDocumentCreated({
                 const pData = sourceViewDoc.data();
                 const outstanding = pData.amount;
                 const payment = lines.reduce((acc, l) => acc + (l.payment_amount || l.amount || 0), 0);
-                if (payment !== outstanding) throw new Error(`PAYMENT_MISMATCH: Outstanding payable is ${outstanding}, attempting to pay ${payment}`);
-                transaction.set(db.collection("payable_views").doc(payloadData.source_document_id), { status: "settled", payment_doc: expectedHmac }, { merge: true });
+
+                // FIX 5: Payment Tolerance
+                const tolerance = config.payment_tolerance || 0;
+                if (Math.abs(payment - outstanding) > tolerance) {
+                    throw new Error(`PAYMENT_OUTSIDE_TOLERANCE: Outstanding payable is ${outstanding}, attempting to pay ${payment}, tolerance is ${tolerance}`);
+                }
+                transaction.set(db.collection("payable_views").doc(payloadData.source_document_id), { status: "settled", payment_doc: expectedHmac, final_payment: payment }, { merge: true });
 
                 if (pData.due_date && new Date(pData.due_date) < new Date()) {
                     transaction.set(db.collection("payable_alerts").doc(expectedHmac), {
@@ -366,8 +380,13 @@ exports.validateDocumentRequest = onDocumentCreated({
                 const rData = sourceViewDoc.data();
                 const outstanding = rData.amount;
                 const payment = lines.reduce((acc, l) => acc + (l.payment_amount || l.amount || 0), 0);
-                if (payment !== outstanding) throw new Error(`PAYMENT_MISMATCH: Outstanding receivable is ${outstanding}, attempting to collect ${payment}`);
-                transaction.set(db.collection("receivable_views").doc(payloadData.source_document_id), { status: "settled", payment_doc: expectedHmac }, { merge: true });
+
+                // FIX 5: Payment Tolerance
+                const tolerance = config.payment_tolerance || 0;
+                if (Math.abs(payment - outstanding) > tolerance) {
+                    throw new Error(`PAYMENT_OUTSIDE_TOLERANCE: Outstanding receivable is ${outstanding}, attempting to collect ${payment}, tolerance is ${tolerance}`);
+                }
+                transaction.set(db.collection("receivable_views").doc(payloadData.source_document_id), { status: "settled", payment_doc: expectedHmac, final_collection: payment }, { merge: true });
 
                 if (rData.due_date && new Date(rData.due_date) < new Date()) {
                     transaction.set(db.collection("receivable_alerts").doc(expectedHmac), {
@@ -526,8 +545,13 @@ exports.validateDocumentRequest = onDocumentCreated({
             // 8. Lock Trip if closure
             if (docType === "trip_closure" && tripId) {
                 transaction.set(db.collection("trip_states").doc(tripId), { status: "closed", closed_at: FieldValue.serverTimestamp(), closed_by_doc: expectedHmac }, { merge: true });
-                // Financial Settlement Record (from Aggregated Shards)
-                const finalProfit = aggregateTripProfit();
+                // Financial Settlement Record (from Aggregated Shards) — FIX 3: Include current deltas
+                const shardProfit = aggregateTripProfit();
+                const finalProfit = {
+                    total_revenue: shardProfit.total_revenue + revenueDelta,
+                    total_expenses: shardProfit.total_expenses + expenseDelta,
+                    net_profit: shardProfit.net_profit + (revenueDelta - expenseDelta)
+                };
 
                 // HQ Analytics: Boat Profitability (SHARDED)
                 const boatKey = `${payloadData.company_id}__${payloadData.unit_id}__S${shardId}`;
@@ -564,3 +588,26 @@ exports.validateDocumentRequest = onDocumentCreated({
         throw err;
     }
 });
+
+/**
+ * FIX 4: Sharded View Aggregation Helper
+ */
+exports.getTripProfit = async (tripId) => {
+    const db = admin.firestore();
+    const SHARD_COUNT = 10;
+    const snaps = [];
+    for (let i = 0; i < SHARD_COUNT; i++) {
+        snaps.push(db.collection("trip_profit_views").doc(`${tripId}__S${i}`).get());
+    }
+    const results = await Promise.all(snaps);
+    let rev = 0, exp = 0, net = 0;
+    results.forEach(s => {
+        if (s.exists) {
+            const d = s.data();
+            rev += (d.total_revenue || 0);
+            exp += (d.total_expenses || 0);
+            net += (d.net_profit || 0);
+        }
+    });
+    return { total_revenue: rev, total_expenses: exp, net_profit: net };
+};

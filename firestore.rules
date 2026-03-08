@@ -11,13 +11,25 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid != null;
     }
 
+    // Role-aware HQ Check (FIX 2)
+    function isHQReader() {
+      return request.auth.token.role in ['hq_analyst', 'admin', 'ceo'];
+    }
+
     // Confirms the data being written or read belongs to the same
     // company/location/unit as the authenticated user's custom claims.
-    // This is the primary scope enforcement guard.
     function matchesScope(data) {
       return (data.company_id  == request.auth.token.company_id)
           && (data.location_id == request.auth.token.location_id)
           && (data.unit_id     == request.auth.token.unit_id);
+    }
+
+    // AUDIT FIX 2: HQ aware scope (Bypass location/unit for managers)
+    function matchesRoleScope(data) {
+      return isAuth() && (
+        (isHQReader() && data.company_id == request.auth.token.company_id) ||
+        matchesScope(data)
+      );
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -145,7 +157,7 @@ service cloud.firestore {
     // ─────────────────────────────────────────────────────────────────────────
 
     match /documents/{docId} {
-      allow read:               if isAuth() && matchesScope(resource.data);
+      allow read:                  if matchesRoleScope(resource.data);
       allow create, update, delete: if false;
     }
 
@@ -164,37 +176,37 @@ service cloud.firestore {
     // ─────────────────────────────────────────────────────────────────────────
 
     match /trip_profit_views/{tripId} {
-      allow read: if isAuth() && matchesScope(resource.data);
+      allow read: if matchesRoleScope(resource.data);
       allow write: if false;
     }
 
     match /payable_views/{docId} {
-      allow read: if isAuth() && matchesScope(resource.data);
+      allow read: if matchesRoleScope(resource.data);
       allow write: if false;
     }
 
     match /receivable_views/{docId} {
-      allow read: if isAuth() && matchesScope(resource.data);
+      allow read: if matchesRoleScope(resource.data);
       allow write: if false;
     }
 
     match /settlement_views/{docId} {
-      allow read: if isAuth() && matchesScope(resource.data);
+      allow read: if matchesRoleScope(resource.data);
       allow write: if false;
     }
 
     match /transfer_views/{docId} {
-      allow read: if isAuth() && matchesScope(resource.data);
+      allow read: if matchesRoleScope(resource.data);
       allow write: if false;
     }
 
     match /stock_views/{stateId} {
-      allow read: if isAuth() && matchesScope(resource.data);
+      allow read: if matchesRoleScope(resource.data);
       allow write: if false;
     }
 
     match /stock_batch_views/{stateId} {
-      allow read: if isAuth() && matchesScope(resource.data);
+      allow read: if matchesRoleScope(resource.data);
       allow write: if false;
     }
 
@@ -203,32 +215,32 @@ service cloud.firestore {
     // ─────────────────────────────────────────────────────────────────────────
 
     match /yield_alerts/{alertId} {
-      allow read: if isAuth() && matchesScope(resource.data);
+      allow read: if matchesRoleScope(resource.data);
       allow write: if false;
     }
 
     match /inventory_anomalies/{docId} {
-      allow read: if isAuth() && matchesScope(resource.data);
+      allow read: if matchesRoleScope(resource.data);
       allow write: if false;
     }
 
     match /transfer_alerts/{docId} {
-      allow read: if isAuth() && matchesScope(resource.data);
+      allow read: if matchesRoleScope(resource.data);
       allow write: if false;
     }
 
     match /payable_alerts/{docId} {
-      allow read: if isAuth() && matchesScope(resource.data);
+      allow read: if matchesRoleScope(resource.data);
       allow write: if false;
     }
 
     match /receivable_alerts/{docId} {
-      allow read: if isAuth() && matchesScope(resource.data);
+      allow read: if matchesRoleScope(resource.data);
       allow write: if false;
     }
 
     match /trip_anomalies/{docId} {
-      allow read: if isAuth() && matchesScope(resource.data);
+      allow read: if matchesRoleScope(resource.data);
       allow write: if false;
     }
 
@@ -246,30 +258,33 @@ service cloud.firestore {
       // All other overrides are scoped to the company and optionally location/unit.
       allow read: if isAuth() && (
         configId == 'default' || 
-        (resource.data.company_id == request.auth.token.company_id &&
-         (!('location_id' in resource.data) || resource.data.location_id == request.auth.token.location_id) &&
-         (!('unit_id' in resource.data) || resource.data.unit_id == request.auth.token.unit_id))
+        (resource.data.company_id == request.auth.token.company_id && (
+           isHQReader() || (
+            (!('location_id' in resource.data) || resource.data.location_id == request.auth.token.location_id) &&
+            (!('unit_id' in resource.data) || resource.data.unit_id == request.auth.token.unit_id)
+           )
+        ))
       );
       allow write: if false;
     }
 
     match /factory_performance_views/{viewId} {
-      allow read: if isAuth() && matchesScope(resource.data);
+      allow read: if matchesRoleScope(resource.data);
       allow write: if false;
     }
 
     match /boat_profit_views/{viewId} {
-      allow read: if isAuth() && matchesScope(resource.data);
+      allow read: if matchesRoleScope(resource.data);
       allow write: if false;
     }
 
     match /inventory_heatmap_views/{viewId} {
-      allow read: if isAuth() && matchesScope(resource.data);
+      allow read: if matchesRoleScope(resource.data);
       allow write: if false;
     }
 
     match /transfer_network_views/{viewId} {
-      allow read: if isAuth() && matchesScope(resource.data);
+      allow read: if matchesRoleScope(resource.data);
       allow write: if false;
     }
 
@@ -278,7 +293,7 @@ service cloud.firestore {
     // ─────────────────────────────────────────────────────────────────────────
 
     match /processing_batches/{batchId} {
-      allow read:  if isAuth() && matchesScope(resource.data);
+      allow read:  if matchesRoleScope(resource.data);
       allow write: if false;
     }
 

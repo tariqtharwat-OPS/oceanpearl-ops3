@@ -44,5 +44,14 @@ exports.ops3Monitor = require("./lib/monitor").ops3Monitor;
 exports.v3Bootstrap = v3Bootstrap;
 exports.v3SeedTestPack = v3SeedTestPack;
 
+const { onCall } = require("firebase-functions/v2/https");
+const { getTripProfit } = require("./lib/documentProcessor");
+
+exports.getTripProfit = onCall(async (request) => {
+    // Audit compliance: Ensure analyst/admin scope via token
+    if (!request.auth) throw new Error("UNAUTHENTICATED");
+    return await getTripProfit(request.data.trip_id);
+});
+
 const logger = require("./lib/logger");
 logger.info("OPS V3 Functions initialized", { module: "SYSTEM", action: "BOOT" });

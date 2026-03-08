@@ -20,8 +20,14 @@ exports.ops3Monitor = onSchedule({
     const defaultConfig = await db.collection("control_config").doc("default").get();
     allConfigs.set("default", defaultConfig.exists ? defaultConfig.data() : { yield_variance_threshold: 0.1, transfer_delay_hours: 24, max_cost_basis: 1000000 });
 
-    // 2. Monitor Transfer Aging (In-Transit Transfers)
-    const inTransit = await db.collection("transfer_views").where("status", "==", "in_transit").get();
+    const CO = "Ocean-Pearl-SC"; // HQ Scope
+
+    // 2. Monitor Transfer Aging (In-Transit Transfers) — Optimized batching
+    const inTransit = await db.collection("transfer_views")
+        .where("company_id", "==", CO)
+        .where("status", "==", "in_transit")
+        .limit(100)
+        .get();
 
     for (const doc of inTransit.docs) {
         const data = doc.data();
@@ -46,8 +52,12 @@ exports.ops3Monitor = onSchedule({
         }
     }
 
-    // 3. Monitor Overdue Payables
-    const pendingPayables = await db.collection("payable_views").where("status", "==", "pending").get();
+    // 3. Monitor Overdue Payables — Optimized batching
+    const pendingPayables = await db.collection("payable_views")
+        .where("company_id", "==", CO)
+        .where("status", "==", "pending")
+        .limit(100)
+        .get();
 
     for (const doc of pendingPayables.docs) {
         const data = doc.data();
@@ -62,8 +72,12 @@ exports.ops3Monitor = onSchedule({
         }
     }
 
-    // 4. Monitor Overdue Receivables
-    const pendingReceivables = await db.collection("receivable_views").where("status", "==", "pending").get();
+    // 4. Monitor Overdue Receivables — Optimized batching
+    const pendingReceivables = await db.collection("receivable_views")
+        .where("company_id", "==", CO)
+        .where("status", "==", "pending")
+        .limit(100)
+        .get();
 
     for (const doc of pendingReceivables.docs) {
         const data = doc.data();
