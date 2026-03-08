@@ -1,5 +1,6 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
+import { FieldValue } from "firebase-admin/firestore";
 import * as crypto from "crypto";
 
 export const validateDocumentRequest = functions.firestore
@@ -108,7 +109,7 @@ export const validateDocumentRequest = functions.firestore
                     idempotency_key,
                     nonce,
                     status: "posted",
-                    server_timestamp: admin.firestore.FieldValue.serverTimestamp()
+                    server_timestamp: FieldValue.serverTimestamp()
                 });
 
                 // 4. Generate Wallet & Inventory Events
@@ -116,18 +117,21 @@ export const validateDocumentRequest = functions.firestore
                     // Pre-calculate Transformation Value for Cost Basis Propagation
                     let transformationTotalValue = 0;
                     let transformationTotalInQty = 0;
+                    let transformationTotalOutQty = 0;
 
                     for (const line of lines) {
                         if (line.event_type === "transformation_out") {
                             const sid = `${line.location_id}__${line.unit_id}__${line.sku_id}`;
                             const is = activeInventory.get(sid);
                             if (is) transformationTotalValue += line.amount * is.avgCost;
+                            transformationTotalOutQty += line.amount;
                         } else if (line.event_type === "transformation_in") {
                             transformationTotalInQty += line.amount;
                         }
                     }
 
                     const derivedTransformationCost = transformationTotalInQty > 0 ? (transformationTotalValue / transformationTotalInQty) : 0;
+                    const yieldRatio = transformationTotalOutQty > 0 ? (transformationTotalInQty / transformationTotalOutQty) : 0;
 
                     for (let i = 0; i < lines.length; i++) {
                         const line = lines[i];
@@ -164,7 +168,7 @@ export const validateDocumentRequest = functions.firestore
                                 event_type: line.payment_event_type,
                                 parent_document_id: expectedHmac,
                                 sequence_number: walletState.sequenceNumber,
-                                server_timestamp: admin.firestore.FieldValue.serverTimestamp()
+                                server_timestamp: FieldValue.serverTimestamp()
                             });
                         }
 
@@ -219,7 +223,28 @@ export const validateDocumentRequest = functions.firestore
                                 unit_cost: costToApply,
                                 parent_document_id: expectedHmac,
                                 sequence_number: invState.sequenceNumber,
-                                server_timestamp: admin.firestore.FieldValue.serverTimestamp()
+                                server_timestamp: FieldValue.serverTimestamp()
+                            });
+                        }
+                    }
+
+                    // 4b. Create Processing Batch record if transformation
+                    if (payloadData.document_type === "inventory_transformation") {
+                        const batchId = payloadData.batch_id || payloadData.document_id;
+                        if (batchId) {
+                            const batchRef = db.collection("processing_batches").doc(expectedHmac);
+                            transaction.set(batchRef, {
+                                batch_id: batchId,
+                                document_id: expectedHmac,
+                                operator_id: payloadData.operator_id || "SYSTEM",
+                                factory_unit_id: payloadData.factory_unit_id || payloadData.unit_id,
+                                location_id: payloadData.location_id,
+                                company_id: payloadData.company_id,
+                                input_qty: transformationTotalOutQty,
+                                output_qty: transformationTotalInQty,
+                                yield_ratio: Math.round(yieldRatio * 10000) / 10000,
+                                status: "posted",
+                                server_timestamp: FieldValue.serverTimestamp()
                             });
                         }
                     }
@@ -232,7 +257,7 @@ export const validateDocumentRequest = functions.firestore
                         wallet_id: wid,
                         sequence_number: state.sequenceNumber,
                         current_balance: state.currentBalance,
-                        last_updated: admin.firestore.FieldValue.serverTimestamp()
+                        last_updated: FieldValue.serverTimestamp()
                     }, { merge: true });
                 }
                 for (const [scopeId, state] of activeInventory.entries()) {
@@ -245,7 +270,7 @@ export const validateDocumentRequest = functions.firestore
                         sequence_number: state.sequenceNumber,
                         current_balance: state.currentBalance,
                         avg_cost: Math.round(state.avgCost * 100) / 100, // Round to 2 decimals
-                        last_updated: admin.firestore.FieldValue.serverTimestamp()
+                        last_updated: FieldValue.serverTimestamp()
                     }, { merge: true });
                 }
 
@@ -254,7 +279,7 @@ export const validateDocumentRequest = functions.firestore
                     const tripStateRef = db.collection("trip_states").doc(tripId);
                     transaction.set(tripStateRef, {
                         status: "closed",
-                        closed_at: admin.firestore.FieldValue.serverTimestamp(),
+                        closed_at: FieldValue.serverTimestamp(),
                         closed_by_doc: expectedHmac
                     }, { merge: true });
                 }

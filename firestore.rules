@@ -160,6 +160,15 @@ service cloud.firestore {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // INDUSTRIAL PROCESSING COLLECTIONS (read-only for clients)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    match /processing_batches/{batchId} {
+      allow read:  if isAuth() && matchesScope(resource.data);
+      allow write: if false;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // DEFAULT DENY — catches all unlisted collections
     // ─────────────────────────────────────────────────────────────────────────
 
