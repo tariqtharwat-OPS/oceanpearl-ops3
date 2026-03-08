@@ -88,9 +88,15 @@ exports.validateDocumentRequest = onDocumentCreated({
                 invs.set(sid, s.exists ? s.data() : { current_balance: 0, avg_cost: 0, sequence_number: 0 });
             }
 
-            // 3d. Prefetch Settlement Views if applicable
+            // 3d. Prefetch View Projections (Atomic Reads)
             let tripProfitDoc = null;
             if (tripId) tripProfitDoc = await transaction.get(db.collection("trip_profit_views").doc(tripId));
+
+            let sourceViewDoc = null;
+            if (payloadData.source_document_id && ["payment_payable", "payment_receivable"].includes(docType)) {
+                const coll = docType === "payment_payable" ? "payable_views" : "receivable_views";
+                sourceViewDoc = await transaction.get(db.collection(coll).doc(payloadData.source_document_id));
+            }
 
             logger.info(`[DEBUG] Read phase complete. Wallets: ${wallets.size}, Invs: ${invs.size}, docType: ${docType}`);
 
@@ -183,12 +189,11 @@ exports.validateDocumentRequest = onDocumentCreated({
             }
 
             // 5c. SETTLEMENT & VIEW PROJECTIONS
-            let tripProfitStats = tripProfitDoc?.exists ? tripProfitDoc.data() : { total_revenue: 0, total_expenses: 0, net_profit: 0 };
-
             if (docType === "transfer_interlocation" && lines) {
                 const toLoc = lines.find(l => l.event_type === "transfer_received")?.location_id;
                 transaction.set(db.collection("transfer_views").doc(expectedHmac), {
                     document_id: expectedHmac, company_id: payloadData.company_id,
+                    location_id: payloadData.location_id, unit_id: payloadData.unit_id,
                     from_location: payloadData.location_id, to_location: toLoc || null,
                     status: "in_transit", lineage, last_updated: FieldValue.serverTimestamp()
                 });
@@ -199,6 +204,7 @@ exports.validateDocumentRequest = onDocumentCreated({
                 const purchaseAmount = lines.reduce((acc, l) => acc + (l.amount * (l.unit_cost || 0)), 0);
                 transaction.set(db.collection("payable_views").doc(expectedHmac), {
                     document_id: expectedHmac, company_id: payloadData.company_id,
+                    location_id: payloadData.location_id, unit_id: payloadData.unit_id,
                     supplier_id: payloadData.supplier_id, amount: purchaseAmount,
                     status: "pending", server_timestamp: FieldValue.serverTimestamp()
                 });
@@ -207,24 +213,33 @@ exports.validateDocumentRequest = onDocumentCreated({
                 const saleAmount = lines.reduce((acc, l) => acc + (l.amount * (l.unit_price || 0)), 0);
                 transaction.set(db.collection("receivable_views").doc(expectedHmac), {
                     document_id: expectedHmac, company_id: payloadData.company_id,
+                    location_id: payloadData.location_id, unit_id: payloadData.unit_id,
                     customer_id: payloadData.customer_id, amount: saleAmount,
                     status: "pending", server_timestamp: FieldValue.serverTimestamp()
                 });
             }
 
-            // Payment reconciliation
+            // Payment reconciliation with amount validation
             if (docType === "payment_payable" && payloadData.source_document_id) {
+                if (!sourceViewDoc?.exists) throw new Error("PAYABLE_NOT_FOUND");
+                const outstanding = sourceViewDoc.data().amount;
+                const payment = lines.reduce((acc, l) => acc + (l.payment_amount || l.amount || 0), 0);
+                if (payment !== outstanding) throw new Error(`PAYMENT_MISMATCH: Outstanding payable is ${outstanding}, attempting to pay ${payment}`);
                 transaction.set(db.collection("payable_views").doc(payloadData.source_document_id), { status: "settled", payment_doc: expectedHmac }, { merge: true });
             }
             if (docType === "payment_receivable" && payloadData.source_document_id) {
+                if (!sourceViewDoc?.exists) throw new Error("RECEIVABLE_NOT_FOUND");
+                const outstanding = sourceViewDoc.data().amount;
+                const payment = lines.reduce((acc, l) => acc + (l.payment_amount || l.amount || 0), 0);
+                if (payment !== outstanding) throw new Error(`PAYMENT_MISMATCH: Outstanding receivable is ${outstanding}, attempting to collect ${payment}`);
                 transaction.set(db.collection("receivable_views").doc(payloadData.source_document_id), { status: "settled", payment_doc: expectedHmac }, { merge: true });
             }
 
             // 6. Generate Wallet & Inventory Events
+            let revenueDelta = 0, expenseDelta = 0;
             if (lines) {
                 lines.forEach((line, i) => {
                     const baseId = `${expectedHmac}_L${i}`;
-
                     if (line.wallet_id) {
                         const w = wallets.get(line.wallet_id);
                         w.sequence_number += 1;
@@ -232,21 +247,14 @@ exports.validateDocumentRequest = onDocumentCreated({
                         const et = line.payment_event_type || line.event_type;
                         if (["deposit", "transfer_received", "revenue_cash", "payment_received"].includes(et)) {
                             delta = line.payment_amount || line.amount || 0;
-                            if (tripId) tripProfitStats.total_revenue += delta;
+                            revenueDelta += delta;
                         } else if (["expense", "expense_trip", "expense_purchase", "transfer_initiated", "payment_made"].includes(et)) {
                             delta = -(line.payment_amount || line.amount || 0);
-                            if (tripId) tripProfitStats.total_expenses += Math.abs(delta);
+                            expenseDelta += Math.abs(delta);
                         }
-
                         if (line.wallet_type === "hub" && w.current_balance + delta < 0) throw new Error("OVERDRAFT_BLOCKED: Hub wallets cannot fall below zero.");
-
                         w.current_balance += delta;
-                        transaction.set(db.collection("wallet_events").doc(`${baseId}_W`), {
-                            ...line,
-                            parent_document_id: expectedHmac,
-                            sequence_number: w.sequence_number,
-                            server_timestamp: FieldValue.serverTimestamp()
-                        });
+                        transaction.set(db.collection("wallet_events").doc(`${baseId}_W`), { ...line, parent_document_id: expectedHmac, sequence_number: w.sequence_number, server_timestamp: FieldValue.serverTimestamp() });
                     }
 
                     if (line.sku_id) {
@@ -292,10 +300,15 @@ exports.validateDocumentRequest = onDocumentCreated({
                 });
             }
 
-            // Update Trip Profit
-            if (tripId) {
-                tripProfitStats.net_profit = tripProfitStats.total_revenue - tripProfitStats.total_expenses;
-                transaction.set(db.collection("trip_profit_views").doc(tripId), { ...tripProfitStats, last_updated: FieldValue.serverTimestamp() }, { merge: true });
+            // Atomic increment of trip profit
+            if (tripId && (revenueDelta !== 0 || expenseDelta !== 0)) {
+                transaction.set(db.collection("trip_profit_views").doc(tripId), {
+                    company_id: payloadData.company_id, location_id: payloadData.location_id, unit_id: payloadData.unit_id,
+                    total_revenue: FieldValue.increment(revenueDelta),
+                    total_expenses: FieldValue.increment(expenseDelta),
+                    net_profit: FieldValue.increment(revenueDelta - expenseDelta),
+                    last_updated: FieldValue.serverTimestamp()
+                }, { merge: true });
             }
 
             // 7. Write back all final states
@@ -338,9 +351,10 @@ exports.validateDocumentRequest = onDocumentCreated({
             if (docType === "trip_closure" && tripId) {
                 transaction.set(db.collection("trip_states").doc(tripId), { status: "closed", closed_at: FieldValue.serverTimestamp(), closed_by_doc: expectedHmac }, { merge: true });
                 // Financial Settlement Record
+                const finalProfit = tripProfitDoc?.exists ? tripProfitDoc.data() : { total_revenue: 0, total_expenses: 0, net_profit: 0 };
                 transaction.set(db.collection("settlement_views").doc(tripId), {
-                    trip_id: tripId, ...tripProfitStats, status: "settled",
-                    server_timestamp: FieldValue.serverTimestamp()
+                    trip_id: tripId, company_id: payloadData.company_id, location_id: payloadData.location_id, unit_id: payloadData.unit_id,
+                    ...finalProfit, status: "settled", server_timestamp: FieldValue.serverTimestamp()
                 });
             }
         });

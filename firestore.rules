@@ -160,6 +160,45 @@ service cloud.firestore {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // HQ VIEW COLLECTIONS (read-only for clients, scope-enforced)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    match /trip_profit_views/{tripId} {
+      allow read: if isAuth() && matchesScope(resource.data);
+      allow write: if false;
+    }
+
+    match /payable_views/{docId} {
+      allow read: if isAuth() && matchesScope(resource.data);
+      allow write: if false;
+    }
+
+    match /receivable_views/{docId} {
+      allow read: if isAuth() && matchesScope(resource.data);
+      allow write: if false;
+    }
+
+    match /settlement_views/{docId} {
+      allow read: if isAuth() && matchesScope(resource.data);
+      allow write: if false;
+    }
+
+    match /transfer_views/{docId} {
+      allow read: if isAuth() && matchesScope(resource.data);
+      allow write: if false;
+    }
+
+    match /stock_views/{stateId} {
+      allow read: if isAuth() && matchesScope(resource.data);
+      allow write: if false;
+    }
+
+    match /stock_batch_views/{stateId} {
+      allow read: if isAuth() && matchesScope(resource.data);
+      allow write: if false;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // INDUSTRIAL PROCESSING COLLECTIONS (read-only for clients)
     // ─────────────────────────────────────────────────────────────────────────
 
