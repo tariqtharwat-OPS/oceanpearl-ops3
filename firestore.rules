@@ -199,6 +199,45 @@ service cloud.firestore {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // PHASE 5 — OPERATIONAL CONTROL COLLECTIONS (read-only for clients)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    match /yield_alerts/{alertId} {
+      allow read: if isAuth() && matchesScope(resource.data);
+      allow write: if false;
+    }
+
+    match /inventory_anomalies/{docId} {
+      allow read: if isAuth() && matchesScope(resource.data);
+      allow write: if false;
+    }
+
+    match /transfer_alerts/{docId} {
+      allow read: if isAuth() && matchesScope(resource.data);
+      allow write: if false;
+    }
+
+    match /payable_alerts/{docId} {
+      allow read: if isAuth() && matchesScope(resource.data);
+      allow write: if false;
+    }
+
+    match /receivable_alerts/{docId} {
+      allow read: if isAuth() && matchesScope(resource.data);
+      allow write: if false;
+    }
+
+    match /trip_anomalies/{docId} {
+      allow read: if isAuth() && matchesScope(resource.data);
+      allow write: if false;
+    }
+
+    match /cost_anomalies/{docId} {
+      allow read: if isAuth() && matchesScope(resource.data);
+      allow write: if false;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // INDUSTRIAL PROCESSING COLLECTIONS (read-only for clients)
     // ─────────────────────────────────────────────────────────────────────────
 

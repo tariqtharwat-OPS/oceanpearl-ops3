@@ -103,18 +103,19 @@ exports.validateDocumentRequest = onDocumentCreated({
             // 3b. Lineage Inheritance (Automatic)
             logger.info(`[TRACE] Inheriting lineage for ${expectedHmac}`, { sourceDocId: payloadData.source_document_id || payloadData.source_receiving_doc });
             let inheritedLineage = {};
+            let sourceDocData = null;
             const sourceDocId = payloadData.source_document_id || payloadData.source_receiving_doc;
             if (sourceDocId) {
                 const sourceDoc = await transaction.get(db.collection("documents").doc(sourceDocId));
                 if (sourceDoc.exists) {
-                    const sd = sourceDoc.data();
-                    const sLineage = sd.lineage || {};
+                    sourceDocData = sourceDoc.data();
+                    const sLineage = sourceDocData.lineage || {};
                     inheritedLineage = {
-                        trip_id: sd.trip_id || sLineage.trip_id,
-                        batch_id: sd.batch_id || sLineage.batch_id,
-                        origin_location_id: sd.origin_location_id || sd.location_id || sLineage.origin_location_id,
-                        origin_unit_id: sd.origin_unit_id || sd.unit_id || sLineage.origin_unit_id,
-                        source_receiving_doc: sd.source_receiving_doc || (sd.document_type === "hub_receive_from_boat" ? sourceDocId : sLineage.source_receiving_doc)
+                        trip_id: sourceDocData.trip_id || sLineage.trip_id,
+                        batch_id: sourceDocData.batch_id || sLineage.batch_id,
+                        origin_location_id: sourceDocData.origin_location_id || sourceDocData.location_id || sLineage.origin_location_id,
+                        origin_unit_id: sourceDocData.origin_unit_id || sourceDocData.unit_id || sLineage.origin_unit_id,
+                        source_receiving_doc: sourceDocData.source_receiving_doc || (sourceDocData.document_type === "hub_receive_from_boat" ? sourceDocId : sLineage.source_receiving_doc)
                     };
                 }
             }
@@ -135,6 +136,18 @@ exports.validateDocumentRequest = onDocumentCreated({
                         if (!s || s.current_balance < l.amount) {
                             throw new Error(`HUB_RECEIVE_OVERCOUNT: SKU ${l.sku_id} — requested ${l.amount}, boat has ${s ? s.current_balance : 0}`);
                         }
+                    }
+                }
+
+                // Control 3: Transfer Aging
+                if (sourceDocData && sourceDocData.server_timestamp) {
+                    const ageHours = (Date.now() - sourceDocData.server_timestamp.toDate().getTime()) / (1000 * 60 * 60);
+                    if (ageHours > 24) {
+                        transaction.set(db.collection("transfer_alerts").doc(expectedHmac), {
+                            company_id: payloadData.company_id, location_id: payloadData.location_id, unit_id: payloadData.unit_id,
+                            document_id: expectedHmac, source_document_id: sourceDocId, age_hours: Math.round(ageHours),
+                            type: "TRANSFER_DELAYED", timestamp: FieldValue.serverTimestamp()
+                        });
                     }
                 }
             }
@@ -186,6 +199,19 @@ exports.validateDocumentRequest = onDocumentCreated({
                     waste_ratio: transOutQty > 0 ? Math.round((wasteQty / transOutQty) * 10000) / 10000 : 0,
                     status: "posted", server_timestamp: FieldValue.serverTimestamp()
                 });
+
+                // Control 1: Yield Variance Alerts
+                const expectedYield = payloadData.expected_yield_ratio || 0.8;
+                const variance = Math.abs(yieldRatio - expectedYield);
+                if (variance > 0.1) {
+                    transaction.set(db.collection("yield_alerts").doc(expectedHmac), {
+                        company_id: payloadData.company_id, location_id: payloadData.location_id, unit_id: payloadData.unit_id,
+                        batch_id: bId, expected_ratio: expectedYield, actual_ratio: yieldRatio,
+                        variance: Math.round(variance * 10000) / 10000,
+                        severity: variance > 0.3 ? "CRITICAL" : "WARNING",
+                        timestamp: FieldValue.serverTimestamp()
+                    });
+                }
             }
 
             // 5c. SETTLEMENT & VIEW PROJECTIONS
@@ -195,7 +221,9 @@ exports.validateDocumentRequest = onDocumentCreated({
                     document_id: expectedHmac, company_id: payloadData.company_id,
                     location_id: payloadData.location_id, unit_id: payloadData.unit_id,
                     from_location: payloadData.location_id, to_location: toLoc || null,
-                    status: "in_transit", lineage, last_updated: FieldValue.serverTimestamp()
+                    status: "in_transit", lineage,
+                    initiated_at: FieldValue.serverTimestamp(),
+                    last_updated: FieldValue.serverTimestamp()
                 });
             }
 
@@ -206,8 +234,16 @@ exports.validateDocumentRequest = onDocumentCreated({
                     document_id: expectedHmac, company_id: payloadData.company_id,
                     location_id: payloadData.location_id, unit_id: payloadData.unit_id,
                     supplier_id: payloadData.supplier_id, amount: purchaseAmount,
+                    due_date: payloadData.due_date || null,
                     status: "pending", server_timestamp: FieldValue.serverTimestamp()
                 });
+
+                if (payloadData.due_date && new Date(payloadData.due_date) < new Date()) {
+                    transaction.set(db.collection("payable_alerts").doc(expectedHmac), {
+                        company_id: payloadData.company_id, location_id: payloadData.location_id, unit_id: payloadData.unit_id,
+                        document_id: expectedHmac, type: "OVERDUE_AT_CREATION", timestamp: FieldValue.serverTimestamp()
+                    });
+                }
             }
             if (payloadData.customer_id && payloadData.is_credit) {
                 const saleAmount = lines.reduce((acc, l) => acc + (l.amount * (l.unit_price || 0)), 0);
@@ -215,24 +251,48 @@ exports.validateDocumentRequest = onDocumentCreated({
                     document_id: expectedHmac, company_id: payloadData.company_id,
                     location_id: payloadData.location_id, unit_id: payloadData.unit_id,
                     customer_id: payloadData.customer_id, amount: saleAmount,
+                    due_date: payloadData.due_date || null,
                     status: "pending", server_timestamp: FieldValue.serverTimestamp()
                 });
+
+                if (payloadData.due_date && new Date(payloadData.due_date) < new Date()) {
+                    transaction.set(db.collection("receivable_alerts").doc(expectedHmac), {
+                        company_id: payloadData.company_id, location_id: payloadData.location_id, unit_id: payloadData.unit_id,
+                        document_id: expectedHmac, type: "OVERDUE_AT_CREATION", timestamp: FieldValue.serverTimestamp()
+                    });
+                }
             }
 
             // Payment reconciliation with amount validation
             if (docType === "payment_payable" && payloadData.source_document_id) {
                 if (!sourceViewDoc?.exists) throw new Error("PAYABLE_NOT_FOUND");
-                const outstanding = sourceViewDoc.data().amount;
+                const pData = sourceViewDoc.data();
+                const outstanding = pData.amount;
                 const payment = lines.reduce((acc, l) => acc + (l.payment_amount || l.amount || 0), 0);
                 if (payment !== outstanding) throw new Error(`PAYMENT_MISMATCH: Outstanding payable is ${outstanding}, attempting to pay ${payment}`);
                 transaction.set(db.collection("payable_views").doc(payloadData.source_document_id), { status: "settled", payment_doc: expectedHmac }, { merge: true });
+
+                if (pData.due_date && new Date(pData.due_date) < new Date()) {
+                    transaction.set(db.collection("payable_alerts").doc(expectedHmac), {
+                        company_id: payloadData.company_id, location_id: payloadData.location_id, unit_id: payloadData.unit_id,
+                        document_id: payloadData.source_document_id, type: "LATE_PAYMENT", timestamp: FieldValue.serverTimestamp()
+                    });
+                }
             }
             if (docType === "payment_receivable" && payloadData.source_document_id) {
                 if (!sourceViewDoc?.exists) throw new Error("RECEIVABLE_NOT_FOUND");
-                const outstanding = sourceViewDoc.data().amount;
+                const rData = sourceViewDoc.data();
+                const outstanding = rData.amount;
                 const payment = lines.reduce((acc, l) => acc + (l.payment_amount || l.amount || 0), 0);
                 if (payment !== outstanding) throw new Error(`PAYMENT_MISMATCH: Outstanding receivable is ${outstanding}, attempting to collect ${payment}`);
                 transaction.set(db.collection("receivable_views").doc(payloadData.source_document_id), { status: "settled", payment_doc: expectedHmac }, { merge: true });
+
+                if (rData.due_date && new Date(rData.due_date) < new Date()) {
+                    transaction.set(db.collection("receivable_alerts").doc(expectedHmac), {
+                        company_id: payloadData.company_id, location_id: payloadData.location_id, unit_id: payloadData.unit_id,
+                        document_id: payloadData.source_document_id, type: "LATE_COLLECTION", timestamp: FieldValue.serverTimestamp()
+                    });
+                }
             }
 
             // 6. Generate Wallet & Inventory Events
@@ -333,6 +393,24 @@ exports.validateDocumentRequest = onDocumentCreated({
                     last_updated: FieldValue.serverTimestamp()
                 });
 
+                // Control 2: Inventory Anomalies
+                if (v.current_balance < 0) {
+                    transaction.set(db.collection("inventory_anomalies").doc(`${k}__NEG`), {
+                        company_id: payloadData.company_id, location_id: locId, unit_id: unitId, sku_id: skuId,
+                        balance: v.current_balance, type: "NEGATIVE_BALANCE",
+                        timestamp: FieldValue.serverTimestamp()
+                    });
+                }
+
+                // Control 6: Cost Integrity
+                if (roundedCost > 1000000) {
+                    transaction.set(db.collection("cost_anomalies").doc(`${k}__COST`), {
+                        company_id: payloadData.company_id, location_id: locId, unit_id: unitId, sku_id: skuId,
+                        avg_cost: roundedCost, type: "HIGH_COST_BASIS",
+                        timestamp: FieldValue.serverTimestamp()
+                    });
+                }
+
                 // Batch-specific Stock View for HQ
                 if (lineage.batch_id && v.current_balance > 0) {
                     const bk = `${k}__${lineage.batch_id}`;
@@ -352,6 +430,16 @@ exports.validateDocumentRequest = onDocumentCreated({
                 transaction.set(db.collection("trip_states").doc(tripId), { status: "closed", closed_at: FieldValue.serverTimestamp(), closed_by_doc: expectedHmac }, { merge: true });
                 // Financial Settlement Record
                 const finalProfit = tripProfitDoc?.exists ? tripProfitDoc.data() : { total_revenue: 0, total_expenses: 0, net_profit: 0 };
+
+                // Control 5: Trip Settlement Verification
+                if (Math.abs(finalProfit.total_revenue - finalProfit.total_expenses - finalProfit.net_profit) > 1) {
+                    transaction.set(db.collection("trip_anomalies").doc(tripId), {
+                        company_id: payloadData.company_id, location_id: payloadData.location_id, unit_id: payloadData.unit_id,
+                        trip_id: tripId, revenue: finalProfit.total_revenue, expenses: finalProfit.total_expenses, profit: finalProfit.net_profit,
+                        type: "P&L_MISMATCH", timestamp: FieldValue.serverTimestamp()
+                    });
+                }
+
                 transaction.set(db.collection("settlement_views").doc(tripId), {
                     trip_id: tripId, company_id: payloadData.company_id, location_id: payloadData.location_id, unit_id: payloadData.unit_id,
                     ...finalProfit, status: "settled", server_timestamp: FieldValue.serverTimestamp()
