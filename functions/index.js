@@ -60,7 +60,8 @@ exports.getTripProfit = onCall(async (request) => {
 
     const doc = docSnap.data();
     const user = request.auth.token;
-    const isHQ = ['hq_analyst', 'admin', 'ceo'].includes(user.role);
+    const userRole = (user && user.role) ? user.role.toLowerCase() : '';
+    const isHQ = ['hq_analyst', 'admin', 'ceo'].includes(userRole);
 
     // 2. Validate Scope (FIX 1)
     if (isHQ) {

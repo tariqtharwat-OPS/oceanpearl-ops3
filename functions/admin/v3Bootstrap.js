@@ -55,10 +55,10 @@ exports.v3Bootstrap = onCall({ region: 'asia-southeast1' }, async (request) => {
     }
   }
 
-  // Create Firestore user profile with ADMIN role
+  // Create Firestore user profile with ADMIN role (Standardized to lowercase)
   await db.collection('v3_users').doc(userRecord.uid).set({
     email: adminEmail,
-    role: 'ADMIN',
+    role: 'admin',
     displayName: 'CEO Ocean Pearl',
     allowedLocationIds: [],
     allowedUnitIds: [],
