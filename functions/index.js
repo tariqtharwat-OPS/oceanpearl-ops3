@@ -38,6 +38,9 @@ exports.validateDocumentRequest = require("./lib/documentProcessor").validateDoc
 // Export Admin functions
 const { v3Bootstrap } = require("./admin/v3Bootstrap");
 const { v3SeedTestPack } = require("./admin/v3SeedTestPack");
+
+// Phase 6 Monitor
+exports.ops3Monitor = require("./lib/monitor").ops3Monitor;
 exports.v3Bootstrap = v3Bootstrap;
 exports.v3SeedTestPack = v3SeedTestPack;
 

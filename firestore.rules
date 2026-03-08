@@ -238,6 +238,35 @@ service cloud.firestore {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // PHASE 6 — HQ ANALYTICS & CONFIGURATION (read-only for clients)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    match /control_config/{configId} {
+      allow read: if isAuth(); // Global system configs
+      allow write: if false;
+    }
+
+    match /factory_performance_views/{viewId} {
+      allow read: if isAuth() && matchesScope(resource.data);
+      allow write: if false;
+    }
+
+    match /boat_profit_views/{viewId} {
+      allow read: if isAuth() && matchesScope(resource.data);
+      allow write: if false;
+    }
+
+    match /inventory_heatmap_views/{viewId} {
+      allow read: if isAuth() && matchesScope(resource.data);
+      allow write: if false;
+    }
+
+    match /transfer_network_views/{viewId} {
+      allow read: if isAuth() && matchesScope(resource.data);
+      allow write: if false;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // INDUSTRIAL PROCESSING COLLECTIONS (read-only for clients)
     // ─────────────────────────────────────────────────────────────────────────
 

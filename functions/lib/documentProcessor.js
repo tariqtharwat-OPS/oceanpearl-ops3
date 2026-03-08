@@ -88,7 +88,7 @@ exports.validateDocumentRequest = onDocumentCreated({
                 invs.set(sid, s.exists ? s.data() : { current_balance: 0, avg_cost: 0, sequence_number: 0 });
             }
 
-            // 3d. Prefetch View Projections (Atomic Reads)
+            // 3d. Prefetch View Projections & Config (Atomic Reads)
             let tripProfitDoc = null;
             if (tripId) tripProfitDoc = await transaction.get(db.collection("trip_profit_views").doc(tripId));
 
@@ -97,6 +97,15 @@ exports.validateDocumentRequest = onDocumentCreated({
                 const coll = docType === "payment_payable" ? "payable_views" : "receivable_views";
                 sourceViewDoc = await transaction.get(db.collection(coll).doc(payloadData.source_document_id));
             }
+
+            // Configuration System (Dynamic Thresholds)
+            const configSnap = await transaction.get(db.collection("control_config").doc("default"));
+            const config = configSnap.exists ? configSnap.data() : {
+                yield_variance_threshold: 0.1,
+                transfer_delay_hours: 24,
+                max_cost_basis: 1000000,
+                overdue_days: 0
+            };
 
             logger.info(`[DEBUG] Read phase complete. Wallets: ${wallets.size}, Invs: ${invs.size}, docType: ${docType}`);
 
@@ -142,13 +151,40 @@ exports.validateDocumentRequest = onDocumentCreated({
                 // Control 3: Transfer Aging
                 if (sourceDocData && sourceDocData.server_timestamp) {
                     const ageHours = (Date.now() - sourceDocData.server_timestamp.toDate().getTime()) / (1000 * 60 * 60);
-                    if (ageHours > 24) {
+                    if (ageHours > config.transfer_delay_hours) {
                         transaction.set(db.collection("transfer_alerts").doc(expectedHmac), {
                             company_id: payloadData.company_id, location_id: payloadData.location_id, unit_id: payloadData.unit_id,
                             document_id: expectedHmac, source_document_id: sourceDocId, age_hours: Math.round(ageHours),
                             type: "TRANSFER_DELAYED", timestamp: FieldValue.serverTimestamp()
                         });
                     }
+
+                    // HQ Analytics: Transfer Network (Inter-location)
+                    const toLoc = payloadData.location_id;
+                    const fromLoc = sourceDocData.location_id;
+                    const netKey = `${payloadData.company_id}__${fromLoc}__${toLoc}`;
+                    transaction.set(db.collection("transfer_network_views").doc(netKey), {
+                        company_id: payloadData.company_id,
+                        from_location: fromLoc,
+                        to_location: toLoc,
+                        transfer_count: FieldValue.increment(1),
+                        total_age_hours: FieldValue.increment(ageHours),
+                        last_updated: FieldValue.serverTimestamp()
+                    }, { merge: true });
+                }
+            }
+
+            if (docType === "transfer_interlocation" && lines) {
+                const toLoc = lines.find(l => l.event_type === "transfer_received")?.location_id;
+                if (toLoc) {
+                    const netKey = `${payloadData.company_id}__${payloadData.location_id}__${toLoc}`;
+                    transaction.set(db.collection("transfer_network_views").doc(netKey), {
+                        company_id: payloadData.company_id,
+                        from_location: payloadData.location_id,
+                        to_location: toLoc,
+                        transfer_count: FieldValue.increment(1),
+                        last_updated: FieldValue.serverTimestamp()
+                    }, { merge: true });
                 }
             }
 
@@ -203,15 +239,25 @@ exports.validateDocumentRequest = onDocumentCreated({
                 // Control 1: Yield Variance Alerts
                 const expectedYield = payloadData.expected_yield_ratio || 0.8;
                 const variance = Math.abs(yieldRatio - expectedYield);
-                if (variance > 0.1) {
+                if (variance > config.yield_variance_threshold) {
                     transaction.set(db.collection("yield_alerts").doc(expectedHmac), {
                         company_id: payloadData.company_id, location_id: payloadData.location_id, unit_id: payloadData.unit_id,
                         batch_id: bId, expected_ratio: expectedYield, actual_ratio: yieldRatio,
                         variance: Math.round(variance * 10000) / 10000,
-                        severity: variance > 0.3 ? "CRITICAL" : "WARNING",
+                        severity: variance > (config.yield_variance_threshold * 3) ? "CRITICAL" : "WARNING",
                         timestamp: FieldValue.serverTimestamp()
                     });
                 }
+
+                // HQ Analytics: Factory Performance
+                const facPerfId = `${payloadData.company_id}__${payloadData.unit_id}`;
+                transaction.set(db.collection("factory_performance_views").doc(facPerfId), {
+                    company_id: payloadData.company_id, location_id: payloadData.location_id, unit_id: payloadData.unit_id,
+                    total_input_qty: FieldValue.increment(transOutQty),
+                    total_output_qty: FieldValue.increment(transQty),
+                    processing_volume: FieldValue.increment(1),
+                    last_updated: FieldValue.serverTimestamp()
+                }, { merge: true });
             }
 
             // 5c. SETTLEMENT & VIEW PROJECTIONS
@@ -302,6 +348,10 @@ exports.validateDocumentRequest = onDocumentCreated({
                     const baseId = `${expectedHmac}_L${i}`;
                     if (line.wallet_id) {
                         const w = wallets.get(line.wallet_id);
+                        if (!w) {
+                            logger.error(`[CRITICAL] Wallet not found in pre-fetched map: ${line.wallet_id}. Pre-fetched keys: ${Array.from(wallets.keys())}`);
+                            throw new Error(`WALLET_NOT_FOUND_IN_TRANSACTION: ${line.wallet_id}`);
+                        }
                         w.sequence_number += 1;
                         let delta = 0;
                         const et = line.payment_event_type || line.event_type;
@@ -317,9 +367,13 @@ exports.validateDocumentRequest = onDocumentCreated({
                         transaction.set(db.collection("wallet_events").doc(`${baseId}_W`), { ...line, parent_document_id: expectedHmac, sequence_number: w.sequence_number, server_timestamp: FieldValue.serverTimestamp() });
                     }
 
-                    if (line.sku_id) {
+                    if (line.sku_id && line.location_id && line.unit_id) {
                         const sid = `${line.location_id}__${line.unit_id}__${line.sku_id}`;
                         const s = invs.get(sid);
+                        if (!s) {
+                            logger.warn(`[WARN] Inventory scope not pre-fetched: ${sid}`);
+                            return;
+                        }
                         s.sequence_number += 1;
                         let delta = 0, cost = line.unit_cost || 0;
 
@@ -403,13 +457,20 @@ exports.validateDocumentRequest = onDocumentCreated({
                 }
 
                 // Control 6: Cost Integrity
-                if (roundedCost > 1000000) {
+                if (roundedCost > config.max_cost_basis) {
                     transaction.set(db.collection("cost_anomalies").doc(`${k}__COST`), {
                         company_id: payloadData.company_id, location_id: locId, unit_id: unitId, sku_id: skuId,
                         avg_cost: roundedCost, type: "HIGH_COST_BASIS",
                         timestamp: FieldValue.serverTimestamp()
                     });
                 }
+
+                // HQ Analytics: Inventory Heatmap
+                transaction.set(db.collection("inventory_heatmap_views").doc(k), {
+                    company_id: payloadData.company_id, location_id: locId, unit_id: unitId, sku_id: skuId,
+                    qty: v.current_balance, avg_cost: roundedCost,
+                    last_updated: FieldValue.serverTimestamp()
+                });
 
                 // Batch-specific Stock View for HQ
                 if (lineage.batch_id && v.current_balance > 0) {
@@ -430,6 +491,17 @@ exports.validateDocumentRequest = onDocumentCreated({
                 transaction.set(db.collection("trip_states").doc(tripId), { status: "closed", closed_at: FieldValue.serverTimestamp(), closed_by_doc: expectedHmac }, { merge: true });
                 // Financial Settlement Record
                 const finalProfit = tripProfitDoc?.exists ? tripProfitDoc.data() : { total_revenue: 0, total_expenses: 0, net_profit: 0 };
+
+                // HQ Analytics: Boat Profitability
+                const boatKey = `${payloadData.company_id}__${payloadData.unit_id}`;
+                transaction.set(db.collection("boat_profit_views").doc(boatKey), {
+                    company_id: payloadData.company_id, location_id: payloadData.location_id, unit_id: payloadData.unit_id,
+                    total_revenue: FieldValue.increment(finalProfit.total_revenue || 0),
+                    total_expenses: FieldValue.increment(finalProfit.total_expenses || 0),
+                    total_profit: FieldValue.increment(finalProfit.net_profit || 0),
+                    trip_count: FieldValue.increment(1),
+                    last_updated: FieldValue.serverTimestamp()
+                }, { merge: true });
 
                 // Control 5: Trip Settlement Verification
                 if (Math.abs(finalProfit.total_revenue - finalProfit.total_expenses - finalProfit.net_profit) > 1) {
