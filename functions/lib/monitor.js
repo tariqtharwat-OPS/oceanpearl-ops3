@@ -15,25 +15,28 @@ exports.ops3Monitor = onSchedule({
     const db = admin.firestore();
     const now = Date.now();
 
-    // 1. Fetch System Config
-    const configSnap = await db.collection("control_config").doc("default").get();
-    const config = configSnap.exists ? configSnap.data() : {
-        yield_variance_threshold: 0.1,
-        transfer_delay_hours: 24,
-        overdue_days: 0
-    };
+    // 1. Fetch Necessary Configs for Resolution
+    const allConfigs = new Map();
+    const defaultConfig = await db.collection("control_config").doc("default").get();
+    allConfigs.set("default", defaultConfig.exists ? defaultConfig.data() : { yield_variance_threshold: 0.1, transfer_delay_hours: 24, max_cost_basis: 1000000 });
 
     // 2. Monitor Transfer Aging (In-Transit Transfers)
-    const inTransit = await db.collection("transfer_views")
-        .where("status", "==", "in_transit")
-        .get();
+    const inTransit = await db.collection("transfer_views").where("status", "==", "in_transit").get();
 
     for (const doc of inTransit.docs) {
         const data = doc.data();
         if (!data.initiated_at) continue;
 
+        // Resolve Config for this specific location/unit
+        const locConfig = data.location_id ? (await db.collection("control_config").doc(`loc__${data.location_id}`).get()) : null;
+        const unitConfig = data.unit_id ? (await db.collection("control_config").doc(`unit__${data.unit_id}`).get()) : null;
+
+        const finalDelay = unitConfig?.exists && unitConfig.data().transfer_delay_hours !== undefined ? unitConfig.data().transfer_delay_hours :
+            (locConfig?.exists && locConfig.data().transfer_delay_hours !== undefined ? locConfig.data().transfer_delay_hours :
+                allConfigs.get("default").transfer_delay_hours);
+
         const ageHours = (now - data.initiated_at.toDate().getTime()) / (1000 * 60 * 60);
-        if (ageHours > config.transfer_delay_hours) {
+        if (ageHours > finalDelay) {
             await db.collection("transfer_alerts").doc(`MONITOR_${doc.id}`).set({
                 company_id: data.company_id, location_id: data.location_id, unit_id: data.unit_id,
                 document_id: doc.id, age_hours: Math.round(ageHours),
@@ -44,9 +47,7 @@ exports.ops3Monitor = onSchedule({
     }
 
     // 3. Monitor Overdue Payables
-    const pendingPayables = await db.collection("payable_views")
-        .where("status", "==", "pending")
-        .get();
+    const pendingPayables = await db.collection("payable_views").where("status", "==", "pending").get();
 
     for (const doc of pendingPayables.docs) {
         const data = doc.data();
@@ -62,9 +63,7 @@ exports.ops3Monitor = onSchedule({
     }
 
     // 4. Monitor Overdue Receivables
-    const pendingReceivables = await db.collection("receivable_views")
-        .where("status", "==", "pending")
-        .get();
+    const pendingReceivables = await db.collection("receivable_views").where("status", "==", "pending").get();
 
     for (const doc of pendingReceivables.docs) {
         const data = doc.data();

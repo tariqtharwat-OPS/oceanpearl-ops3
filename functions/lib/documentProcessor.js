@@ -98,14 +98,27 @@ exports.validateDocumentRequest = onDocumentCreated({
                 sourceViewDoc = await transaction.get(db.collection(coll).doc(payloadData.source_document_id));
             }
 
-            // Configuration System (Dynamic Thresholds)
-            const configSnap = await transaction.get(db.collection("control_config").doc("default"));
-            const config = configSnap.exists ? configSnap.data() : {
-                yield_variance_threshold: 0.1,
-                transfer_delay_hours: 24,
-                max_cost_basis: 1000000,
-                overdue_days: 0
+            // Configuration System (Hierarchical Resolution)
+            const configIds = ['default'];
+            if (payloadData.location_id) configIds.push(`loc__${payloadData.location_id}`);
+            if (payloadData.unit_id) configIds.push(`unit__${payloadData.unit_id}`);
+            const skuIdsInLines = [...new Set(lines ? lines.map(l => l.sku_id).filter(Boolean) : [])];
+            skuIdsInLines.forEach(cid => configIds.push(`sku__${cid}`));
+
+            const configMap = new Map();
+            for (const cid of configIds) {
+                const snap = await transaction.get(db.collection("control_config").doc(cid));
+                if (snap.exists) configMap.set(cid, snap.data());
+            }
+
+            const resolveThresholds = (skuId) => {
+                const base = configMap.get('default') || { yield_variance_threshold: 0.1, transfer_delay_hours: 24, max_cost_basis: 1000000 };
+                const loc = payloadData.location_id ? (configMap.get(`loc__${payloadData.location_id}`) || {}) : {};
+                const unit = payloadData.unit_id ? (configMap.get(`unit__${payloadData.unit_id}`) || {}) : {};
+                const sku = skuId ? (configMap.get(`sku__${skuId}`) || {}) : {};
+                return { ...base, ...loc, ...unit, ...sku };
             };
+            const config = resolveThresholds(); // Document-level default
 
             logger.info(`[DEBUG] Read phase complete. Wallets: ${wallets.size}, Invs: ${invs.size}, docType: ${docType}`);
 
@@ -255,6 +268,8 @@ exports.validateDocumentRequest = onDocumentCreated({
                     company_id: payloadData.company_id, location_id: payloadData.location_id, unit_id: payloadData.unit_id,
                     total_input_qty: FieldValue.increment(transOutQty),
                     total_output_qty: FieldValue.increment(transQty),
+                    waste_qty: FieldValue.increment(wasteQty),
+                    byproduct_qty: FieldValue.increment(byproductQty),
                     processing_volume: FieldValue.increment(1),
                     last_updated: FieldValue.serverTimestamp()
                 }, { merge: true });
@@ -457,7 +472,8 @@ exports.validateDocumentRequest = onDocumentCreated({
                 }
 
                 // Control 6: Cost Integrity
-                if (roundedCost > config.max_cost_basis) {
+                const skuConfig = resolveThresholds(skuId);
+                if (roundedCost > skuConfig.max_cost_basis) {
                     transaction.set(db.collection("cost_anomalies").doc(`${k}__COST`), {
                         company_id: payloadData.company_id, location_id: locId, unit_id: unitId, sku_id: skuId,
                         avg_cost: roundedCost, type: "HIGH_COST_BASIS",

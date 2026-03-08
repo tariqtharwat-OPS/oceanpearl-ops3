@@ -73,13 +73,26 @@ async function run() {
     await db.collection("wallet_states").doc("B1-W").set({ current_balance: 100000000, sequence_number: 0 });
     console.log("  ✓ Wallets seeded");
 
-    // 1. Setup Configuration
+    // 1. Setup Configuration Hierarchies
     await db.collection("control_config").doc("default").set({
-        yield_variance_threshold: 0.15, // Relaxed yield for Dobo
-        transfer_delay_hours: 48,
-        max_cost_basis: 5000000
+        yield_variance_threshold: 0.1,
+        transfer_delay_hours: 24,
+        max_cost_basis: 1000000
     });
-    console.log("  ✓ System Configuration seeded");
+
+    // Unit Override (Fact-KM allows 20% variance)
+    await db.collection("control_config").doc(`unit__Fact-KM`).set({
+        company_id: CO, location_id: LOC_A, unit_id: "Fact-KM",
+        yield_variance_threshold: 0.2
+    });
+
+    // SKU Override (snapper-whole has high cost basis allowed)
+    await db.collection("control_config").doc(`sku__snapper-whole`).set({
+        company_id: CO,
+        max_cost_basis: 20000000
+    });
+
+    console.log("  ✓ Hierarchical System Configuration seeded");
 
     // 2. Boat Operations (Simulation of multiple trips for two boats)
     console.log("\n═══ Segment 1: Network-Scale Boat Operations ═══");

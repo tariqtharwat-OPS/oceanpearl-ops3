@@ -242,7 +242,14 @@ service cloud.firestore {
     // ─────────────────────────────────────────────────────────────────────────
 
     match /control_config/{configId} {
-      allow read: if isAuth(); // Global system configs
+      // 'default' is the global system baseline. 
+      // All other overrides are scoped to the company and optionally location/unit.
+      allow read: if isAuth() && (
+        configId == 'default' || 
+        (resource.data.company_id == request.auth.token.company_id &&
+         (!('location_id' in resource.data) || resource.data.location_id == request.auth.token.location_id) &&
+         (!('unit_id' in resource.data) || resource.data.unit_id == request.auth.token.unit_id))
+      );
       allow write: if false;
     }
 
