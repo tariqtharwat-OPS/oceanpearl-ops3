@@ -1,19 +1,26 @@
 # PHASE 3 — GO / NO-GO REPORT
 
-## 1. Status: GO ✅
-Phase 3 (HQ Control Layer) is fully implemented and verified. The system now supports automated industrial traceability and real-time HQ analytics.
+## 1. Status: GO ✅ (Conditional Approval Resolved)
+Phase 3 (HQ Control Layer) is verified. The system supports **server-side lineage derivation** and real-time HQ analytics.
 
-## 2. Verified Capabilities
-- [x] **Auto-Lineage**: Lineage propagates from Boat to Cold Storage via `source_document_id`.
+## 2. Automatic vs. Manual Scopes (Clarification)
+| Flow | Lineage Type | Requirement | Automation Level |
+|---|---|---|---|
+| **Boat Landing** | Origin | Manual | Base Inputs |
+| **Hub Receive** | Derived | Client selects Trip or Landing Doc | Semi-Automatic |
+| **Factory Transform**| Derived | Client selects Receiving Doc | Semi-Automatic |
+| **WIP/FG Movement** | Automated | Backend derives heritage from Source Doc | Fully Automatic (Derivation) |
+| **Stock Views** | Automated | Backend projects lineage automatically | Fully Automatic |
+
+## 3. Verified Capabilities
+- [x] **Server-Side Derivation**: Backend lookups propagate deep properties (trip, batch) from selected sources.
 - [x] **HQ Projections**: `stock_batch_views` and `transfer_views` provide instant network visibility.
-- [x] **Industrial KPIs**: Processing batches now automatically calculate yield and waste ratios.
-- [x] **Scalability**: Tested with multi-stage factory movement and inter-location transfers.
+- [x] **Industrial KPIs**: Processing batches automatically calculate yield/waste ratios.
 
-## 3. Risk Assessment
-- **Risk**: Dependency on `source_document_id` for inheritance.
-- **Mitigation**: The system fails gracefully or defaults to current payload if the source is missing; UI must enforce selection of source for industrial flows.
-- **Risk**: Increased Firestore writes per transaction (Ledger + Views).
-- **Mitigation**: Acceptable for industrial transaction volume (receiving/batching), ensuring data consistency.
+## 4. Risk Assessment
+- **Risk**: Dependency on `source_document_id` for linkage.
+- **Clarification**: This is an architectural requirement to maintain industrial chain-of-custody. The backend automates the **data flow** (deriving 5+ fields) but not the **physical batch selection**.
+- **Mitigation**: UI selection components will list only available stock batches for a given unit.
 
-## 4. Next Steps
+## 5. Next Steps
 Phase 4: Advanced financial settlement and automated boat-to-hub payment reconciliation.
