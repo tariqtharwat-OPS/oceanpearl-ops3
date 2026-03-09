@@ -35,6 +35,12 @@ exports.enforcement = require("./admin/v3AdminEnforcement");
 // Core Idempotent Document Processor
 exports.validateDocumentRequest = require("./lib/documentProcessor").validateDocumentRequest;
 
+// Phase 2 Step 2 — Processing Batch Management
+const processingBatches = require("./lib/processingBatches");
+exports.createProcessingBatch = processingBatches.createProcessingBatch;
+exports.updateProcessingBatch = processingBatches.updateProcessingBatch;
+exports.getProcessingBatch = processingBatches.getProcessingBatch;
+
 // Export Admin functions
 const { v3Bootstrap } = require("./admin/v3Bootstrap");
 const { v3SeedTestPack } = require("./admin/v3SeedTestPack");
