@@ -307,6 +307,17 @@ service cloud.firestore {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // Phase 2 Step 4 — Hub Receiving (callable write-only, scoped client read)
+    // Clients may READ their own unit's receiving records.
+    // ALL writes (create, update, cancel, confirm) go through callable functions.
+    // ─────────────────────────────────────────────────────────────────────────
+
+    match /hub_receiving/{docId} {
+      allow read:  if matchesRoleScope(resource.data);
+      allow write: if false;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // DEFAULT DENY — catches all unlisted collections
     // ─────────────────────────────────────────────────────────────────────────
 

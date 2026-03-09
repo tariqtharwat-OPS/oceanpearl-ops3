@@ -49,6 +49,14 @@ exports.completeWipState = wipStates.completeWipState;
 exports.cancelWipState   = wipStates.cancelWipState;
 exports.getWipState      = wipStates.getWipState;
 
+// Phase 2 Step 4 — Hub Receiving & Inter-Unit Transfers
+const hubReceiving = require("./lib/hubReceiving");
+exports.createHubReceiving            = hubReceiving.createHubReceiving;
+exports.updateHubReceivingInspection  = hubReceiving.updateHubReceivingInspection;
+exports.confirmHubReceiving           = hubReceiving.confirmHubReceiving;
+exports.cancelHubReceiving            = hubReceiving.cancelHubReceiving;
+exports.getHubReceiving               = hubReceiving.getHubReceiving;
+
 // Export Admin functions
 const { v3Bootstrap } = require("./admin/v3Bootstrap");
 const { v3SeedTestPack } = require("./admin/v3SeedTestPack");
