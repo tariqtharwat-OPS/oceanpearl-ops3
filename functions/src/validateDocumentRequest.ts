@@ -11,19 +11,22 @@ export const validateDocumentRequest = functions.firestore
 
         if (!data) return;
 
-        const HMAC_SECRET = process.env.HMAC_SECRET || "OPS3_PHASE0_DEV_SECRET";
+        const HMAC_SECRET = process.env.HMAC_SECRET;
+        if (!HMAC_SECRET) {
+            console.error("CRITICAL: HMAC_SECRET is not set in environment variables.");
+            throw new Error("Server configuration error: HMAC_SECRET is missing.");
+        }
 
         // 1. Validate payload integrity
         const { idempotency_key, nonce, lines, ...payloadData } = data;
 
         // Reconstruct the exact stringified object hash
-        // We know we sent the whole payload, so:
         const payloadString = JSON.stringify({ ...payloadData, lines });
-        const payloadHash = crypto.createHash('sha256').update(payloadString).digest('hex');
+        const payloadHash = crypto.createHash("sha256").update(payloadString).digest("hex");
 
-        const expectedHmac = crypto.createHmac('sha256', HMAC_SECRET)
+        const expectedHmac = crypto.createHmac("sha256", HMAC_SECRET)
             .update(payloadHash + (nonce || ""))
-            .digest('hex');
+            .digest("hex");
 
         if (idempotency_key !== expectedHmac) {
             console.error(`HMAC validation failed on document_request. Replay attack or payload tampering detected.`);
@@ -44,7 +47,7 @@ export const validateDocumentRequest = functions.firestore
                 }
                 if (lockData.status === "RUNNING") {
                     const elapsed = Date.now() - lockData.timestamp;
-                    if (elapsed < 60000) {
+                    if (elapsed < 60000) { // 1 minute timeout
                         throw new Error("IDEMPOTENCY_REJECT: Document currently running.");
                     }
                 }
@@ -76,6 +79,7 @@ export const validateDocumentRequest = functions.firestore
                     const doc = await transaction.get(walletStateRef);
                     if (doc.exists) walletStateDocs.set(wid, doc);
                 }
+
                 for (const scopeId of inventoryScopes) {
                     const inventoryStateRef = db.collection("inventory_states").doc(scopeId);
                     const doc = await transaction.get(inventoryStateRef);
@@ -91,6 +95,7 @@ export const validateDocumentRequest = functions.firestore
                         sequenceNumber: doc?.data()?.sequence_number || 0
                     });
                 }
+
                 const activeInventory = new Map<string, { currentBalance: number, avgCost: number, sequenceNumber: number }>();
                 for (const scopeId of inventoryScopes) {
                     const doc = inventoryStateDocs.get(scopeId);
@@ -114,10 +119,28 @@ export const validateDocumentRequest = functions.firestore
 
                 // 4. Generate Wallet & Inventory Events
                 if (lines && Array.isArray(lines)) {
+
                     // Pre-calculate Transformation Value for Cost Basis Propagation
                     let transformationTotalValue = 0;
                     let transformationTotalInQty = 0;
                     let transformationTotalOutQty = 0;
+
+                    // AUDIT FIX: Pre-validate all transformation_out lines BEFORE any mutations
+                    if (payloadData.document_type === "inventory_transformation") {
+                        const requiredStock = new Map<string, number>();
+                        for (const line of lines) {
+                            if (line.event_type === "transformation_out") {
+                                const sid = `${line.location_id}__${line.unit_id}__${line.sku_id}`;
+                                requiredStock.set(sid, (requiredStock.get(sid) || 0) + line.amount);
+                            }
+                        }
+                        for (const [sid, required] of requiredStock.entries()) {
+                            const invState = activeInventory.get(sid);
+                            if (!invState || invState.currentBalance < required) {
+                                throw new Error(`STOCK_DEFICIT: SKU ${sid.split("__")[2]} requires ${required}, but only ${invState?.currentBalance || 0} available.`);
+                            }
+                        }
+                    }
 
                     for (const line of lines) {
                         if (line.event_type === "transformation_out") {
@@ -142,10 +165,8 @@ export const validateDocumentRequest = functions.firestore
                             if (!line.wallet_id || !line.payment_amount || !line.payment_event_type) {
                                 throw new Error("MALFORMED_PAYLOAD: Wallet line missing required fields (wallet_id, payment_amount, payment_event_type).");
                             }
-
                             const walletState = activeWallets.get(line.wallet_id);
                             if (!walletState) throw new Error(`STATE_ERROR: Wallet ${line.wallet_id} not initialized in active map.`);
-
                             walletState.sequenceNumber += 1;
 
                             let delta = 0;
@@ -159,8 +180,8 @@ export const validateDocumentRequest = functions.firestore
                             if (line.wallet_type === "hub" && walletState.currentBalance + delta < 0) {
                                 throw new Error("OVERDRAFT_BLOCKED: Hub wallets cannot fall below zero.");
                             }
-
                             walletState.currentBalance += delta;
+
                             const eventRef = db.collection("wallet_events").doc(eventBaseId + "_W");
                             transaction.set(eventRef, {
                                 ...line,
@@ -177,11 +198,9 @@ export const validateDocumentRequest = functions.firestore
                             if (!line.sku_id || !line.amount || !line.event_type || !line.location_id || !line.unit_id) {
                                 throw new Error("MALFORMED_PAYLOAD: Inventory line missing required fields (sku_id, amount, event_type, location_id, unit_id).");
                             }
-
                             const scopeId = `${line.location_id}__${line.unit_id}__${line.sku_id}`;
                             const invState = activeInventory.get(scopeId);
                             if (!invState) throw new Error(`STATE_ERROR: Inventory scope ${scopeId} not initialized in active map.`);
-
                             invState.sequenceNumber += 1;
 
                             // Calculate Value & Cost Basis Propagation
@@ -190,7 +209,6 @@ export const validateDocumentRequest = functions.firestore
 
                             if (["receive_own", "receive_buy", "transfer_received", "transfer_cancelled"].includes(line.event_type)) {
                                 delta = line.amount;
-
                                 // WAC (Weighted Average Cost) Calculation for inflow
                                 if (delta > 0) {
                                     const oldVal = invState.currentBalance * invState.avgCost;
@@ -211,9 +229,9 @@ export const validateDocumentRequest = functions.firestore
                             }
 
                             if (invState.currentBalance + delta < 0) {
+                                // This check is now redundant due to the pre-validation, but kept as a safety net.
                                 throw new Error(`STOCK_DEFICIT: SKU ${line.sku_id} insufficient.`);
                             }
-
                             invState.currentBalance += delta;
                             if (invState.currentBalance === 0) invState.avgCost = 0;
 
@@ -292,9 +310,9 @@ export const validateDocumentRequest = functions.firestore
             await snap.ref.delete();
 
         } catch (error: any) {
-            if (error.message.includes("OVERDRAFT_BLOCKED")) {
+            if (error.message.includes("OVERDRAFT_BLOCKED") || error.message.includes("STOCK_DEFICIT")) {
                 await lockRef.update({ status: "FAILED", error: error.message, timestamp: Date.now() });
-                await snap.ref.delete();
+                await snap.ref.delete(); // Remove safe failures
             } else {
                 await lockRef.update({ status: "FAILED", error: error.message, timestamp: Date.now() });
             }
