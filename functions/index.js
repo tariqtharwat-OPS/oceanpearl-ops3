@@ -41,6 +41,14 @@ exports.createProcessingBatch = processingBatches.createProcessingBatch;
 exports.updateProcessingBatch = processingBatches.updateProcessingBatch;
 exports.getProcessingBatch = processingBatches.getProcessingBatch;
 
+// Phase 2 Step 3 — WIP State Management
+const wipStates = require("./lib/wipStates");
+exports.createWipState   = wipStates.createWipState;
+exports.advanceWipStage  = wipStates.advanceWipStage;
+exports.completeWipState = wipStates.completeWipState;
+exports.cancelWipState   = wipStates.cancelWipState;
+exports.getWipState      = wipStates.getWipState;
+
 // Export Admin functions
 const { v3Bootstrap } = require("./admin/v3Bootstrap");
 const { v3SeedTestPack } = require("./admin/v3SeedTestPack");

@@ -298,6 +298,15 @@ service cloud.firestore {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // Phase 2 Step 3 — WIP States (callable write-only, scoped client read)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    match /wip_states/{wipId} {
+      allow read:  if matchesRoleScope(resource.data);
+      allow write: if false;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // DEFAULT DENY — catches all unlisted collections
     // ─────────────────────────────────────────────────────────────────────────
 
