@@ -12,6 +12,8 @@ import LocationManagerLayout from './layouts/LocationManagerLayout';
 import UnitOperatorLayout from './layouts/UnitOperatorLayout';
 import InvestorLayout from './layouts/InvestorLayout';
 import BoatOperatorLayout from './layouts/BoatOperatorLayout';
+import FactoryOperatorLayout from './layouts/FactoryOperatorLayout';
+import HubOperatorLayout from './layouts/HubOperatorLayout';
 
 // Shared Components
 import ProtectedRoute from './components/ProtectedRoute';
@@ -71,6 +73,20 @@ const AppRoutes: React.FC = () => {
         </ProtectedRoute>
       } />
 
+      {/* FACTORY OPERATOR (Processing Batches, WIP, Transformation) */}
+      <Route path="/app/factory/*" element={
+        <ProtectedRoute allowedRoles={['factory_operator', 'unit_operator', 'admin', 'ceo']}>
+          <FactoryOperatorLayout />
+        </ProtectedRoute>
+      } />
+
+      {/* HUB OPERATOR (Receiving, Inspection, Confirmation) */}
+      <Route path="/app/hub/*" element={
+        <ProtectedRoute allowedRoles={['hub_operator', 'unit_operator', 'admin', 'ceo']}>
+          <HubOperatorLayout />
+        </ProtectedRoute>
+      } />
+
       {/* INVESTOR (Read-only Overview) */}
       <Route path="/app/investor/*" element={
         <ProtectedRoute allowedRoles={['investor']}>
@@ -100,6 +116,8 @@ const RoleBasedRouter = () => {
     case 'finance_officer': return <Navigate to="/app/finance/ledger" replace />;
     case 'location_manager': return <Navigate to="/app/location/transit" replace />;
     case 'unit_operator': return <Navigate to="/app/operator/dashboard" replace />;
+    case 'factory_operator': return <Navigate to="/app/factory/batches" replace />;
+    case 'hub_operator': return <Navigate to="/app/hub/trips" replace />;
     case 'boat_operator': return <Navigate to="/app/boat/start" replace />;
     case 'investor': return <Navigate to="/app/investor/dashboard" replace />;
     default: return <Navigate to="/login" replace />; // Fallback failsafe
