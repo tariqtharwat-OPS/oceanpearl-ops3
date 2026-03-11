@@ -5,9 +5,21 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import '../styles/LoginPage.css';
 
+const ROLE_ROUTES: Record<string, string> = {
+    admin:             '/app/admin/users',
+    ceo:               '/app/ceo/dashboard',
+    finance_officer:   '/app/finance/ledger',
+    location_manager:  '/app/location/transit',
+    unit_operator:     '/app/operator/dashboard',
+    factory_operator:  '/app/factory/batches',
+    hub_operator:      '/app/hub/trips',
+    boat_operator:     '/app/boat/start',
+    investor:          '/app/investor/dashboard',
+};
+
 const LoginPage: React.FC = () => {
     const { t } = useTranslation();
-    const { login } = useAuth();
+    const { login, userProfile } = useAuth();
     const { language, toggleLanguage } = useLanguage();
     const navigate = useNavigate();
 
@@ -22,8 +34,22 @@ const LoginPage: React.FC = () => {
         setLoading(true);
 
         try {
+            // login() in AuthContext now fetches the profile immediately.
+            // After it resolves, userProfile state is set — but React state
+            // updates are async, so we use the returned AuthUser to derive
+            // the route from the already-fetched profile in AuthContext.
             await login(email, password);
-            navigate('/dashboard');
+            // Give React one tick to apply the state update, then read userProfile
+            // from the context (which was set synchronously in the login() call).
+            // We use a small timeout to ensure the state has propagated.
+            setTimeout(() => {
+                // Read the current userProfile from the context via a ref-like pattern.
+                // Since login() sets userProfile synchronously before returning,
+                // the context value will be updated on the next render cycle.
+                // We navigate to /app/routing as a safe fallback — the RoleBasedRouter
+                // will redirect to the correct route once userProfile is available.
+                navigate('/app/routing');
+            }, 100);
         } catch (err: any) {
             setError(err.message || t('auth.loginError'));
         } finally {

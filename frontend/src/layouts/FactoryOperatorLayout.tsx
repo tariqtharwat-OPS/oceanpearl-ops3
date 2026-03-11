@@ -1,7 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Topbar from '../components/Topbar';
-import Sidebar, { NavItem } from '../components/Sidebar';
+import Sidebar, { type NavItem } from '../components/Sidebar';
 import { Layers, Plus, Play, ChevronRight, CheckSquare, RefreshCw, BarChart2 } from 'lucide-react';
 import FactoryBatchList from '../pages/factory/FactoryBatchList';
 import FactoryBatchCreate from '../pages/factory/FactoryBatchCreate';

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Card, Button, Alert, FormField, Input, Select } from '../../components/ops3/Card';
-import { postTransformation, TransformationLine } from '../../services/ops3Service';
+import { postTransformation, type TransformationLine } from '../../services/ops3Service';
 import { useAuth } from '../../contexts/AuthContext';
 
 const SKU_OPTIONS = ['tuna-raw', 'tuna-fillet', 'tuna-loin', 'tuna-waste', 'shrimp-raw', 'shrimp-peeled'];

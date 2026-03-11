@@ -1,7 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Topbar from '../components/Topbar';
-import Sidebar, { NavItem } from '../components/Sidebar';
+import Sidebar, { type NavItem } from '../components/Sidebar';
 import { UsersRound, Settings, Database, ShieldAlert } from 'lucide-react';
 
 const AdminLayout: React.FC = () => {

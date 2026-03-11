@@ -107,7 +107,15 @@ const AppRoutes: React.FC = () => {
 
 // Smart component to bounce the user to their designated shell
 const RoleBasedRouter = () => {
-  const { userProfile } = useAuth();
+  const { userProfile, loading } = useAuth();
+  // BUGFIX: Wait for auth state and Firestore profile fetch to complete before deciding
+  // where to send the user. Without this check, a race condition causes a redirect to
+  // /login before the profile loads (especially on first login after page navigation).
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="text-center font-medium text-slate-500">Validating Security Clearance...</div>
+    </div>
+  );
   if (!userProfile) return <Navigate to="/login" replace />;
 
   switch (userProfile.role.toLowerCase()) {

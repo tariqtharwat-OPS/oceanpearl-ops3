@@ -1,7 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Topbar from '../components/Topbar';
-import Sidebar, { NavItem } from '../components/Sidebar';
+import Sidebar, { type NavItem } from '../components/Sidebar';
 import { FilePlus2, Scissors, ArrowRightLeft, Target, AlertTriangle } from 'lucide-react';
 
 const UnitOperatorLayout: React.FC = () => {

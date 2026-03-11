@@ -41,6 +41,12 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // v3_users — same rule as users; supports frontend firestoreService which reads from this collection
+    match /v3_users/{userId} {
+      allow read:  if isAuth() && request.auth.uid == userId;
+      allow write: if false;
+    }
+
     match /locations/{locationId} {
       allow read:  if isAuth() && resource.data.location_id == request.auth.token.location_id;
       allow write: if false;

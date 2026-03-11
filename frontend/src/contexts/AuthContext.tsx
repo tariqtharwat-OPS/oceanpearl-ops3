@@ -9,7 +9,7 @@ interface AuthContextType {
     userProfile: UserProfile | null;
     loading: boolean;
     isAdmin: boolean;
-    login: typeof authService.login;
+    login: (email: string, password: string) => Promise<AuthUser>;
     logout: typeof authService.logout;
 }
 
@@ -42,12 +42,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return () => unsubscribe();
     }, []);
 
+    // Enhanced login: signs in AND immediately fetches the profile.
+    // This avoids a race condition where onAuthStateChanged fires after the
+    // RoleBasedRouter renders, causing a redirect back to /login.
+    const login = async (email: string, password: string): Promise<AuthUser> => {
+        setLoading(true);
+        const authUser = await authService.login(email, password);
+        setUser(authUser);
+        try {
+            const profile = await firestoreService.getUserProfile(authUser.uid);
+            setUserProfile(profile);
+        } catch (error) {
+            console.error('Error fetching user profile after login:', error);
+            setUserProfile(null);
+        }
+        setLoading(false);
+        return authUser;
+    };
+
     const value = {
         user,
         userProfile,
         loading,
         isAdmin: ['admin', 'ceo', 'ADMIN', 'CEO'].includes(userProfile?.role || ''),
-        login: authService.login,
+        login,
         logout: authService.logout,
     };
 

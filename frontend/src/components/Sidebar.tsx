@@ -1,12 +1,11 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { getCurrentLanguage, t } from '../i18n';
-import { LucideIcon } from 'lucide-react';
-
+import { getCurrentLanguage } from '../i18n';
+// Use React.ComponentType to avoid runtime error with lucide-react's type-only LucideIcon export
 export interface NavItem {
     label: string;
     path: string;
-    icon: LucideIcon;
+    icon: React.ComponentType<{ className?: string }>;
 }
 
 export interface SidebarProps {
