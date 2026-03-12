@@ -90,8 +90,15 @@ function makeFactoryRequest(data, uid = "factory-op-e2e") {
 }
 
 // ─── Seed helpers ─────────────────────────────────────────────────────────────
+// Canonical user profile source: v3_users (aligned with auth.js)
 async function seedUser(uid, role, scope) {
-    await db.collection("users").doc(uid).set({ uid, role, ...scope });
+    await db.collection("v3_users").doc(uid).set({
+        uid,
+        role,
+        company_id: scope.company_id,
+        allowedLocationIds: scope.location_id ? [scope.location_id] : [],
+        allowedUnitIds: scope.unit_id ? [scope.unit_id] : [],
+    });
 }
 
 async function seedClosedTrip(tripId, boatUnitId) {
@@ -149,7 +156,11 @@ async function seedPostedTransformation(docId, scope) {
 
 // ─── Cleanup ──────────────────────────────────────────────────────────────────
 async function cleanup() {
-    const cols = ["hub_receiving", "wip_states", "processing_batches", "documents", "document_requests", "idempotency_locks"];
+    const cols = [
+        "hub_receiving", "wip_states", "processing_batches",
+        "documents", "document_requests", "idempotency_locks",
+        "v3_users", "inventory_states", "inventory_events", "trip_states"
+    ];
     for (const col of cols) {
         const snap = await db.collection(col).get();
         if (!snap.empty) {

@@ -60,6 +60,8 @@ exports.getHubReceiving               = hubReceiving.getHubReceiving;
 // Export Admin functions
 const { v3Bootstrap } = require("./admin/v3Bootstrap");
 const { v3SeedTestPack } = require("./admin/v3SeedTestPack");
+const { admin_createUser } = require("./admin/v3AdminCreateUser");
+exports.admin_createUser = admin_createUser;
 
 // Phase 6 Monitor
 exports.ops3Monitor = require("./lib/monitor").ops3Monitor;

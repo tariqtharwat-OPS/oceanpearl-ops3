@@ -62,11 +62,14 @@ function requireAuth(request) {
     return request.auth.uid;
 }
 
+// Canonical user profile source: v3_users (aligned with auth.js and all other modules)
 async function getUserProfile(uid) {
     const db = admin.firestore();
-    const snap = await db.collection("users").doc(uid).get();
+    const snap = await db.collection("v3_users").doc(uid).get();
     if (!snap.exists) throw new HttpsError("not-found", "USER_NOT_FOUND");
-    return snap.data();
+    const data = snap.data();
+    data.uid = uid;
+    return data;
 }
 
 function requireRole(user, allowedRoles) {
@@ -76,19 +79,27 @@ function requireRole(user, allowedRoles) {
     }
 }
 
+// v3_users schema uses allowedLocationIds[] (array) instead of scalar location_id
 function requireLocationScope(user, location_id) {
+    if (!location_id) return;
     const role = (user.role || "").toLowerCase();
     const isHQ = HQ_ROLES.map(r => r.toLowerCase()).includes(role);
-    if (!isHQ && user.location_id !== location_id) {
+    if (isHQ) return;
+    const allowed = Array.isArray(user.allowedLocationIds) ? user.allowedLocationIds.map(String) : [];
+    if (!allowed.includes(String(location_id))) {
         throw new HttpsError("permission-denied", "LOCATION_SCOPE_MISMATCH");
     }
 }
 
+// v3_users schema uses allowedUnitIds[] (array) instead of scalar unit_id
 function requireUnitScope(user, unit_id) {
+    if (!unit_id) return;
     const role = (user.role || "").toLowerCase();
     const isHQ = HQ_ROLES.map(r => r.toLowerCase()).includes(role);
     const isLocationManager = role === "location_manager";
-    if (!isHQ && !isLocationManager && user.unit_id !== unit_id) {
+    if (isHQ || isLocationManager) return;
+    const allowed = Array.isArray(user.allowedUnitIds) ? user.allowedUnitIds.map(String) : [];
+    if (!allowed.includes(String(unit_id))) {
         throw new HttpsError("permission-denied", "UNIT_SCOPE_MISMATCH");
     }
 }

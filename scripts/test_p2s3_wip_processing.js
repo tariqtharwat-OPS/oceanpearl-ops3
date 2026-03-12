@@ -61,12 +61,15 @@ const SCOPE = {
     unit_id: "UNIT_FACTORY_01",
 };
 
+// Canonical user profile source: v3_users (aligned with auth.js)
 async function seedUser(uid, role, scopeOverride = {}) {
-    await db.collection("users").doc(uid).set({
+    const scope = { ...SCOPE, ...scopeOverride };
+    await db.collection("v3_users").doc(uid).set({
         uid,
         role,
-        ...SCOPE,
-        ...scopeOverride,
+        company_id: scope.company_id,
+        allowedLocationIds: [scope.location_id],
+        allowedUnitIds: [scope.unit_id],
     });
 }
 
@@ -114,7 +117,7 @@ async function createWipDirectly(data) {
 }
 
 async function cleanup() {
-    const collections = ["wip_states", "processing_batches", "documents", "users"];
+    const collections = ["wip_states", "processing_batches", "documents", "v3_users"];
     for (const col of collections) {
         const snap = await db.collection(col).get();
         const batch = db.batch();

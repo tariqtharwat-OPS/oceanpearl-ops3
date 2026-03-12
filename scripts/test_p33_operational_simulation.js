@@ -19,14 +19,14 @@
  *     - doc_id only (HMAC generated internally)
  *   wipStates.createWipState:
  *     - batch_id, company_id, location_id, unit_id, sku_id, quantity, stage
- *     - reads user from users/{uid} (not v3_users)
+ *     - reads user from v3_users/{uid} via auth.js (unified canonical source)
  *   wipStates.advanceWipStage:
  *     - doc_id, new_stage, optional quantity_loss
  *   wipStates.completeWipState:
  *     - doc_id, transformation_document_id, optional quantity_out
  *   processingBatches.createProcessingBatch:
  *     - batch_id, company_id, location_id, unit_id, input_lines, output_lines
- *     - reads user from v3_users/{uid} via auth.js
+ *     - reads user from v3_users/{uid} via auth.js (unified canonical source)
  */
 "use strict";
 
@@ -168,11 +168,12 @@ function makeAdminRequest(data, uid = ADMIN_UID) {
     };
 }
 
-// ─── User profile seeder ──────────────────────────────────────────────────────
+// ─── User profile seeder ────────────────────────────────────────────────────
+// All modules now use v3_users as the canonical user profile source.
+// wipStates.js was updated to read from v3_users with allowedLocationIds[]/allowedUnitIds[].
 async function seedUserProfiles() {
     const batch = db.batch();
-
-    // v3_users — for processingBatches (auth.js)
+    // v3_users — canonical source for ALL modules (auth.js, wipStates, processingBatches)
     const v3Users = [
         {
             uid: FACTORY_OP_UID,
@@ -190,35 +191,13 @@ async function seedUserProfiles() {
             allowedUnitIds: [],
             displayName: "Sim Admin"
         }
+        // NOTE: HUB_OP_UID is intentionally NOT seeded here.
+        // Scenario 6.4 verifies that a hub_operator has no WIP factory profile,
+        // which causes USER_NOT_FOUND when they attempt WIP creation.
     ];
     for (const u of v3Users) {
         batch.set(db.collection("v3_users").doc(u.uid), u);
     }
-
-    // users — for wipStates (local getUserProfile)
-    // wipStates checks user.location_id and user.unit_id directly
-    const usersCollection = [
-        {
-            uid: FACTORY_OP_UID,
-            role: "factory_operator",
-            company_id: COMPANY_ID,
-            location_id: LOCATION_ID,
-            unit_id: FACTORY_UNIT,
-            displayName: "Sim Factory Operator"
-        },
-        {
-            uid: ADMIN_UID,
-            role: "admin",
-            company_id: COMPANY_ID,
-            location_id: LOCATION_ID,
-            unit_id: FACTORY_UNIT,
-            displayName: "Sim Admin"
-        }
-    ];
-    for (const u of usersCollection) {
-        batch.set(db.collection("users").doc(u.uid), u);
-    }
-
     await batch.commit();
 }
 
@@ -892,10 +871,10 @@ async function scenario6() {
 
     // 6.4: hub_operator tries WIP creation
     console.log("\n  Step 6.4: hub_operator blocked from WIP creation");
-    // WIP reads from users/{uid} — hub_op_uid has no profile in users collection
-    // This will throw USER_NOT_FOUND (not-found), which is also a permission barrier
+    // WIP now reads from v3_users/{uid} (canonical source).
+    // HUB_OP_UID is intentionally NOT seeded in v3_users, so this throws USER_NOT_FOUND.
     await assertThrows(
-        "S6.4: hub_operator blocked from WIP (no factory profile)",
+        "S6.4: hub_operator blocked from WIP (no factory profile in v3_users)",
         () => wipModule.createWipState.run({
             auth: { uid: HUB_OP_UID, token: { uid: HUB_OP_UID } },
             data: {
@@ -908,7 +887,7 @@ async function scenario6() {
                 stage: "receiving"
             }
         }),
-        "not-found"  // USER_NOT_FOUND — hub_op has no profile in users collection
+        "not-found"  // USER_NOT_FOUND — hub_op has no profile in v3_users collection
     );
 
     // 6.5: Admin can call hub function (supervisory access)

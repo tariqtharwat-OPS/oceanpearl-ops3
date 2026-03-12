@@ -41,9 +41,12 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // v3_users — same rule as users; supports frontend firestoreService which reads from this collection
+    // v3_users — canonical user profile collection (unified source for all modules)
+    // Each user can read their own profile.
+    // Admin/CEO can list all profiles for user management panel.
+    // All writes go through Cloud Functions (Admin SDK bypasses these rules).
     match /v3_users/{userId} {
-      allow read:  if isAuth() && request.auth.uid == userId;
+      allow read:  if isAuth() && (request.auth.uid == userId || isHQReader());
       allow write: if false;
     }
 

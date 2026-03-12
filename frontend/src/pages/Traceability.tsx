@@ -22,7 +22,13 @@ const Traceability = () => {
 
         try {
             // Calling the PUBLIC HTTPS endpoint
-            const response = await fetch(`http://127.0.0.1:5001/oceanpearl-ops/asia-southeast1/traceability-verifyBatchPublic?batchId=${batchId}`);
+            // Uses emulator URL in local dev, production Cloud Functions URL in staging/production
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const projectId = import.meta.env.VITE_FIREBASE_PROJECT_ID || 'oceanpearl-ops';
+            const baseUrl = isLocal
+                ? `http://127.0.0.1:5001/${projectId}/asia-southeast1/traceability-verifyBatchPublic`
+                : `https://asia-southeast1-${projectId}.cloudfunctions.net/traceability-verifyBatchPublic`;
+            const response = await fetch(`${baseUrl}?batchId=${batchId}`);
             const result = await response.json();
 
             if (result.ok) {
@@ -31,7 +37,7 @@ const Traceability = () => {
                 setError(result.error || 'Verification failed');
             }
         } catch (err: any) {
-            setError('Connection failed. Is the emulator running?');
+            setError('Verification service unavailable. Please try again later.');
         } finally {
             setLoading(false);
         }

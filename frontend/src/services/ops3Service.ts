@@ -12,9 +12,10 @@ const functions = getFunctions(app, 'asia-southeast1');
 const db = getFirestore(app);
 
 // ─── HMAC helper (matches backend logic) ─────────────────────────────────────
-// In emulator mode we use the dev secret. In production this would be
-// server-side only — the UI never exposes the real secret.
-const HMAC_SECRET = 'OPS3_PHASE0_DEV_SECRET';
+// HMAC_SECRET: read from VITE_HMAC_SECRET env var in staging/production.
+// Falls back to dev secret for local emulator use.
+// STAGING ACTION REQUIRED: set VITE_HMAC_SECRET in .env.production to the real secret.
+const HMAC_SECRET = (import.meta.env.VITE_HMAC_SECRET as string) || 'OPS3_PHASE0_DEV_SECRET';
 
 function generateHmac(payload: Record<string, unknown>, nonce: string): string {
   const payloadString = JSON.stringify(payload);
