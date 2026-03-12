@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, Button, Alert, FormField, Input, Select } from '../../components/ops3/Card';
 import { postTransformation, type TransformationLine } from '../../services/ops3Service';
 import { useAuth } from '../../contexts/AuthContext';
@@ -12,6 +13,7 @@ interface LineForm {
 }
 
 const FactoryTransformation: React.FC = () => {
+  const navigate = useNavigate();
   const { userProfile } = useAuth();
   const companyId = userProfile?.companyId || 'oceanpearl';
   const locationId = userProfile?.allowedLocationIds?.[0] || 'test-loc-1';
@@ -39,12 +41,19 @@ const FactoryTransformation: React.FC = () => {
     setLines(prev => prev.map((l, i) => i === idx ? { ...l, [field]: value } : l));
   };
 
+  const hasValidOut = lines.some(l => l.event_type === 'transformation_out' && l.amount && parseFloat(l.amount) > 0);
+  const hasValidIn = lines.some(l => l.event_type === 'transformation_in' && l.amount && parseFloat(l.amount) > 0);
+  const isFormValid = documentId.trim() && hasValidOut && hasValidIn;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setResult(null);
     const validLines = lines.filter(l => l.amount && parseFloat(l.amount) > 0);
-    if (validLines.length < 2) { setError('At least one transformation_out and one transformation_in line are required.'); return; }
+    if (!hasValidOut || !hasValidIn) {
+      setError('At least one transformation_out and one transformation_in line with quantity > 0 are required.');
+      return;
+    }
     setLoading(true);
     try {
       const txnLines: TransformationLine[] = validLines.map(l => ({
@@ -64,8 +73,6 @@ const FactoryTransformation: React.FC = () => {
         notes: notes || undefined,
       });
       setResult(res);
-      setDocumentId(`TRANS-${Date.now()}`);
-      setBatchId('');
     } catch (e: any) {
       setError(e.message || 'Failed to post transformation');
     } finally {
@@ -73,19 +80,75 @@ const FactoryTransformation: React.FC = () => {
     }
   };
 
-  const outLines = lines.filter(l => l.event_type === 'transformation_out');
-  const inLines = lines.filter(l => l.event_type === 'transformation_in');
+  const handleReset = () => {
+    setResult(null);
+    setDocumentId(`TRANS-${Date.now()}`);
+    setBatchId('');
+    setLines([
+      { sku_id: 'tuna-raw', amount: '', event_type: 'transformation_out' },
+      { sku_id: 'tuna-fillet', amount: '', event_type: 'transformation_in' },
+      { sku_id: 'tuna-waste', amount: '', event_type: 'transformation_in' },
+    ]);
+    setNotes('');
+    setError('');
+  };
+
+  if (result) {
+    return (
+      <div className="max-w-2xl space-y-4">
+        <Card title="Transformation Posted" subtitle="The inventory transformation has been posted to the ledger">
+          <div className="space-y-4">
+            <Alert type="success" message="Transformation posted to the immutable ledger." />
+            <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 text-sm space-y-2">
+              <div className="flex justify-between">
+                <span className="text-slate-500">Document ID</span>
+                <span className="font-mono font-semibold">{result.document_id}</span>
+              </div>
+              {result.idempotency_key && (
+                <div className="flex flex-col gap-1">
+                  <span className="text-slate-500">Idempotency Key</span>
+                  <code className="text-xs font-mono bg-slate-100 p-2 rounded break-all">{result.idempotency_key}</code>
+                </div>
+              )}
+            </div>
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
+              <strong>Important:</strong> Copy the <strong>Idempotency Key</strong> above. You will need it as the <code>transformation_document_id</code> when completing WIP on the <strong>Complete WIP</strong> screen.
+            </div>
+            <p className="text-sm text-slate-600">
+              Inventory states will update asynchronously as the ledger trigger processes the transformation.
+            </p>
+            <div className="flex gap-3 pt-2">
+              <Button variant="primary" onClick={() => navigate('/app/factory/wip-complete')}>
+                Complete WIP →
+              </Button>
+              <Button variant="secondary" onClick={handleReset}>
+                Post Another Transformation
+              </Button>
+              <Button variant="ghost" onClick={() => navigate('/app/factory/batches')}>
+                ← Back to Batches
+              </Button>
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl space-y-4">
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" onClick={() => navigate('/app/factory/batches')}>
+          ← Back to Batches
+        </Button>
+      </div>
       <Card title="Record Transformation" subtitle="Post an inventory transformation to the immutable ledger">
         <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
-          <strong>Architecture note:</strong> This writes a <code>document_request</code> to Firestore. The backend trigger processes it asynchronously and updates <code>inventory_states</code> via the immutable ledger. The returned <code>idempotency_key</code> is the transformation document ID used to complete WIP.
+          <strong>Architecture note:</strong> This writes a <code>document_request</code> to Firestore. The backend trigger processes it asynchronously and updates <code>inventory_states</code> via the immutable ledger. The returned <code>idempotency_key</code> is used as the transformation document ID when completing WIP.
         </div>
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="grid grid-cols-2 gap-4">
             <FormField label="Document ID" required>
-              <Input value={documentId} onChange={e => setDocumentId(e.target.value)} required />
+              <Input value={documentId} onChange={e => setDocumentId(e.target.value)} />
             </FormField>
             <FormField label="Batch ID" hint="Optional — links this transformation to a batch">
               <Input value={batchId} onChange={e => setBatchId(e.target.value)} placeholder="e.g. BATCH-001" />
@@ -95,7 +158,9 @@ const FactoryTransformation: React.FC = () => {
           {/* OUT lines */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-semibold text-red-700">Transformation OUT (consumed)</label>
+              <label className="text-sm font-semibold text-red-700">
+                Transformation OUT <span className="font-normal text-slate-500">(consumed / raw input)</span>
+              </label>
               <Button type="button" variant="ghost" onClick={() => addLine('transformation_out')} className="text-red-600">+ Add Out</Button>
             </div>
             <div className="space-y-2">
@@ -104,7 +169,15 @@ const FactoryTransformation: React.FC = () => {
                   <Select value={line.sku_id} onChange={e => updateLine(idx, 'sku_id', e.target.value)} className="flex-1">
                     {SKU_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
                   </Select>
-                  <Input type="number" min="0.01" step="0.01" value={line.amount} onChange={e => updateLine(idx, 'amount', e.target.value)} placeholder="qty kg" className="w-28" />
+                  <Input
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    value={line.amount}
+                    onChange={e => updateLine(idx, 'amount', e.target.value)}
+                    placeholder="qty kg"
+                    className="w-28"
+                  />
                   <Button type="button" variant="ghost" onClick={() => removeLine(idx)} className="text-red-500 px-2">✕</Button>
                 </div>
               ))}
@@ -114,7 +187,9 @@ const FactoryTransformation: React.FC = () => {
           {/* IN lines */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-semibold text-green-700">Transformation IN (produced)</label>
+              <label className="text-sm font-semibold text-green-700">
+                Transformation IN <span className="font-normal text-slate-500">(produced / finished output)</span>
+              </label>
               <Button type="button" variant="ghost" onClick={() => addLine('transformation_in')} className="text-green-600">+ Add In</Button>
             </div>
             <div className="space-y-2">
@@ -123,7 +198,15 @@ const FactoryTransformation: React.FC = () => {
                   <Select value={line.sku_id} onChange={e => updateLine(idx, 'sku_id', e.target.value)} className="flex-1">
                     {SKU_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
                   </Select>
-                  <Input type="number" min="0.01" step="0.01" value={line.amount} onChange={e => updateLine(idx, 'amount', e.target.value)} placeholder="qty kg" className="w-28" />
+                  <Input
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    value={line.amount}
+                    onChange={e => updateLine(idx, 'amount', e.target.value)}
+                    placeholder="qty kg"
+                    className="w-28"
+                  />
                   <Button type="button" variant="ghost" onClick={() => removeLine(idx)} className="text-green-500 px-2">✕</Button>
                 </div>
               ))}
@@ -135,16 +218,15 @@ const FactoryTransformation: React.FC = () => {
           </FormField>
 
           {error && <Alert type="error" message={error} />}
-          {result && (
-            <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-sm space-y-1">
-              <div className="font-semibold text-green-800">Transformation Posted to Ledger</div>
-              <div className="text-green-700">Document ID: <strong>{result.document_id}</strong></div>
-              <div className="text-green-700 break-all">Idempotency Key: <code className="text-xs">{result.idempotency_key}</code></div>
-              <div className="text-green-600 text-xs mt-1">Use this idempotency_key as the transformation_document_id when completing WIP.</div>
-            </div>
-          )}
 
-          <Button type="submit" loading={loading}>Post Transformation</Button>
+          <div className="flex gap-3 pt-2">
+            <Button type="submit" loading={loading} disabled={!isFormValid}>
+              Post Transformation
+            </Button>
+            <Button type="button" variant="secondary" onClick={() => navigate('/app/factory/batches')}>
+              Cancel
+            </Button>
+          </div>
         </form>
       </Card>
     </div>

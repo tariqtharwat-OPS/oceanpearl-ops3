@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, Button, Alert, FormField, Input, Select } from '../../components/ops3/Card';
 import { createHubReceiving } from '../../services/ops3Service';
 import { useAuth } from '../../contexts/AuthContext';
@@ -11,6 +12,7 @@ interface ReceivingLine {
 }
 
 const HubReceivingCreate: React.FC = () => {
+  const navigate = useNavigate();
   const { userProfile } = useAuth();
   const companyId = userProfile?.companyId || 'oceanpearl';
   const locationId = userProfile?.allowedLocationIds?.[0] || 'test-loc-1';
@@ -56,9 +58,6 @@ const HubReceivingCreate: React.FC = () => {
         notes: notes || undefined,
       });
       setResult(res);
-      setTripId('');
-      setSourceUnitId('');
-      setLines([{ sku_id: 'tuna-raw', expected_qty: '' }]);
     } catch (e: any) {
       setError(e.message || 'Failed to create hub receiving');
     } finally {
@@ -66,27 +65,87 @@ const HubReceivingCreate: React.FC = () => {
     }
   };
 
+  const handleReset = () => {
+    setResult(null);
+    setTripId('');
+    setSourceUnitId('');
+    setLines([{ sku_id: 'tuna-raw', expected_qty: '' }]);
+    setNotes('');
+    setError('');
+  };
+
+  if (result) {
+    return (
+      <div className="max-w-2xl space-y-4">
+        <Card title="Hub Receiving Created" subtitle="The receiving record has been registered successfully">
+          <div className="space-y-4">
+            <Alert type="success" message={`Receiving record created successfully.`} />
+            <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 text-sm space-y-2">
+              <div className="flex justify-between">
+                <span className="text-slate-500">Document ID</span>
+                <span className="font-mono font-semibold text-slate-800">{result.doc_id}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Status</span>
+                <span className="font-semibold text-blue-700">{result.status}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Trip ID</span>
+                <span className="font-mono">{tripId}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Lines</span>
+                <span>{lines.filter(l => l.expected_qty && parseFloat(l.expected_qty) > 0).length} SKU(s)</span>
+              </div>
+            </div>
+            <p className="text-sm text-slate-600">
+              Next step: Navigate to <strong>Inspect Quantities</strong> to record actual received quantities and QC status for this receiving.
+            </p>
+            <div className="flex gap-3 pt-2">
+              <Button variant="primary" onClick={() => navigate('/app/hub/inspect')}>
+                Go to Inspect Quantities →
+              </Button>
+              <Button variant="secondary" onClick={handleReset}>
+                Create Another
+              </Button>
+              <Button variant="ghost" onClick={() => navigate('/app/hub/trips')}>
+                ← Back to Trips
+              </Button>
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-2xl space-y-4">
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" onClick={() => navigate('/app/hub/trips')}>
+          ← Back to Trips
+        </Button>
+      </div>
       <Card title="Create Hub Receiving" subtitle="Register expected catch from a closed boat trip">
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="grid grid-cols-2 gap-4">
             <FormField label="Trip ID" required hint="Must be a closed trip">
-              <Input value={tripId} onChange={e => setTripId(e.target.value)} placeholder="e.g. TRIP-001" required />
+              <Input value={tripId} onChange={e => setTripId(e.target.value)} placeholder="e.g. TRIP-001" />
             </FormField>
             <FormField label="Source Boat Unit ID" required hint="The boat unit that made the trip">
-              <Input value={sourceUnitId} onChange={e => setSourceUnitId(e.target.value)} placeholder="e.g. test-boat-1" required />
+              <Input value={sourceUnitId} onChange={e => setSourceUnitId(e.target.value)} placeholder="e.g. test-boat-1" />
             </FormField>
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-medium text-slate-700">Expected Lines</label>
+              <label className="text-sm font-medium text-slate-700">
+                Expected Lines <span className="text-red-500">*</span>
+              </label>
               <Button type="button" variant="ghost" onClick={addLine}>+ Add SKU</Button>
             </div>
             <div className="space-y-2">
               {lines.map((line, idx) => (
-                <div key={idx} className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg">
+                <div key={idx} className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200">
                   <Select value={line.sku_id} onChange={e => updateLine(idx, 'sku_id', e.target.value)} className="flex-1">
                     {SKU_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
                   </Select>
@@ -99,22 +158,26 @@ const HubReceivingCreate: React.FC = () => {
                     placeholder="expected kg"
                     className="w-36"
                   />
-                  <Button type="button" variant="ghost" onClick={() => removeLine(idx)} className="text-red-500 px-2">✕</Button>
+                  {lines.length > 1 && (
+                    <Button type="button" variant="ghost" onClick={() => removeLine(idx)} className="text-red-500 px-2">✕</Button>
+                  )}
                 </div>
               ))}
             </div>
           </div>
 
           <FormField label="Notes">
-            <Input value={notes} onChange={e => setNotes(e.target.value)} placeholder="Optional" />
+            <Input value={notes} onChange={e => setNotes(e.target.value)} placeholder="Optional notes" />
           </FormField>
 
           {error && <Alert type="error" message={error} />}
-          {result && (
-            <Alert type="success" message={`Hub receiving created: ${result.doc_id} · Status: ${result.status}`} />
-          )}
 
-          <Button type="submit" loading={loading}>Create Receiving Record</Button>
+          <div className="flex gap-3 pt-2">
+            <Button type="submit" loading={loading}>Create Receiving Record</Button>
+            <Button type="button" variant="secondary" onClick={() => navigate('/app/hub/trips')}>
+              Cancel
+            </Button>
+          </div>
         </form>
       </Card>
     </div>

@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, Button, Alert, FormField, Input, Select } from '../../components/ops3/Card';
 import { createWipState } from '../../services/ops3Service';
 import { useAuth } from '../../contexts/AuthContext';
 
-const STAGES = ['receiving', 'sorting', 'filleting', 'freezing', 'packing', 'dispatch'];
+// Valid stages as defined in the backend wipStates.js WIP_STAGES array
+const STAGES = ['receiving', 'sorting', 'processing', 'quality_check', 'packing'];
 const SKU_OPTIONS = ['tuna-raw', 'tuna-fillet', 'tuna-loin', 'tuna-waste', 'shrimp-raw', 'shrimp-peeled'];
 
 const FactoryWipCreate: React.FC = () => {
+  const navigate = useNavigate();
   const { userProfile } = useAuth();
   const companyId = userProfile?.companyId || 'oceanpearl';
   const locationId = userProfile?.allowedLocationIds?.[0] || 'test-loc-1';
@@ -40,8 +43,6 @@ const FactoryWipCreate: React.FC = () => {
         notes: notes || undefined,
       });
       setResult(res);
-      setBatchId('');
-      setQuantity('');
     } catch (e: any) {
       setError(e.message || 'Failed to create WIP state');
     } finally {
@@ -49,12 +50,73 @@ const FactoryWipCreate: React.FC = () => {
     }
   };
 
+  const handleReset = () => {
+    setResult(null);
+    setBatchId('');
+    setQuantity('');
+    setNotes('');
+    setError('');
+  };
+
+  if (result) {
+    return (
+      <div className="max-w-xl space-y-4">
+        <Card title="WIP Processing Started" subtitle="Work-in-progress record has been created">
+          <div className="space-y-4">
+            <Alert type="success" message="WIP processing started successfully." />
+            <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 text-sm space-y-2">
+              <div className="flex justify-between">
+                <span className="text-slate-500">Document ID</span>
+                <span className="font-mono font-semibold">{result.doc_id}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Batch ID</span>
+                <span className="font-mono">{result.batch_id}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Current Stage</span>
+                <span className="font-semibold text-blue-700">{result.current_stage || stage}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Status</span>
+                <span className="font-semibold text-blue-700">{result.status}</span>
+              </div>
+            </div>
+            <p className="text-sm text-slate-600">
+              Next step: Go to <strong>Advance WIP Stage</strong> to move this WIP through the processing stages.
+            </p>
+            <div className="flex gap-3 pt-2">
+              <Button variant="primary" onClick={() => navigate('/app/factory/wip-advance')}>
+                Advance WIP Stage →
+              </Button>
+              <Button variant="secondary" onClick={handleReset}>
+                Start Another WIP
+              </Button>
+              <Button variant="ghost" onClick={() => navigate('/app/factory/batches')}>
+                ← Back to Batches
+              </Button>
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-xl space-y-4">
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" onClick={() => navigate('/app/factory/batches')}>
+          ← Back to Batches
+        </Button>
+      </div>
       <Card title="Start WIP Processing" subtitle="Create a work-in-progress record for a batch">
         <form onSubmit={handleSubmit} className="space-y-5">
           <FormField label="Batch ID" required hint="Must reference an existing in_progress batch">
-            <Input value={batchId} onChange={e => setBatchId(e.target.value)} placeholder="e.g. BATCH-001" required />
+            <Input
+              value={batchId}
+              onChange={e => setBatchId(e.target.value)}
+              placeholder="e.g. BATCH-001"
+            />
           </FormField>
 
           <div className="grid grid-cols-2 gap-4">
@@ -64,11 +126,18 @@ const FactoryWipCreate: React.FC = () => {
               </Select>
             </FormField>
             <FormField label="Quantity (kg)" required>
-              <Input type="number" min="0.01" step="0.01" value={quantity} onChange={e => setQuantity(e.target.value)} placeholder="e.g. 100" required />
+              <Input
+                type="number"
+                min="0.01"
+                step="0.01"
+                value={quantity}
+                onChange={e => setQuantity(e.target.value)}
+                placeholder="e.g. 100"
+              />
             </FormField>
           </div>
 
-          <FormField label="Initial Stage" required>
+          <FormField label="Initial Stage" required hint="Starting stage for this WIP record">
             <Select value={stage} onChange={e => setStage(e.target.value)}>
               {STAGES.map(s => <option key={s} value={s}>{s}</option>)}
             </Select>
@@ -79,11 +148,13 @@ const FactoryWipCreate: React.FC = () => {
           </FormField>
 
           {error && <Alert type="error" message={error} />}
-          {result && (
-            <Alert type="success" message={`WIP created: ${result.doc_id} · Batch: ${result.batch_id} · Status: ${result.status}`} />
-          )}
 
-          <Button type="submit" loading={loading}>Start WIP</Button>
+          <div className="flex gap-3 pt-2">
+            <Button type="submit" loading={loading}>Start WIP</Button>
+            <Button type="button" variant="secondary" onClick={() => navigate('/app/factory/batches')}>
+              Cancel
+            </Button>
+          </div>
         </form>
       </Card>
     </div>
