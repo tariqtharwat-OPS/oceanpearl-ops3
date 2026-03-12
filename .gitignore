@@ -48,3 +48,4 @@ functions/node_modules/
 functions/lib/*.js.map
 __pycache__/
 *.pyc
+service-account.json

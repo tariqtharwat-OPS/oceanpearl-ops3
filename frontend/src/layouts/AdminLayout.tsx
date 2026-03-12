@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Topbar from '../components/Topbar';
 import Sidebar, { type NavItem } from '../components/Sidebar';
 import { UsersRound, Settings, Database, ShieldAlert } from 'lucide-react';
+import AdminUsersPage from '../pages/AdminUsersPage';
 
 const AdminLayout: React.FC = () => {
 
@@ -22,10 +23,10 @@ const AdminLayout: React.FC = () => {
 
                 <main className="flex-1 overflow-x-hidden overflow-y-auto bg-slate-100 p-6">
                     <Routes>
-                        <Route path="users" element={<div>User Role Management Under Construction</div>} />
-                        <Route path="settings" element={<div>System Configuration Under Construction</div>} />
-                        <Route path="data" element={<div>Database Tools Under Construction</div>} />
-                        <Route path="security" element={<div>Security Audit Under Construction</div>} />
+                        <Route path="users" element={<AdminUsersPage />} />
+                        <Route path="settings" element={<div className="p-4 text-slate-600">System Configuration — Coming Soon</div>} />
+                        <Route path="data" element={<div className="p-4 text-slate-600">Database Tools — Coming Soon</div>} />
+                        <Route path="security" element={<div className="p-4 text-slate-600">Security Audit — Coming Soon</div>} />
                         <Route path="*" element={<Navigate to="users" replace />} />
                     </Routes>
                 </main>

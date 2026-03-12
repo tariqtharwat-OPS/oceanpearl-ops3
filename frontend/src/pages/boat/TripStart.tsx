@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
 import { Play, Users, X, Loader2, CheckCircle } from 'lucide-react';
 import { firestoreWriterService } from '../../services/firestoreWriterService';
+import { useAuth } from '../../contexts/AuthContext';
 
 const TripStart: React.FC = () => {
     const [status, setStatus] = useState<'IDLE' | 'LOADING' | 'SUCCESS'>('IDLE');
     const [error, setError] = useState<string | null>(null);
+    const { userProfile } = useAuth();
+    const companyId = 'oceanpearl';
+    const locationId = userProfile?.allowedLocationIds?.[0] || 'LOC-BOAT-01';
+    const unitId = userProfile?.allowedUnitIds?.[0] || 'UNIT-BOAT-01';
 
     const handleStartTrip = async () => {
         try {
@@ -12,6 +17,9 @@ const TripStart: React.FC = () => {
             setError(null);
 
             const payload = {
+                company_id: companyId,
+                location_id: locationId,
+                unit_id: unitId,
                 wallet_id: "TRIP-WALLET-B1", // The wallet created for this trip
                 event_type: "trip_start",
                 amount: 0, // No money moved, just an initialization event

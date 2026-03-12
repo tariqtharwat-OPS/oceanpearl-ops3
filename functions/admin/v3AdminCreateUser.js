@@ -28,11 +28,13 @@ const VALID_ROLES = [
     "hub_operator",
     "factory_operator",
     "unit_operator",
+    "boat_operator",
     "location_manager",
     "finance_officer",
     "hq_analyst",
     "ceo",
-    "admin"
+    "admin",
+    "investor"
 ];
 
 exports.admin_createUser = onCall({ region: "asia-southeast1" }, async (request) => {

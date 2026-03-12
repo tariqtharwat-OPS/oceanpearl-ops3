@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Anchor, Lock, Users, Printer, QrCode } from 'lucide-react';
 import { firestoreWriterService } from '../../services/firestoreWriterService';
+import { useAuth } from '../../contexts/AuthContext';
 import clsx from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -9,12 +10,15 @@ function cn(...inputs: (string | undefined | null | false)[]) {
 }
 
 const TripClosure: React.FC = () => {
+    const { userProfile } = useAuth();
+    const companyId = 'oceanpearl';
+    const locationId = userProfile?.allowedLocationIds?.[0] || 'LOC-BOAT-01';
+    const unitId = userProfile?.allowedUnitIds?.[0] || 'UNIT-BOAT-01';
     const [status, setStatus] = useState<'draft' | 'loading' | 'success' | 'error'>('draft');
     const [errorMsg, setErrorMsg] = useState('');
 
     const tripId = "TRIP-B1-0226";
     const vesselId = "Boat Faris";
-    const locationId = "Kaimana-Hub";
     const walletId = "TRIP-WALLET-B1";
     const hubWalletId = "HUB-TREASURY-01";
 
@@ -51,6 +55,12 @@ const TripClosure: React.FC = () => {
                 lines: [
                     // Cash Remittance Line
                     {
+                        company_id: companyId,
+
+                        location_id: locationId,
+
+                        unit_id: unitId,
+
                         wallet_id: walletId,
                         payment_amount: summary.audit.remitted,
                         payment_event_type: "transfer_initiated",
@@ -59,12 +69,13 @@ const TripClosure: React.FC = () => {
                     },
                     // Inventory Remittance Lines (Example for Snapper)
                     {
+                        company_id: companyId,
+                        location_id: locationId,
+                        unit_id: unitId,
                         sku_id: "snapper-grade-a",
                         amount: summary.catch.total,
                         event_type: "transfer_initiated",
-                        location_id: locationId,
-                        unit_id: vesselId,
-                        destination_location_id: locationId, // Hub Location
+                        destination_location_id: locationId,
                         destination_unit_id: "HUB-WAREHOUSE",
                         source_screen: "boat_close"
                     }

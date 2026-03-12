@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Anchor, Trash2, Printer, Lock } from 'lucide-react';
 import { firestoreWriterService } from '../../services/firestoreWriterService';
+import { useAuth } from '../../contexts/AuthContext';
 import clsx from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -9,6 +10,10 @@ function cn(...inputs: (string | undefined | null | false)[]) {
 }
 
 const OwnCatch: React.FC = () => {
+    const { userProfile } = useAuth();
+    const companyId = 'oceanpearl';
+    const locationId = userProfile?.allowedLocationIds?.[0] || 'LOC-BOAT-01';
+    const unitId = userProfile?.allowedUnitIds?.[0] || 'UNIT-BOAT-01';
     const [lines, setLines] = useState([
         { id: 1, sku: 'Snapper (Grade A)', weight: 120.5, quality: 'Standard / Cold' }
     ]);
@@ -19,7 +24,6 @@ const OwnCatch: React.FC = () => {
     const documentId = "RCV-OWN-0226";
     const tripId = "TRIP-B1-0226";
     const vesseId = "Boat-Faris";
-    const locationId = "Kaimana-Hub";
 
     const addLine = () => {
         setLines([...lines, { id: Date.now(), sku: 'Snapper (Grade A)', weight: 0, quality: 'Standard / Cold' }]);
@@ -51,6 +55,12 @@ const OwnCatch: React.FC = () => {
                     event_type: "receive_own",
                     location_id: locationId,
                     unit_id: vesseId,
+                    company_id: companyId,
+
+                    location_id: locationId,
+
+                    unit_id: unitId,
+
                     sku_id: line.sku.toLowerCase().replace(/\s+/g, '-'), // dummy slugify
                     amount: Number(line.weight),
                     trip_id: tripId,

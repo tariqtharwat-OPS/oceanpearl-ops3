@@ -29,7 +29,8 @@
         "destination": "/app/",
         "type": 301
       }
-    ]
+    ],
+    "site": "oceanpearl-ops"
   },
   "emulators": {
     "auth": {

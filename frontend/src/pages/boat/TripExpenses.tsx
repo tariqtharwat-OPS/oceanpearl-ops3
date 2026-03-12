@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Anchor, Info, X, Printer, Lock } from 'lucide-react';
 import { firestoreWriterService } from '../../services/firestoreWriterService';
+import { useAuth } from '../../contexts/AuthContext';
 import clsx from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -9,6 +10,10 @@ function cn(...inputs: (string | undefined | null | false)[]) {
 }
 
 const TripExpenses: React.FC = () => {
+    const { userProfile } = useAuth();
+    const companyId = 'oceanpearl';
+    const locationId = userProfile?.allowedLocationIds?.[0] || 'LOC-BOAT-01';
+    const unitId = userProfile?.allowedUnitIds?.[0] || 'UNIT-BOAT-01';
     const [vendor, setVendor] = useState('Pertamina (Fuel)');
     const [wallet, setWallet] = useState('TRIP-WALLET-B1');
     const [crewName, setCrewName] = useState('Pak Budi (ID-011)');
@@ -52,6 +57,12 @@ const TripExpenses: React.FC = () => {
                 total_amount: total,
                 recorded_at: new Date().toISOString(),
                 lines: lines.map(line => ({
+                    company_id: companyId,
+
+                    location_id: locationId,
+
+                    unit_id: unitId,
+
                     wallet_id: wallet,
                     amount: Number(line.amount),
                     event_type: "expense", // Map based on type, but for now we just use 'expense'

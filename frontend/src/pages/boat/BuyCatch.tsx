@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ShoppingBag, Trash2, Printer, Lock } from 'lucide-react';
 import { firestoreWriterService } from '../../services/firestoreWriterService';
+import { useAuth } from '../../contexts/AuthContext';
 import clsx from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -9,6 +10,10 @@ function cn(...inputs: (string | undefined | null | false)[]) {
 }
 
 const BuyCatch: React.FC = () => {
+    const { userProfile } = useAuth();
+    const companyId = 'oceanpearl';
+    const locationId = userProfile?.allowedLocationIds?.[0] || 'LOC-BOAT-01';
+    const unitId = userProfile?.allowedUnitIds?.[0] || 'UNIT-BOAT-01';
     const [supplier, setSupplier] = useState('Pak Nelayan A');
     const [settlement, setSettlement] = useState('ap'); // 'ap' or 'cash'
     const [lines, setLines] = useState([
@@ -21,7 +26,6 @@ const BuyCatch: React.FC = () => {
     const documentId = "RCV-BUY-0226";
     const tripId = "TRIP-B1-0226";
     const vesseId = "Boat-Faris";
-    const locationId = "Kaimana-Hub";
     const walletId = "TRIP-WALLET-B1";
 
     const addLine = () => {
@@ -55,6 +59,12 @@ const BuyCatch: React.FC = () => {
                 unit_id: vesseId,
                 lines: lines.map(line => ({
                     // Inventory Part
+                    company_id: companyId,
+
+                    location_id: locationId,
+
+                    unit_id: unitId,
+
                     sku_id: line.sku.toLowerCase().replace(/\s+/g, '-'),
                     amount: Number(line.weight),
                     event_type: "receive_buy",
@@ -62,6 +72,12 @@ const BuyCatch: React.FC = () => {
                     unit_id: vesseId,
 
                     // Financial Part (if cash)
+                    company_id: companyId,
+
+                    location_id: locationId,
+
+                    unit_id: unitId,
+
                     wallet_id: settlement === 'cash' ? walletId : undefined,
                     payment_amount: Number(line.weight) * Number(line.price),
                     payment_event_type: settlement === 'cash' ? "expense_purchase" : undefined,

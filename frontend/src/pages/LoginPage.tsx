@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
@@ -27,27 +27,21 @@ const LoginPage: React.FC = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const emailRef = useRef<HTMLInputElement>(null);
+    const passwordRef = useRef<HTMLInputElement>(null);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
         setLoading(true);
 
+        // Read values from DOM refs to support both React state and direct DOM input
+        const emailVal = emailRef.current?.value || email;
+        const passwordVal = passwordRef.current?.value || password;
+
         try {
-            // login() in AuthContext now fetches the profile immediately.
-            // After it resolves, userProfile state is set — but React state
-            // updates are async, so we use the returned AuthUser to derive
-            // the route from the already-fetched profile in AuthContext.
-            await login(email, password);
-            // Give React one tick to apply the state update, then read userProfile
-            // from the context (which was set synchronously in the login() call).
-            // We use a small timeout to ensure the state has propagated.
+            await login(emailVal, passwordVal);
             setTimeout(() => {
-                // Read the current userProfile from the context via a ref-like pattern.
-                // Since login() sets userProfile synchronously before returning,
-                // the context value will be updated on the next render cycle.
-                // We navigate to /app/routing as a safe fallback — the RoleBasedRouter
-                // will redirect to the correct route once userProfile is available.
                 navigate('/app/routing');
             }, 100);
         } catch (err: any) {
@@ -86,6 +80,7 @@ const LoginPage: React.FC = () => {
                             id="email"
                             type="email"
                             placeholder={t('auth.emailPlaceholder')}
+                            ref={emailRef}
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
@@ -99,6 +94,7 @@ const LoginPage: React.FC = () => {
                             id="password"
                             type="password"
                             placeholder={t('auth.passwordPlaceholder')}
+                            ref={passwordRef}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required

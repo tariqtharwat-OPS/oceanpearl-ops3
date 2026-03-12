@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Anchor, ShoppingCart, Trash2, Printer, Lock } from 'lucide-react';
 import { firestoreWriterService } from '../../services/firestoreWriterService';
+import { useAuth } from '../../contexts/AuthContext';
 import clsx from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -9,6 +10,10 @@ function cn(...inputs: (string | undefined | null | false)[]) {
 }
 
 const BoatSale: React.FC = () => {
+    const { userProfile } = useAuth();
+    const companyId = 'oceanpearl';
+    const locationId = userProfile?.allowedLocationIds?.[0] || 'LOC-BOAT-01';
+    const unitId = userProfile?.allowedUnitIds?.[0] || 'UNIT-BOAT-01';
     const [customer, setCustomer] = useState('Local Market Trader');
     const [paymentMethod, setPaymentMethod] = useState('cash'); // 'cash' or 'receivable'
     const [lines, setLines] = useState([
@@ -21,7 +26,6 @@ const BoatSale: React.FC = () => {
     const documentId = "INV-B1-SALE-0226";
     const tripId = "TRIP-B1-0226";
     const vesseId = "Boat-Faris";
-    const locationId = "Kaimana-Hub";
     const walletId = "TRIP-WALLET-B1";
 
     const addLine = () => {
@@ -55,6 +59,12 @@ const BoatSale: React.FC = () => {
                 unit_id: vesseId,
                 lines: lines.map(line => ({
                     // Inventory Part
+                    company_id: companyId,
+
+                    location_id: locationId,
+
+                    unit_id: unitId,
+
                     sku_id: line.sku,
                     amount: Number(line.quantity),
                     event_type: "sale_out",
@@ -62,6 +72,12 @@ const BoatSale: React.FC = () => {
                     unit_id: vesseId,
 
                     // Financial Part (if cash)
+                    company_id: companyId,
+
+                    location_id: locationId,
+
+                    unit_id: unitId,
+
                     wallet_id: paymentMethod === 'cash' ? walletId : undefined,
                     payment_amount: Number(line.quantity) * Number(line.unitPrice),
                     payment_event_type: paymentMethod === 'cash' ? "revenue_cash" : undefined,

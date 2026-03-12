@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
 import { Coins, X, Check, Save, Loader2, CheckCircle } from 'lucide-react';
 import { firestoreWriterService } from '../../services/firestoreWriterService';
+import { useAuth } from '../../contexts/AuthContext';
 
 const OpeningBalances: React.FC = () => {
+    const { userProfile } = useAuth();
+    const companyId = 'oceanpearl';
+    const locationId = userProfile?.allowedLocationIds?.[0] || 'LOC-BOAT-01';
+    const unitId = userProfile?.allowedUnitIds?.[0] || 'UNIT-BOAT-01';
     const [status, setStatus] = useState<'IDLE' | 'LOADING' | 'SUCCESS'>('IDLE');
     const [error, setError] = useState<string | null>(null);
 
@@ -13,6 +18,12 @@ const OpeningBalances: React.FC = () => {
 
             // 1. Physical Cash Deposit Event
             const depositPayload = {
+                company_id: companyId,
+
+                location_id: locationId,
+
+                unit_id: unitId,
+
                 wallet_id: "TRIP-WALLET-B1",
                 event_type: "deposit_cash_handover",
                 amount: 5000000,
@@ -25,6 +36,12 @@ const OpeningBalances: React.FC = () => {
 
             // 2. Employee Advance Event
             const advancePayload = {
+                company_id: companyId,
+
+                location_id: locationId,
+
+                unit_id: unitId,
+
                 wallet_id: "TRIP-WALLET-B1",
                 event_type: "expense_advance",
                 amount: 250000,
