@@ -319,7 +319,8 @@ const confirmHubReceiving = onCall({ region: "asia-southeast1" }, async (request
         throw new HttpsError("failed-precondition", "NO_RECEIVABLE_LINES: All lines have zero received quantity");
     }
 
-    const payload = {
+    // Build payload WITHOUT lines for HMAC computation (matching documentProcessor.js pattern)
+    const payloadData = {
         document_type: "hub_receive_from_boat",
         company_id: doc.company_id,
         location_id: doc.location_id,
@@ -329,12 +330,14 @@ const confirmHubReceiving = onCall({ region: "asia-southeast1" }, async (request
         source_receiving_doc: data.doc_id,
         operator_id: token.uid || "unknown",
         notes: `Hub receiving confirmation for trip ${doc.trip_id}. Variance: ${hasVariance ? "YES" : "NONE"}`,
-        lines,
     };
 
-    // Generate HMAC for the document_request
-    const payloadString = JSON.stringify(payload);
-    const hmac = crypto.createHmac("sha256", hmacSecret).update(payloadString).digest("hex");
+    // Generate HMAC using the same double-hash pattern as documentProcessor.js:
+    //   payloadHash = SHA256(JSON.stringify({ ...payloadData, lines }))
+    //   idempotency_key = HMAC-SHA256(payloadHash + nonce)
+    const payloadString = JSON.stringify({ ...payloadData, lines });
+    const payloadHash = crypto.createHash("sha256").update(payloadString).digest("hex");
+    const hmac = crypto.createHmac("sha256", hmacSecret).update(payloadHash).digest("hex");
 
     // Post to document_requests inbox — documentProcessor handles the rest
     const requestRef = db.collection("document_requests").doc(hmac);
@@ -353,11 +356,13 @@ const confirmHubReceiving = onCall({ region: "asia-southeast1" }, async (request
         return { success: true, doc_id: data.doc_id, status: "confirmed", ledger_document_id: hmac, idempotent: true };
     }
 
+    // Write ONLY the payload fields + idempotency_key + lines to document_requests.
+    // Do NOT include status, created_at, or any other metadata fields —
+    // they would end up in payloadData in documentProcessor and break HMAC validation.
     await requestRef.set({
-        ...payload,
-        hmac,
-        status: "pending",
-        created_at: admin.firestore.FieldValue.serverTimestamp(),
+        ...payloadData,
+        lines,
+        idempotency_key: hmac,
     });
 
     // Update hub_receiving to confirmed
