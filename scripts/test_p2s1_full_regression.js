@@ -16,8 +16,24 @@ function generateHmac(payload, nonce) {
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
+async function cleanup() {
+    const cols = [
+        "inventory_states", "inventory_events", "wallet_states", "wallet_events",
+        "document_requests", "idempotency_locks", "trip_states"
+    ];
+    for (const col of cols) {
+        const snap = await db.collection(col).get();
+        if (!snap.empty) {
+            const batch = db.batch();
+            snap.docs.forEach(d => batch.delete(d.ref));
+            await batch.commit();
+        }
+    }
+}
+
 async function runTests() {
     console.log("🚀 STARTING PHASE 2 STEP 1 VERIFICATION & REGRESSION SUITE 🚀\n");
+    await cleanup();
 
     const companyId = "oceanpearl";
     const locationId = "test-loc-1";
